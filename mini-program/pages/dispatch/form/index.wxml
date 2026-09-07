@@ -1,0 +1,184 @@
+<view class="dispatch-page">
+  <green-header title="班组派班" bind:back="goBack" />
+
+  <view class="dispatch-hero-card">
+    <view class="dispatch-slogan-row">
+      <view class="dispatch-safety-shield">
+        <t-icon name="secured" size="58rpx" color="#37b77b" />
+      </view>
+      <view class="dispatch-slogan-item">
+        <t-icon name="check-circle" size="34rpx" color="#078249" />
+        <text>安全第一</text>
+      </view>
+      <view class="dispatch-slogan-divider"></view>
+      <view class="dispatch-slogan-item">
+        <t-icon name="check-circle" size="34rpx" color="#078249" />
+        <text>预防为主</text>
+      </view>
+    </view>
+    <view class="dispatch-hero-line"></view>
+    <view class="dispatch-metric-row">
+      <view class="dispatch-metric">
+        <view class="dispatch-metric-main">
+          <t-icon name="usergroup" size="36rpx" color="#23a669" />
+          <view class="dispatch-metric-value">{{managementCount || '0'}}</view>
+        </view>
+        <view class="dispatch-metric-label">管理人员</view>
+      </view>
+      <view class="dispatch-metric">
+        <view class="dispatch-metric-main">
+          <t-icon name="usergroup" size="36rpx" color="#2f85df" />
+          <view class="dispatch-metric-value">0</view>
+        </view>
+        <view class="dispatch-metric-label">作业人员</view>
+      </view>
+      <view class="dispatch-metric">
+        <view class="dispatch-metric-main">
+          <t-icon name="file-paste" size="34rpx" color="#f4a100" />
+          <view class="dispatch-metric-value">{{dispatchTaskText ? 1 : 0}}</view>
+        </view>
+        <view class="dispatch-metric-label">班组任务</view>
+      </view>
+      <view class="dispatch-metric">
+        <view class="dispatch-metric-main">
+          <t-icon name="calendar" size="30rpx" color="#0b8f60" />
+          <view class="dispatch-metric-value dispatch-metric-date">{{dispatchDate || '请选择'}}</view>
+        </view>
+        <view class="dispatch-metric-label">派班日期</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="dispatch-form-card">
+    <view class="dispatch-form-row">
+      <view class="dispatch-field-label">
+        <t-icon t-class="dispatch-field-icon" name="building" size="32rpx" color="#078249" />
+        <text>公司</text>
+        <text class="dispatch-required">*</text>
+      </view>
+      <picker class="dispatch-picker" mode="selector" range="{{companyOptions}}" range-key="label" value="{{companyIndex}}" bindchange="changeDispatchCompany">
+        <view class="dispatch-control">
+          <text class="{{currentCompany.company ? 'dispatch-control-text' : 'dispatch-control-placeholder'}}">{{currentCompany.company || '请选择'}}</text>
+          <t-icon name="chevron-down" size="32rpx" color="#909399" />
+        </view>
+      </picker>
+    </view>
+
+    <view class="dispatch-form-row">
+      <view class="dispatch-field-label">
+        <t-icon t-class="dispatch-field-icon" name="city-1" size="32rpx" color="#078249" />
+        <text>车间</text>
+        <text class="dispatch-required">*</text>
+      </view>
+      <picker class="dispatch-picker" mode="selector" range="{{departmentOptions}}" range-key="label" value="{{departmentIndex}}" bindchange="changeDispatchDepartment">
+        <view class="dispatch-control">
+          <text class="{{currentCompany.workshop ? 'dispatch-control-text' : 'dispatch-control-placeholder'}}">{{currentCompany.workshop || '请选择'}}</text>
+          <t-icon name="chevron-down" size="32rpx" color="#909399" />
+        </view>
+      </picker>
+    </view>
+
+    <view class="dispatch-form-row">
+      <view class="dispatch-field-label">
+        <t-icon t-class="dispatch-field-icon" name="usergroup" size="32rpx" color="#078249" />
+        <text>班组</text>
+        <text class="dispatch-required">*</text>
+      </view>
+      <picker class="dispatch-picker" mode="selector" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeDispatchTeam">
+        <view class="dispatch-control">
+          <text class="{{currentTeam ? 'dispatch-control-text' : 'dispatch-control-placeholder'}}">{{currentTeam || '请选择'}}</text>
+          <t-icon name="chevron-down" size="32rpx" color="#909399" />
+        </view>
+      </picker>
+    </view>
+
+    <view class="dispatch-form-row dispatch-form-row-textarea">
+      <view class="dispatch-field-label">
+        <t-icon t-class="dispatch-field-icon" name="file-paste" size="32rpx" color="#078249" />
+        <text>班组任务</text>
+        <text class="dispatch-required">*</text>
+      </view>
+      <view class="dispatch-control dispatch-control-textarea">
+        <textarea class="dispatch-textarea" placeholder-class="dispatch-placeholder" placeholder="请输入班组任务" value="{{dispatchTaskText}}" maxlength="200" bindinput="updateDispatchTaskText"></textarea>
+        <text class="dispatch-char-count">{{dispatchTaskLength}}/200</text>
+      </view>
+    </view>
+
+    <view class="dispatch-form-row">
+      <view class="dispatch-field-label">
+        <t-icon t-class="dispatch-field-icon" name="swap" size="32rpx" color="#078249" />
+        <text>排班类型</text>
+        <text class="dispatch-required">*</text>
+      </view>
+      <picker class="dispatch-picker" mode="selector" range="{{dispatchTypeOptions}}" value="{{dispatchTypeIndex}}" bindchange="changeDispatchType">
+        <view class="dispatch-control">
+          <text class="{{dispatchType ? 'dispatch-control-text' : 'dispatch-control-placeholder'}}">{{dispatchType || '请选择'}}</text>
+          <t-icon name="chevron-down" size="32rpx" color="#909399" />
+        </view>
+      </picker>
+    </view>
+
+    <view class="dispatch-form-row">
+      <view class="dispatch-field-label dispatch-field-label-long">
+        <t-icon t-class="dispatch-field-icon" name="user" size="32rpx" color="#078249" />
+        <view class="dispatch-field-stack" data-field-label="管理人员人数（手录）">
+          <view class="dispatch-field-stack-line">
+            <text>管理人员人数</text>
+            <text class="dispatch-required">*</text>
+          </view>
+          <text class="dispatch-field-subtitle">（手录）</text>
+        </view>
+      </view>
+      <view class="dispatch-control">
+        <input class="dispatch-input" type="number" value="{{managementCount}}" placeholder-class="dispatch-placeholder" placeholder="请输入人数" bindinput="updateManagementCount" />
+        <text class="dispatch-control-unit">人</text>
+      </view>
+    </view>
+
+    <view class="dispatch-form-row">
+      <view class="dispatch-field-label">
+        <t-icon t-class="dispatch-field-icon" name="calendar" size="32rpx" color="#078249" />
+        <text>派班日期</text>
+        <text class="dispatch-required">*</text>
+      </view>
+      <picker class="dispatch-picker" mode="date" value="{{dispatchDate}}" bindchange="changeDispatchDate">
+        <view class="dispatch-control">
+          <text class="{{dispatchDate ? 'dispatch-control-text' : 'dispatch-control-placeholder'}}">{{dispatchDate || '请选择日期'}}</text>
+          <t-icon name="calendar" size="32rpx" color="#909399" />
+        </view>
+      </picker>
+    </view>
+
+    <view class="dispatch-form-row dispatch-form-row-textarea dispatch-form-row-last">
+      <view class="dispatch-field-label">
+        <t-icon t-class="dispatch-field-icon" name="edit" size="32rpx" color="#078249" />
+        <text>备注</text>
+      </view>
+      <view class="dispatch-control dispatch-control-textarea">
+        <textarea class="dispatch-textarea" placeholder-class="dispatch-placeholder" placeholder="请输入备注（非必填）" value="{{dispatchRemark}}" maxlength="200" bindinput="updateDispatchRemark"></textarea>
+        <text class="dispatch-char-count">{{dispatchRemarkLength}}/200</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="result-tip" wx:if="{{operationResult}}">{{operationResult}}</view>
+
+  <view class="dispatch-bottom-spacer"></view>
+  <view class="dispatch-bottom-bar">
+    <button class="dispatch-draft-btn" bindtap="openDispatchDraft">
+      <t-icon name="save" size="34rpx" color="#0b8f60" />
+      <text>草稿</text>
+    </button>
+    <button class="dispatch-submit-btn" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitDispatch">
+      <t-icon wx:if="{{!submitting}}" name="send" size="34rpx" color="#ffffff" />
+      <text>提交</text>
+    </button>
+  </view>
+
+  <view class="exam-drawer-mask pale" wx:if="{{showDispatchDraft}}" bindtap="closeDispatchDraft"></view>
+  <view class="draft-panel before-draft dispatch-draft-panel" wx:if="{{showDispatchDraft}}">
+    <input placeholder="输入草稿名称后保存" value="{{dispatchDraftName}}" bindinput="updateDispatchDraftName" />
+    <button class="draft-save" bindtap="saveDispatchDraft">✓</button>
+    <button class="draft-delete" bindtap="deleteDispatchDraft">×</button>
+  </view>
+</view>

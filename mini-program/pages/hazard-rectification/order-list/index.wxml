@@ -1,0 +1,96 @@
+<wxs module="format">
+function minute(value) {
+  if (!value) return "-"
+  var text = "" + value
+  text = text.replace("T", " ")
+  if (text.length >= 16) return text.slice(0, 16)
+  return text
+}
+
+module.exports = {
+  minute: minute
+}
+</wxs>
+
+<view class="page">
+  <green-header title="隐患整改" bind:back="goBack" />
+
+  <view class="order-toolbar">
+    <view class="order-date-filter">
+      <t-icon class="order-date-icon" name="calendar" size="34rpx" color="#253042" />
+      <picker mode="date" value="{{startDate}}" bindchange="changeStartDate">
+        <view class="order-date-value">{{startDate}}</view>
+      </picker>
+      <text class="order-date-separator">至</text>
+      <picker mode="date" value="{{endDate}}" bindchange="changeEndDate">
+        <view class="order-date-value">{{endDate}}</view>
+      </picker>
+      <t-icon class="order-date-arrow" name="chevron-down" size="30rpx" color="#253042" />
+    </view>
+  </view>
+
+  <view class="order-tabs-wrap">
+    <view class="order-tabs">
+      <view class="order-tab {{status === 'all' ? 'active' : ''}}" data-status="all" bindtap="changeStatus">全部</view>
+      <view class="order-tab {{status === 'PENDING_ASSIGN' ? 'active' : ''}}" data-status="PENDING_ASSIGN" bindtap="changeStatus">待下发</view>
+      <view class="order-tab {{status === 'PENDING_RECTIFY' ? 'active' : ''}}" data-status="PENDING_RECTIFY" bindtap="changeStatus">待整改</view>
+      <view class="order-tab {{status === 'PENDING_ACCEPTANCE' ? 'active' : ''}}" data-status="PENDING_ACCEPTANCE" bindtap="changeStatus">待验收</view>
+      <view class="order-tab {{status === 'CLOSED' ? 'active' : ''}}" data-status="CLOSED" bindtap="changeStatus">已闭环</view>
+    </view>
+  </view>
+
+  <view class="order-org-filter-row">
+    <picker mode="selector" range="{{departmentOptions}}" range-key="label" value="{{departmentIndex}}" bindchange="changeDepartment">
+      <view class="order-org-filter">
+        <t-icon class="order-org-icon" name="building" size="32rpx" color="#0b9860" />
+        <text class="order-org-label">部门：</text>
+        <text class="order-org-value">{{currentDepartmentLabel}}</text>
+        <t-icon class="order-org-arrow" name="chevron-down" size="28rpx" color="#253042" />
+      </view>
+    </picker>
+    <picker mode="selector" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeTeam">
+      <view class="order-org-filter">
+        <t-icon class="order-org-icon" name="usergroup" size="32rpx" color="#0b9860" />
+        <text class="order-org-label">班组：</text>
+        <text class="order-org-value">{{currentTeamLabel}}</text>
+        <t-icon class="order-org-arrow" name="chevron-down" size="28rpx" color="#253042" />
+      </view>
+    </picker>
+  </view>
+
+  <view wx:if="{{loading}}" class="rectification-state">
+    <t-loading theme="circular" size="44rpx" text="正在加载整改单..." />
+  </view>
+  <view wx:elif="{{errorText}}" class="rectification-state">
+    <t-empty description="{{errorText}}" />
+    <t-button t-class="rectification-retry" size="small" theme="primary" variant="outline" bind:tap="loadOrders">点击重试</t-button>
+  </view>
+  <block wx:elif="{{orders.length > 0}}">
+    <view class="order-card" wx:for="{{orders}}" wx:key="id" data-id="{{item.id}}" bindtap="openDetail">
+      <view class="order-card-main order-card-title">
+        <view class="order-card-fields order-card-body">
+          <view class="order-card-line"><text>部门：</text><text>{{item.departmentName || item.department || '-'}}</text></view>
+          <view class="order-card-line"><text>班组：</text><text>{{item.teamName || item.team || '-'}}</text></view>
+          <view class="order-card-line"><text>检查方式：</text><text>{{item.checkMethod || item.inspectionMethod || item.payload.checkMethod || '-'}}</text></view>
+          <view class="order-card-line"><text>检查类型：</text><text>{{item.checkType || item.inspectionType || item.payload.checkType || item.sourceModuleName || '-'}}</text></view>
+          <view class="order-card-line"><text>责任人：</text><text>{{item.rectificationResponsiblePerson || item.rectificationResponsibleUserName || item.ownerName || '-'}}</text></view>
+        </view>
+        <view wx:if="{{item.statusLabel || item.status}}" class="order-status-wrap">
+          <view class="order-status-pill order-status-{{item.status}}">
+            <t-icon t-class="order-status-icon" size="28rpx" name="{{item.status === 'CLOSED' ? 'check-circle' : item.status === 'PENDING_RECTIFY' ? 'hourglass' : item.status === 'PENDING_ACCEPTANCE' ? 'search' : 'time'}}" />
+            <text>{{item.status === 'CLOSED' ? '已闭环' : item.status === 'PENDING_ASSIGN' ? '待下发' : item.status === 'PENDING_RECTIFY' ? '待整改' : item.status === 'PENDING_ACCEPTANCE' ? '待验收' : (item.statusLabel || item.status)}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="order-card-foot">
+        <view class="order-card-date">
+          <text class="order-date-label">日期：</text>
+          <text>{{format.minute(item.businessTime || item.businessDateTime || item.createdAt || item.businessDate)}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+  <view wx:else class="rectification-state">
+    <t-empty description="暂无整改单" />
+  </view>
+</view>

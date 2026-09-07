@@ -1,0 +1,34 @@
+<green-header title="{{title}}" bind:back="goBack" />
+<view class="records-page">
+  <t-loading wx:if="{{loading}}" text="加载中" />
+  <view wx:elif="{{errorText}}" class="state-card">
+    <text>{{errorText}}</text>
+    <text class="retry" bindtap="refresh">重新加载</text>
+  </view>
+  <view wx:elif="{{records.length}}" class="record-list">
+    <view
+      class="record-card"
+      wx:for="{{records}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="openRecord"
+      hover-class="record-card--pressed"
+    >
+      <view class="record-main">
+        <view class="record-title">{{item.title}}</view>
+        <view class="record-meta">
+          <text>{{item.dateText}}</text>
+          <text>{{item.subtitle}}</text>
+        </view>
+      </view>
+      <view class="record-side">
+        <text wx:if="{{item.pointsText}}" class="record-points">{{item.pointsText}}</text>
+        <text class="status-pill {{item.statusTone}}">{{item.statusLabel}}</text>
+        <t-icon wx:if="{{item.type !== 'points'}}" name="chevron-right" size="34rpx" color="#a8afb9" />
+      </view>
+    </view>
+    <view wx:if="{{loadingMore}}" class="list-tip">加载中…</view>
+    <view wx:elif="{{!hasMore}}" class="list-tip">已显示全部记录</view>
+  </view>
+  <t-empty wx:else description="暂无记录，完成相关业务后将在这里展示" />
+</view>

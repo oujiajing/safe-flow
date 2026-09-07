@@ -1,0 +1,10 @@
+<view class="upload-panel">
+  <view wx:if="{{photo}}" class="upload-panel__preview" bindtap="preview">
+    <image class="upload-panel__image" src="{{photo}}" mode="aspectFill" />
+    <text class="upload-panel__count">{{previewText}}</text>
+  </view>
+  <view wx:else class="upload-panel__empty" bindtap="upload">
+    <t-icon name="camera" size="44rpx" color="#252b36" />
+    <text>{{emptyText}}</text>
+  </view>
+</view>

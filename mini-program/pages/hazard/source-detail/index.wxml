@@ -1,0 +1,242 @@
+<view class="source-page {{moduleKey === 'quick-shot' ? 'quick-shot-page' : ''}} {{moduleKey === 'safety-check' ? 'safety-check-page' : ''}}">
+  <green-header title="{{moduleKey === 'quick-shot' ? '随手拍详情' : title}}" bind:back="goBack" />
+
+  <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载记录..." />
+  <state-view wx:elif="{{errorText}}" errorText="{{errorText}}" bind:retry="loadRecord" />
+
+  <block wx:elif="{{record && moduleKey === 'safety-check'}}">
+    <view class="safety-tabs">
+      <view class="safety-tab {{safetyDetailTab === 'basic' ? 'active' : ''}}" data-tab="basic" bindtap="changeSafetyDetailTab">基础信息</view>
+      <view class="safety-tab {{safetyDetailTab === 'hazards' ? 'active' : ''}}" data-tab="hazards" bindtap="changeSafetyDetailTab">隐患明细</view>
+    </view>
+
+    <view wx:if="{{safetyDetailTab === 'basic'}}" class="safety-basic">
+      <safe-card compact="{{true}}" elevated="{{true}}">
+        <view class="safety-readonly-card">
+          <view class="safety-readonly-grid">
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">检查单位</text>
+              <text class="safety-readonly-pill">{{inspectionUnitOptions[inspectionUnitIndex].label || record.payload.inspectionUnitName || record.payload.inspectionUnit || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">受检单位</text>
+              <text class="safety-readonly-pill">{{inspectedUnitOptions[inspectedUnitIndex].label || record.payload.inspectedUnitName || record.companyName || record.company || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">受检项目</text>
+              <text class="safety-readonly-value">{{record.payload.inspectedProject || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">检查类型</text>
+              <text class="safety-readonly-pill">{{record.payload.checkType || record.payload.checkTheme || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">检查类型（手录）</text>
+              <text class="safety-readonly-value">{{record.payload.manualCheckType || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">检查日期</text>
+              <text class="safety-readonly-value">{{record.payload.checkDate || record.businessDate || record.recordDate || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">检查时间</text>
+              <text class="safety-readonly-value">{{record.payload.checkTime || record.createdAt || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">创建人</text>
+              <text class="safety-readonly-chip">{{record.payload.creatorName || record.ownerUserName || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">状态</text>
+              <text class="safety-readonly-status {{record.status === 'ARCHIVED' || record.statusLabel === '已检查' || record.statusLabel === '已完成' ? 'done' : 'pending'}}">{{record.status === 'ARCHIVED' || record.statusLabel === '已检查' || record.statusLabel === '已完成' ? '已检查' : '待检查'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">检查方式</text>
+              <text class="safety-readonly-pill">{{record.payload.checkMethod || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">检查人员</text>
+              <view class="safety-readonly-chip-list"><text wx:for="{{record.payload.inspectors}}" wx:key="*this" class="safety-readonly-chip">{{item}}</text><text wx:if="{{!record.payload.inspectors || record.payload.inspectors.length === 0}}" class="safety-readonly-value">-</text></view>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">验收人员</text>
+              <view class="safety-readonly-chip-list"><text wx:for="{{record.payload.acceptanceUsers}}" wx:key="*this" class="safety-readonly-chip">{{item}}</text><text wx:if="{{!record.payload.acceptanceUsers || record.payload.acceptanceUsers.length === 0}}" class="safety-readonly-value">-</text></view>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">检查人员（手录）</text>
+              <text class="safety-readonly-value">{{record.payload.manualInspectors || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">受检单位人员</text>
+              <view class="safety-readonly-chip-list"><text wx:for="{{record.payload.inspectedUnitUsers}}" wx:key="*this" class="safety-readonly-chip">{{item}}</text><text wx:if="{{!record.payload.inspectedUnitUsers || record.payload.inspectedUnitUsers.length === 0}}" class="safety-readonly-value">-</text></view>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">受检单位人员（手录）</text>
+              <text class="safety-readonly-value">{{record.payload.manualInspectedUnitUsers || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row wide">
+              <text class="safety-readonly-label">检查内容</text>
+              <text class="safety-readonly-box">{{record.payload.checkContent || record.content || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row wide">
+              <text class="safety-readonly-label">备注</text>
+              <text class="safety-readonly-box">{{record.payload.remark || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">整改验收是否通过</text>
+              <text class="safety-readonly-pill">{{record.payload.acceptancePassed || '-'}}</text>
+            </view>
+            <view class="safety-readonly-row">
+              <text class="safety-readonly-label">验收日期</text>
+              <text class="safety-readonly-value">{{record.payload.acceptanceDate || '-'}}</text>
+            </view>
+          </view>
+          <view class="safety-readonly-attachments">
+            <text class="safety-readonly-label">附件</text>
+            <view class="safety-photo-strip">
+              <image wx:for="{{record.payload.attachments}}" wx:key="name" src="{{item.url || item.path || item.previewUrl}}" class="safety-attachment-photo" mode="aspectFill" />
+              <view wx:if="{{!record.payload.attachments || record.payload.attachments.length === 0}}" class="safety-empty-attachment">-</view>
+            </view>
+          </view>
+        </view>
+      </safe-card>
+    </view>
+
+    <view wx:if="{{safetyDetailTab === 'hazards'}}" class="safety-hazard-panel">
+      <safe-card compact="{{true}}" elevated="{{true}}">
+        <view class="safety-readonly-card">
+          <view class="safety-readonly-summary">隐患总数 {{record.payload.checkItems.length || 0}} 条</view>
+          <view class="safety-readonly-hazard-list">
+            <view class="safety-readonly-hazard-card" wx:for="{{record.payload.checkItems}}" wx:key="index">
+              <view class="safety-readonly-hazard-head">
+                <view class="safety-readonly-hazard-index">{{index + 1}}</view>
+                <text class="safety-readonly-hazard-status">{{item.rectificationStatusLabel || item.rectificationStatus || '已整改'}}</text>
+              </view>
+              <view class="safety-readonly-row">
+                <text class="safety-readonly-label">是否启用AI</text>
+                <text class="safety-readonly-pill">{{item.enableAi || '否'}}</text>
+              </view>
+              <view class="safety-readonly-row">
+                <text class="safety-readonly-label">整改前照片</text>
+                <view class="safety-readonly-photo-list">
+                  <image wx:for="{{item.beforePhotos}}" wx:key="*this" src="{{item}}" class="safety-readonly-photo" mode="aspectFill" />
+                  <text wx:if="{{!item.beforePhotos || item.beforePhotos.length === 0}}" class="safety-readonly-value">-</text>
+                </view>
+              </view>
+              <view class="safety-readonly-row wide">
+                <text class="safety-readonly-label">隐患描述</text>
+                <text class="safety-readonly-box">{{item.hazardDescription || '-'}}</text>
+              </view>
+              <view class="safety-readonly-row wide">
+                <text class="safety-readonly-label">整改措施</text>
+                <text class="safety-readonly-box">{{item.rectificationMeasures || '-'}}</text>
+              </view>
+              <view class="safety-readonly-row">
+                <text class="safety-readonly-label">整改责任人</text>
+                <text class="safety-readonly-chip">{{item.rectificationResponsiblePerson || '-'}}</text>
+              </view>
+              <view class="safety-readonly-row">
+                <text class="safety-readonly-label">整改截止日期</text>
+                <text class="safety-readonly-value">{{item.rectificationDeadline || '-'}}</text>
+              </view>
+              <view class="safety-readonly-row">
+                <text class="safety-readonly-label">整改后照片</text>
+                <view class="safety-readonly-photo-list">
+                  <image wx:for="{{item.afterPhotos}}" wx:key="*this" src="{{item}}" class="safety-readonly-photo" mode="aspectFill" />
+                  <text wx:if="{{!item.afterPhotos || item.afterPhotos.length === 0}}" class="safety-readonly-value">-</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </safe-card>
+    </view>
+  </block>
+
+  <view wx:elif="{{record}}" class="source-detail quick-shot-detail">
+    <view class="quick-shot-detail-content">
+      <safe-card compact="{{true}}" elevated="{{true}}">
+        <view class="quick-shot-summary-card">
+          <view class="quick-shot-summary-icon"><t-icon name="secured" size="42rpx" color="#13a66b" /></view>
+          <view class="quick-shot-summary-main">
+            <view class="quick-shot-summary-title">{{record.status === 'REVIEWED' || record.statusLabel === '通过' || record.statusLabel === '已通过' ? '已上报' : (record.statusLabel || record.status || '-')}}</view>
+            <view class="quick-shot-summary-desc">您的隐患已成功上报，感谢参与安全管理</view>
+            <view class="quick-shot-summary-meta">
+              <text><t-icon t-class="quick-shot-summary-meta-icon" name="user" size="24rpx" color="#a1a9b6" />上报人：{{record.ownerUserName || record.payload.reporterName || '-'}}</text>
+              <text><t-icon t-class="quick-shot-summary-meta-icon" name="time" size="24rpx" color="#a1a9b6" />上报时间：{{record.businessDate || record.recordDate || record.createdAt || '-'}}</text>
+            </view>
+          </view>
+          <view class="quick-shot-summary-badge">
+            <text></text>{{record.status === 'REVIEWED' || record.statusLabel === '通过' || record.statusLabel === '已通过' ? '已上报' : (record.statusLabel || record.status || '-')}}
+          </view>
+        </view>
+      </safe-card>
+
+      <safe-card compact="{{true}}" elevated="{{true}}">
+        <view class="quick-shot-photo-card">
+          <view class="quick-shot-card-title">隐患图片</view>
+          <view wx:if="{{record.payload.photo}}" class="quick-shot-photo-wrap" bindtap="previewRecordPhoto">
+            <image class="quick-shot-photo" src="{{record.payload.photo}}" mode="aspectFill" />
+            <text class="quick-shot-photo-count">1/1</text>
+          </view>
+          <view wx:else class="quick-shot-empty-photo">-</view>
+        </view>
+      </safe-card>
+
+      <safe-card compact="{{true}}" elevated="{{true}}">
+        <view class="quick-shot-info-card">
+          <view class="quick-shot-section-title"><text></text>详细信息</view>
+          <info-row label="编号" value="{{record.recordNo || record.sourceRecordId || record.id || '-'}}" />
+          <info-row label="公司" value="{{record.companyName || record.company || '广东广晟稀有金属光电新材料有限公司'}}" />
+          <info-row label="部门" value="{{record.departmentName || record.payload.departmentName || '-'}}" />
+          <info-row label="班组" value="{{record.team || record.teamName || '-'}}" />
+          <info-row label="上报人" value="{{record.ownerUserName || record.payload.reporterName || '-'}}" />
+          <info-row label="上传日期" value="{{record.businessDate || record.recordDate || '-'}}" />
+          <view class="quick-shot-info-status">
+            <text>状态</text>
+            <status-badge status="{{record.status}}" label="{{record.statusLabel || (record.status === 'REVIEWED' ? '已上报' : '')}}" size="small" />
+          </view>
+          <info-row label="创建时间" value="{{record.createdAt || '-'}}" />
+          <info-row label="是否启用AI" value="{{record.payload.enableAi || '-'}}" />
+        </view>
+      </safe-card>
+
+      <safe-card compact="{{true}}" elevated="{{true}}">
+        <view class="quick-shot-hazard-card">
+          <view class="quick-shot-section-title"><text></text>隐患详情</view>
+          <info-row label="隐患图片" value="{{record.payload.photo ? '查看上方图片（共1张）' : '-'}}" arrow="{{record.payload.photo ? true : false}}" />
+          <info-row label="隐患描述" value="{{record.payload.hazardDescription || record.payload.checkTheme || record.content || '-'}}" />
+          <info-row label="整改措施" value="{{record.payload.rectificationMeasures || '-'}}" />
+          <info-row label="更新时间" value="{{record.updatedAt || record.createdAt || '-'}}" />
+        </view>
+      </safe-card>
+
+      <view class="quick-shot-primary-action-wrap">
+        <view class="quick-shot-primary-action {{actioning ? 'loading' : ''}}" bindtap="openRectificationOrder">
+          <t-icon name="file-paste" size="32rpx" color="#ffffff" /> {{actioning ? '处理中...' : '打开整改单'}}
+        </view>
+      </view>
+    </view>
+  </view>
+  <state-view wx:else empty="{{true}}" emptyText="记录不存在" />
+
+  <view wx:if="{{showHazardDetail}}" class="hazard-modal-mask">
+    <view class="hazard-modal">
+      <view class="hazard-modal-head">
+        <text>明细</text>
+        <text class="hazard-modal-close" bindtap="closeHazardDetail">×</text>
+      </view>
+      <view class="hazard-modal-field"><text class="safety-label required">序号</text><text>{{currentHazardDetailIndex + 1}}</text></view>
+      <view class="hazard-modal-field"><text class="safety-label required">受检单位</text><text class="safety-value link">{{inspectedUnitOptions[inspectedUnitIndex].label || record.companyName || '-'}}</text></view>
+      <view class="hazard-modal-field"><text class="safety-label required">是否启用AI</text><text class="safety-value link">{{currentHazardDetail.enableAi || '否'}}</text></view>
+      <view class="hazard-modal-field"><text class="safety-label">隐患库选择</text><text>{{currentHazardDetail.hazardLibraryName || '-'}}</text></view>
+      <view class="hazard-modal-field"><text class="safety-label required">整改前照片</text><view class="safety-photo-strip"><image wx:for="{{currentHazardDetail.beforePhotos}}" wx:key="*this" src="{{item}}" class="hazard-photo" mode="aspectFill" /></view></view>
+      <view class="hazard-modal-field block"><text class="safety-label required">隐患描述</text><text>{{currentHazardDetail.hazardDescription || '-'}}</text></view>
+      <view class="hazard-modal-field block"><text class="safety-label required">整改措施</text><text>{{currentHazardDetail.rectificationMeasures || '-'}}</text></view>
+      <view class="hazard-modal-field"><text class="safety-label required">整改责任人</text><text class="safety-chip">{{currentHazardDetail.rectificationResponsiblePerson || '-'}}</text></view>
+      <view class="hazard-modal-field"><text class="safety-label required">整改截止日期</text><text>{{currentHazardDetail.rectificationDeadline || '-'}}</text></view>
+      <view class="hazard-modal-field"><text class="safety-label required">整改后照片</text><view class="safety-photo-strip"><image wx:for="{{currentHazardDetail.afterPhotos}}" wx:key="*this" src="{{item}}" class="hazard-photo" mode="aspectFill" /></view></view>
+      <view class="hazard-modal-field"><text class="safety-label required">状态</text><text class="safety-status done">{{currentHazardDetail.rectificationStatusLabel || currentHazardDetail.rectificationStatus || '-'}}</text></view>
+    </view>
+  </view>
+</view>

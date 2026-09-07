@@ -1,0 +1,25 @@
+package com.pingan.banzu.dto;
+
+public record HazardRectificationOrderListItem(
+    String id,
+    String orderNo,
+    String sourceType,
+    String sourceModuleKey,
+    String sourceRecordId,
+    String sourceRecordNo,
+    String rootDispatchRecordId,
+    Long companyId,
+    String company,
+    Long departmentId,
+    String department,
+    Long teamId,
+    String team,
+    String businessDate,
+    int hazardCount,
+    String status,
+    String statusLabel,
+    String rectificationDeadline,
+    String issuedAt,
+    String rectifiedAt,
+    String closedAt,
+    int version) {}

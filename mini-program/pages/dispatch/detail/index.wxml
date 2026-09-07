@@ -1,0 +1,21 @@
+<view class="page">
+  <view class="dispatch-page detail-screen">
+    <green-header title="班组派班" bind:back="goBack" />
+    <view class="detail-return-strip">
+      <button bindtap="goBack">‹ 返回</button>
+    </view>
+    <view wx:if="{{loading}}" class="dispatch-report-empty">正在加载派班详情...</view>
+    <view wx:elif="{{errorText}}" class="dispatch-report-empty" bindtap="loadRecord">{{errorText}}，点击重试</view>
+    <view wx:elif="{{dispatchRecord}}" class="dispatch-form detail-content-full">
+      <view class="meeting-section-tabs">
+        <view class="meeting-section-tab active">基础信息</view>
+      </view>
+      <view class="dispatch-field"><view class="dispatch-label required-label">班组</view><view class="dispatch-value dispatch-link">{{dispatchRecord.team}}</view></view>
+      <view class="dispatch-field"><view class="dispatch-label required-label">负责人</view><view class="dispatch-value"><text class="person-pill blue">{{dispatchRecord.name}}</text></view></view>
+      <view class="dispatch-field"><view class="dispatch-label required-label">工种</view><view class="dispatch-value dispatch-link">{{dispatchRecord.work}}</view></view>
+      <view class="dispatch-field top"><view class="dispatch-label required-label">班组任务</view><view class="dispatch-value dispatch-link task">{{dispatchRecord.task}}</view></view>
+      <view class="dispatch-field"><view class="dispatch-label required-label">派班日期</view><view class="dispatch-value dispatch-date-value"><text class="dispatch-date-text">{{dispatchRecord.date}}</text></view></view>
+    </view>
+    <view wx:else class="dispatch-report-empty">未找到派班详情</view>
+  </view>
+</view>

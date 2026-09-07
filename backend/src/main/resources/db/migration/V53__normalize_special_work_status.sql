@@ -1,0 +1,11 @@
+UPDATE special_work_record
+SET status = CASE
+  WHEN UPPER(TRIM(status)) = 'APPROVED' THEN 'IN_PROGRESS'
+  WHEN UPPER(TRIM(status)) = 'PENDING' THEN 'PENDING_APPROVAL'
+  ELSE UPPER(TRIM(status))
+END
+WHERE UPPER(TRIM(status)) IN ('APPROVED', 'PENDING');
+
+ALTER TABLE special_work_record
+ADD CONSTRAINT chk_special_work_record_status
+CHECK (status IN ('PENDING_APPROVAL', 'IN_PROGRESS', 'PENDING_ACCEPTANCE', 'COMPLETED'));

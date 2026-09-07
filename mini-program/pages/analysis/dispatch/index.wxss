@@ -1,0 +1,15 @@
+@import "../../../styles/analysis.wxss";
+
+.strip-foot { margin-top:12rpx; color:#697386; font-size:19rpx; }
+.dispatch-org-chart { min-height:370rpx; }
+.dispatch-chart-row { display:grid; grid-template-columns:94rpx 1fr 28rpx; align-items:center; gap:10rpx; margin:24rpx 0; }
+.dispatch-chart-name { font-size:22rpx; color:#172033; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dispatch-chart-bar { display:flex; height:38rpx; background:#edf0f2; overflow:hidden; }
+.dispatch-chart-bar .bar-fill { display:flex; align-items:center; justify-content:center; border-radius:0; color:#fff; font-size:20rpx; }
+.dispatch-chart-total { font-size:20rpx; color:#172033; }
+.dispatch-trend-card { min-height:310rpx; }
+.dispatch-trend-card .chart-canvas { height:190rpx; }
+.dispatch-table-grid { grid-template-columns:1.7fr .8fr .8fr .8fr 1fr; }
+.dispatch-trend-grid { grid-template-columns:repeat(4,1fr); }
+.dispatch-table-name { min-width:0; padding-right:8rpx; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.blue { color:#1677e8; }.green { color:#07965e; }.orange { color:#ff7100; }

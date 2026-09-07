@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "执行检查",
+  "navigationStyle": "custom",
+  "navigationBarBackgroundColor": "#078249",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index"
+  }
+}

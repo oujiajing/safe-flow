@@ -1,0 +1,20 @@
+<view class="sw-page sw-list-page">
+  <green-header title="特种作业" bind:back="goBack" />
+  <view class="sw-search"><t-icon name="search" size="32rpx" color="#8a919d" /><input value="{{keyword}}" bindinput="updateKeyword" placeholder="搜索项目、类型、地点、内容" /></view>
+  <scroll-view class="sw-tabs" scroll-x enhanced show-scrollbar="{{false}}"><view class="sw-tabs-inner"><view wx:for="{{tabs}}" wx:key="value" class="sw-tab {{activeStatus === item.value ? 'active' : ''}}" data-status="{{item.value}}" bindtap="changeStatus">{{item.label}} {{item.count || 0}}</view></view></scroll-view>
+  <view class="sw-filter-row"><picker mode="date" value="{{date}}" bindchange="changeDate"><view class="sw-date-filter {{date ? 'active' : ''}}"><t-icon name="calendar" size="28rpx" color="{{date ? '#168a5b' : '#667085'}}" /><text>{{date || '申请日期'}}</text></view></picker><text wx:if="{{date}}" class="sw-filter-clear" bindtap="clearDate">清除</text></view>
+  <view class="sw-list-content">
+    <view wx:if="{{loading}}" class="sw-empty">正在加载特种作业…</view>
+    <view wx:elif="{{errorText}}" class="sw-error">{{errorText}}</view>
+    <view wx:elif="{{visibleRows.length === 0}}" class="sw-empty">当前条件暂无记录</view>
+    <view wx:for="{{visibleRows}}" wx:key="id" class="sw-record-card" data-id="{{item.id}}" bindtap="openDetail">
+      <view class="sw-record-head"><view><text class="sw-type">{{item.workType || '未填写作业类型'}}</text><text class="sw-project">{{item.project}}</text></view><text class="sw-status {{item.statusClass}}">{{item.statusLabel}}</text></view>
+      <view class="sw-divider" />
+      <view class="sw-record-line"><text>公司</text><text>{{item.company || '-'}}</text></view>
+      <view class="sw-record-line"><text>申请时间</text><text>{{item.applicationTimeLabel}}</text></view>
+      <view class="sw-record-line"><text>作业地点</text><text>{{item.workLocation || '-'}}</text></view>
+      <view class="sw-card-arrow"><text>查看作业票</text><t-icon name="chevron-right" size="28rpx" color="#168a5b" /></view>
+    </view>
+  </view>
+  <button wx:if="{{canCreate}}" class="sw-fab" bindtap="openForm"><t-icon name="add" size="30rpx" color="#ffffff" /><text>新建申请</text></button>
+</view>

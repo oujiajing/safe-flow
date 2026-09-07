@@ -1,0 +1,51 @@
+<view class="profile-page">
+  <view class="profile-nav" style="padding-top: {{statusBarHeight}}px;">
+    <view class="profile-nav-bar" style="height: {{navigationBarHeight}}px;">
+      <view class="profile-nav-action" bindtap="goBack" hover-class="profile-nav-action--pressed" aria-role="button" aria-label="返回">
+        <t-icon name="chevron-left" size="48rpx" color="#20262d" />
+      </view>
+      <view class="profile-nav-title">个人资料</view>
+      <view class="profile-nav-space"></view>
+    </view>
+  </view>
+
+  <view class="profile-content">
+    <view wx:if="{{loading}}" class="profile-loading"><t-loading text="加载中" /></view>
+    <view wx:elif="{{errorText}}" class="state-card" bindtap="loadProfile">{{errorText}}，点击重试</view>
+    <block wx:else>
+      <view class="profile-card">
+        <view
+          class="profile-row profile-avatar-row"
+          bindtap="openAvatarEditor"
+          hover-class="profile-row--pressed"
+          aria-role="button"
+        >
+          <text class="row-label">头像</text>
+          <view class="row-content">
+            <view class="profile-avatar">
+              <image wx:if="{{avatarUrl}}" class="profile-avatar-image" src="{{avatarUrl}}" mode="aspectFill" />
+              <text wx:else>{{avatarText}}</text>
+            </view>
+            <t-icon name="chevron-right" size="38rpx" color="#a8afb9" />
+          </view>
+        </view>
+        <view class="profile-row" wx:for="{{basicRows}}" wx:key="label">
+          <text class="row-label">{{item.label}}</text>
+          <text class="row-value {{item.emphasis ? 'row-value--emphasis' : ''}}">{{item.value}}</text>
+        </view>
+      </view>
+
+      <view class="profile-card organization-card">
+        <view class="profile-row" wx:for="{{organizationRows}}" wx:key="label">
+          <text class="row-label">{{item.label}}</text>
+          <text class="row-value">{{item.value}}</text>
+        </view>
+      </view>
+
+      <view class="maintenance-note">
+        <t-icon name="lock-on" size="28rpx" color="#98a09d" />
+        <text>组织与岗位信息由系统管理员统一维护</text>
+      </view>
+    </block>
+  </view>
+</view>

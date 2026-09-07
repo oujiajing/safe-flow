@@ -1,0 +1,276 @@
+@import "../../styles/analysis.wxss";
+
+.analysis-content--tab {
+  padding-bottom: var(--pingan-tabbar-content-bottom);
+}
+
+.overview-page {
+  background: #f5f6f8;
+}
+
+.overview-content {
+  padding-right: 26rpx;
+  padding-left: 26rpx;
+}
+
+.overview-total-card,
+.overview-summary-card {
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 18rpx;
+  box-shadow: 0 8rpx 26rpx rgba(23, 32, 51, 0.07);
+}
+
+.overview-total-card {
+  margin-top: 26rpx;
+  padding: 24rpx 24rpx 28rpx;
+}
+
+.overview-section-title,
+.overview-title {
+  color: #111a32;
+  font-weight: 700;
+}
+
+.overview-section-title {
+  font-size: 29rpx;
+}
+
+.overview-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 28rpx;
+}
+
+.overview-kpi-item {
+  position: relative;
+  min-width: 0;
+  text-align: center;
+}
+
+.overview-kpi-item + .overview-kpi-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2rpx;
+  bottom: 0;
+  width: 1rpx;
+  background: #e2e6eb;
+}
+
+.overview-kpi-label {
+  color: #2f384d;
+  font-size: 23rpx;
+  white-space: nowrap;
+}
+
+.overview-kpi-value {
+  margin-top: 18rpx;
+  color: #111a32;
+  font-size: 42rpx;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.overview-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 18rpx;
+  height: 910rpx;
+  margin-top: 26rpx;
+}
+
+.overview-summary-card {
+  min-width: 0;
+  height: 446rpx;
+  padding: 24rpx 20rpx;
+  overflow: hidden;
+}
+
+.overview-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.overview-title {
+  font-size: 28rpx;
+  white-space: nowrap;
+}
+
+.overview-detail {
+  padding: 10rpx 0 10rpx 16rpx;
+  color: #07965e;
+  font-size: 23rpx;
+  white-space: nowrap;
+}
+
+.overview-learning-value text {
+  margin-left: 8rpx;
+  color: #3f495d;
+  font-size: 23rpx;
+  font-weight: 400;
+}
+
+.overview-horizontal-title {
+  margin-top: 24rpx;
+  color: #566176;
+  font-size: 19rpx;
+  text-align: center;
+}
+
+.overview-horizontal-chart {
+  height: 306rpx;
+  margin-top: 10rpx;
+}
+
+.overview-horizontal-row {
+  display: grid;
+  grid-template-columns: 88rpx minmax(0, 1fr);
+  align-items: center;
+  min-height: 64rpx;
+}
+
+.overview-horizontal-label {
+  padding-left: 0;
+  padding-right: 4rpx;
+  overflow: hidden;
+  color: #4e596d;
+  font-size: 16rpx;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overview-horizontal-plot {
+  position: relative;
+  display: flex;
+  height: 42rpx;
+  align-items: center;
+  border-left: 1rpx solid #788397;
+}
+
+.overview-horizontal-bar {
+  position: relative;
+  z-index: 1;
+  height: 18rpx;
+  background: #347df0;
+}
+
+.overview-horizontal-value {
+  position: relative;
+  z-index: 1;
+  margin-left: 8rpx;
+  color: #526078;
+  font-size: 18rpx;
+}
+
+.overview-chart-empty {
+  position: absolute;
+  inset: 72rpx 0 auto;
+  color: #94a3b8;
+  font-size: 21rpx;
+  text-align: center;
+}
+
+.overview-donut-wrap {
+  position: relative;
+  width: 230rpx;
+  height: 230rpx;
+  margin: 34rpx auto 0;
+}
+
+.overview-donut {
+  width: 230rpx;
+  height: 230rpx;
+}
+
+.overview-donut-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111a32;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.overview-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18rpx;
+  margin-top: 24rpx;
+  color: #505b70;
+  font-size: 18rpx;
+  white-space: nowrap;
+}
+
+.overview-legend > view {
+  display: flex;
+  align-items: center;
+}
+
+.overview-legend-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-right: 8rpx;
+  border-radius: 50%;
+}
+
+.overview-legend-dot.blue {
+  background: #287cf0;
+}
+
+.overview-legend-dot.gray {
+  background: #d9dee6;
+}
+
+.overview-funnel-chart {
+  width: 100%;
+  height: 336rpx;
+  margin-top: 18rpx;
+}
+
+.overview-learning-value {
+  margin-top: 64rpx;
+  color: #111a32;
+  font-size: 48rpx;
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+}
+
+.overview-learning-caption {
+  margin-top: 26rpx;
+  color: #596479;
+  font-size: 22rpx;
+  text-align: center;
+}
+
+.overview-learning-progress {
+  height: 16rpx;
+  margin-top: 52rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: #e1e5eb;
+}
+
+.overview-learning-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #1677e8;
+}
+
+.overview-learning-count {
+  margin-top: 42rpx;
+  color: #5f697d;
+  font-size: 22rpx;
+}
+
+.overview-learning-count text {
+  color: #1677e8;
+  font-size: 28rpx;
+  font-weight: 600;
+}

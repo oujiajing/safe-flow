@@ -1,0 +1,9 @@
+{
+  "navigationStyle": "custom",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f4f6f5",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}

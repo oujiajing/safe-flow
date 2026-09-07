@@ -1,0 +1,120 @@
+<view class="page">
+  <view class="meeting-detail-page detail-screen">
+    <green-header title="班前会" bind:back="goBack" />
+
+    <view class="meeting-detail-action-bar detail-return-strip">
+      <view class="meeting-back-button meeting-action-control" bindtap="goBack"><t-icon t-class="meeting-back-icon" name="chevron-left" size="50rpx" color="#078249" />返回</view>
+      <view wx:if="{{canUpdateAction}}" class="meeting-save-button meeting-action-control detail-save-btn {{saving ? 'is-loading' : ''}}" bindtap="saveMeetingDetail">保存</view>
+    </view>
+
+    <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载班前会详情..." />
+    <state-view wx:elif="{{errorText}}" errorText="{{errorText}}" bind:retry="loadMeeting" />
+
+    <view wx:elif="{{meetingRecord}}" class="meeting-detail-content meeting-form meeting-confirm-form detail-content-full">
+      <view class="meeting-detail-tabs meeting-section-tabs">
+        <view class="meeting-detail-tab meeting-section-tab {{activeDetailTab === 'basic' ? 'active' : ''}}" data-tab="basic" bindtap="switchDetailTab">基础信息</view>
+        <view class="meeting-detail-tab meeting-section-tab {{activeDetailTab === 'detail' ? 'active' : ''}}" data-tab="detail" bindtap="switchDetailTab">明细信息</view>
+      </view>
+
+      <view wx:if="{{activeDetailTab === 'basic'}}" class="meeting-basic-panel">
+        <safe-card compact="{{true}}" elevated="{{true}}" class="meeting-basic-card">
+          <view class="meeting-row meeting-info-row"><view class="meeting-label required-label">公司</view><view class="meeting-value meeting-link">{{meetingRecord.company}}</view><text class="meeting-row-arrow">›</text></view>
+          <view class="meeting-row meeting-info-row"><view class="meeting-label required-label">车间</view><view class="meeting-value meeting-link">{{meetingRecord.dept}}</view><text class="meeting-row-arrow">›</text></view>
+          <view class="meeting-row meeting-info-row"><view class="meeting-label required-label">班组</view><view class="meeting-value meeting-link">{{meetingRecord.team}}</view><text class="meeting-row-arrow">›</text></view>
+          <view class="meeting-row meeting-info-row">
+            <view class="meeting-label required-label">负责人</view>
+            <picker mode="selector" range="{{ownerOptions}}" range-key="label" value="{{ownerIndex}}" bindchange="changeOwner">
+              <view class="meeting-value meeting-select-inline">{{meetingRecord.owner}}</view>
+            </picker>
+            <text class="meeting-row-arrow">›</text>
+          </view>
+          <view class="meeting-row meeting-info-row meeting-attendee-row">
+            <view class="meeting-label required-label">参会人</view>
+            <view class="meeting-value">
+              <view class="meeting-tags meeting-person-tags" bindtap="toggleAttendeePicker">
+                <text wx:for="{{meetingRecord.attendees}}" wx:key="*this">{{item}}</text>
+                <text wx:if="{{!meetingRecord.attendees.length}}" class="meeting-placeholder">点击选择</text>
+              </view>
+              <checkbox-group wx:if="{{showAttendeePicker}}" class="meeting-attendee-picker" bindchange="changeAttendees">
+                <label wx:for="{{attendeeOptions}}" wx:key="value" class="meeting-attendee-option">
+                  <checkbox value="{{item.value}}" checked="{{meetingRecord.attendees.indexOf(item.value) >= 0}}" />
+                  <text>{{item.label}}</text>
+                </label>
+              </checkbox-group>
+            </view>
+            <text class="meeting-add-text">+ 添加</text>
+          </view>
+          <view class="meeting-row meeting-info-row"><view class="meeting-label required-label">开会日期</view><view class="meeting-value">{{meetingRecord.date}}</view><t-icon t-class="meeting-calendar-icon" name="calendar" size="32rpx" color="#6b7280" /></view>
+          <view class="meeting-row meeting-info-row meeting-media-row">
+            <view class="meeting-label required-label">图片打卡</view>
+            <view class="meeting-value meeting-media-value">
+              <text>{{meetingRecord.imageCheck}}</text>
+              <view wx:if="{{canUpdateAction}}" class="meeting-upload-grid">
+                <view class="meeting-upload-column">
+                  <view class="meeting-upload-box meeting-action-control {{uploadingImageCheck ? 'is-loading' : ''}}" bindtap="uploadMeetingImageCheck"><t-icon t-class="meeting-upload-icon" name="image" size="40rpx" color="#8b94a3" />上传图片</view>
+                  <text class="meeting-upload-limit">最多上传9张</text>
+                </view>
+                <view class="meeting-upload-action meeting-action-control {{uploadingImageCheck ? 'is-loading' : ''}}" bindtap="uploadMeetingImageCheck"><t-icon t-class="meeting-upload-action-icon" name="camera" size="34rpx" color="#078249" />拍照上传</view>
+              </view>
+              <view class="meeting-media-preview-list"><view wx:for="{{meetingRecord.imageAttachments}}" wx:key="id" class="meeting-media-preview"><image class="meeting-media-thumb" src="{{item.url}}" mode="aspectFill" /><text class="meeting-media-name">{{item.originalName}}</text></view></view>
+            </view>
+          </view>
+          <view class="meeting-row meeting-info-row meeting-media-row">
+            <view class="meeting-label required-label">视频打卡</view>
+            <view class="meeting-value meeting-media-value">
+              <text>{{meetingRecord.videoCheck}}</text>
+              <view wx:if="{{canUpdateAction}}" class="meeting-upload-grid">
+                <view class="meeting-upload-column">
+                  <view class="meeting-upload-box meeting-action-control {{uploadingVideoCheck ? 'is-loading' : ''}}" bindtap="uploadMeetingVideoCheck"><t-icon t-class="meeting-upload-icon" name="video" size="40rpx" color="#8b94a3" />上传视频</view>
+                  <text class="meeting-upload-limit">最多上传1个</text>
+                </view>
+                <view class="meeting-upload-action meeting-action-control {{uploadingVideoCheck ? 'is-loading' : ''}}" bindtap="uploadMeetingVideoCheck"><t-icon t-class="meeting-upload-action-icon" name="video-camera" size="34rpx" color="#078249" />拍摄视频</view>
+              </view>
+              <view class="meeting-media-preview-list"><view wx:for="{{meetingRecord.videoAttachments}}" wx:key="id" class="meeting-media-preview video"><video class="meeting-media-video" src="{{item.url}}" controls object-fit="contain" /><text class="meeting-media-name">{{item.originalName}}</text></view></view>
+            </view>
+          </view>
+          <view class="meeting-row meeting-info-row"><view class="meeting-label required-label">状态</view><view class="meeting-value"><text class="meeting-detail-status {{meetingRecord.statusClass}} {{meetingRecord.status === '已提交' ? 'done' : ''}} before-status">{{meetingRecord.status}}</text></view></view>
+          <view class="meeting-row meeting-info-row remark-row"><view class="meeting-label required-placeholder-label">备注</view><view class="meeting-value"><input class="remark-input meeting-note-input" value="{{meetingRecord.task}}" bindinput="updateMeetingContent" placeholder-class="remark-placeholder" placeholder="请输入备注" /></view></view>
+        </safe-card>
+      </view>
+
+      <view wx:elif="{{activeDetailTab === 'detail'}}" class="meeting-detail-panel">
+        <view class="meeting-safety-list">
+          <view wx:if="{{meetingRecord.safetyConfirmItems.length === 0}}" class="meeting-empty small meeting-empty-template">暂无安全确认模板<text>点击选择</text></view>
+          <safe-card wx:for="{{meetingRecord.safetyConfirmItems}}" wx:key="riskType" compact="{{true}}" elevated="{{true}}" class="meeting-safety-card">
+            <view class="meeting-safety-head {{item.expanded ? 'open' : ''}}" data-index="{{index}}" bindtap="toggleSafetyItem">
+              <text class="meeting-safety-no">{{index + 1}}</text>
+              <text class="meeting-safety-risk">{{item.riskType}}</text>
+              <t-icon t-class="meeting-safety-chevron" name="{{item.expanded ? 'chevron-up' : 'chevron-down'}}" size="30rpx" color="#078249" />
+            </view>
+            <view wx:if="{{item.expanded}}" class="meeting-safety-body">
+              <view class="meeting-safety-field">
+                <text>风险</text>
+                <view class="meeting-safety-value link"><text class="meeting-risk-icon">!</text>{{item.riskType}}</view>
+              </view>
+              <view class="meeting-safety-field block">
+                <text>安全注意事项</text>
+                <view class="meeting-safety-text">{{item.safetyItem}}</view>
+              </view>
+              <view class="meeting-safety-field meeting-safety-status-field">
+                <text>确认状态</text>
+                <view class="meeting-select-wrap">
+                  <view class="meeting-select-value meeting-safety-status-chip {{item.confirmStatus ? 'selected' : ''}}" data-index="{{index}}" bindtap="toggleConfirmStatusDropdown">
+                    <text>{{item.confirmStatus || '点击选择'}}</text>
+                    <t-icon t-class="meeting-select-arrow" name="{{confirmStatusDropdownIndex === index ? 'chevron-up' : 'chevron-down'}}" size="24rpx" color="#078249" />
+                  </view>
+                  <view wx:if="{{confirmStatusDropdownIndex === index}}" class="meeting-select-dropdown">
+                    <view class="meeting-select-option {{item.confirmStatus === '已确认' ? 'active' : ''}}" data-index="{{index}}" data-status="已确认" bindtap="chooseConfirmStatus">已确认</view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </safe-card>
+        </view>
+      </view>
+
+      <view class="result-tip" wx:if="{{operationResult}}">{{operationResult}}</view>
+    </view>
+    <state-view wx:else empty="{{true}}" emptyText="未找到班前会详情" />
+  </view>
+</view>

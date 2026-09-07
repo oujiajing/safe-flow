@@ -1,0 +1,25 @@
+<view class="pingan-tabbar-shell">
+  <view class="pingan-tabbar">
+    <view
+      wx:for="{{tabItems}}"
+      wx:key="pagePath"
+      class="pingan-tabbar-item {{selected === item.pagePath ? 'pingan-tabbar-item--active' : ''}}"
+      data-page-path="{{item.pagePath}}"
+      bindtap="onTabTap"
+      aria-role="button"
+      aria-label="{{item.text}}"
+    >
+      <view class="pingan-tabbar-icon-wrap">
+        <image
+          class="pingan-tabbar-icon {{selected === item.pagePath ? 'pingan-tabbar-icon--active' : ''}}"
+          src="{{selected === item.pagePath ? item.selectedIconPath : item.iconPath}}"
+          mode="aspectFit"
+        ></image>
+        <view wx:if="{{item.badgeCount}}" class="pingan-tabbar-badge">
+          {{item.badgeCount > 99 ? '99+' : item.badgeCount}}
+        </view>
+      </view>
+      <text class="pingan-tabbar-label">{{item.text}}</text>
+    </view>
+  </view>
+</view>

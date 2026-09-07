@@ -1,0 +1,37 @@
+<view class="ks-list-page">
+  <green-header title="重点场所" bind:back="goBack" />
+  <view class="ks-search"><t-icon name="search" size="32rpx" color="#8a919d" /><input value="{{keyword}}" bindinput="updateKeyword" placeholder="搜索场所、部门、责任人" /></view>
+  <scroll-view class="ks-tabs" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="ks-tabs-inner">
+      <view class="ks-tab {{activeTab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="changeTab">待检查 {{counts.pending}}</view>
+      <view class="ks-tab {{activeTab === 'rectifying' ? 'active' : ''}}" data-tab="rectifying" bindtap="changeTab">整改中 {{counts.rectifying}}</view>
+      <view class="ks-tab {{activeTab === 'accepting' ? 'active' : ''}}" data-tab="accepting" bindtap="changeTab">待验收 {{counts.accepting}}</view>
+      <view class="ks-tab {{activeTab === 'closed' ? 'active' : ''}}" data-tab="closed" bindtap="changeTab">已检查 {{counts.closed}}</view>
+    </view>
+  </scroll-view>
+  <view class="ks-filter">
+    <picker class="ks-filter-control" mode="selector" range="{{dateOptions}}" value="{{dateFilterIndex}}" bindchange="changeDateFilter">
+      <view class="ks-filter-pill {{dateFilter ? 'active' : ''}}"><text>{{dateFilter || '日期'}}</text><t-icon name="chevron-down" size="18rpx" color="{{dateFilter ? '#078249' : '#4e5969'}}" /></view>
+    </picker>
+    <picker class="ks-filter-control" mode="selector" range="{{departmentOptions}}" value="{{departmentFilterIndex}}" bindchange="changeDepartmentFilter">
+      <view class="ks-filter-pill {{departmentFilter ? 'active' : ''}}"><text>{{departmentFilter || '部门'}}</text><t-icon name="chevron-down" size="18rpx" color="{{departmentFilter ? '#078249' : '#4e5969'}}" /></view>
+    </picker>
+    <picker class="ks-filter-control" mode="selector" range="{{siteTypeOptions}}" value="{{siteTypeFilterIndex}}" bindchange="changeSiteTypeFilter">
+      <view class="ks-filter-pill ks-filter-pill-wide {{siteTypeFilter ? 'active' : ''}}"><text>{{siteTypeFilter || '场所类型'}}</text><t-icon name="chevron-down" size="18rpx" color="{{siteTypeFilter ? '#078249' : '#4e5969'}}" /></view>
+    </picker>
+  </view>
+  <view class="ks-list-content">
+    <view wx:if="{{loading}}" class="ks-empty">正在加载重点场所…</view>
+    <view wx:elif="{{errorText}}" class="ks-error">{{errorText}}</view>
+    <view wx:elif="{{visibleRows.length === 0}}" class="ks-empty">当前分类暂无记录</view>
+    <view wx:for="{{visibleRows}}" wx:key="id" class="ks-task-card" data-id="{{item.id}}" bindtap="openDetail">
+      <view class="ks-task-head"><text>{{item.siteType}}</text><text class="ks-status {{item.state}}">{{item.statusLabel}}</text></view>
+      <view class="ks-task-meta">{{item.department}} · {{item.date}}</view>
+      <view class="ks-task-line"><text>责任部门：{{item.responsibleDepartment}}</text></view>
+      <view class="ks-task-line"><text>责 任 人：{{item.responsiblePerson}}</text></view>
+      <button wx:if="{{item.state === 'pending'}}" class="ks-go" data-id="{{item.id}}" catchtap="openInspection">去检查</button>
+      <button wx:else class="ks-go ks-go-light" data-id="{{item.id}}" catchtap="openDetail">查看详情</button>
+    </view>
+  </view>
+  <button class="ks-fab" bindtap="openForm"><t-icon name="add" size="28rpx" color="#ffffff" /><text>新建</text></button>
+</view>

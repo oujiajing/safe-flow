@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 630" role="img" aria-label="Guangsheng group building illustration">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0ea5e9"/>
+      <stop offset="0.5" stop-color="#7dd3fc"/>
+      <stop offset="0.78" stop-color="#f0abfc"/>
+      <stop offset="1" stop-color="#fef3c7"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#e0f2fe"/>
+      <stop offset="0.5" stop-color="#dbeafe"/>
+      <stop offset="1" stop-color="#fed7aa"/>
+    </linearGradient>
+    <linearGradient id="tower" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="0.22" stop-color="#94a3b8"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="630" fill="url(#sky)"/>
+  <rect width="1600" height="630" fill="#1e3a8a" opacity="0.14"/>
+  <path d="M0 428c170-42 310-24 472 8 186 37 313 26 486-21 216-59 386-50 642 8v207H0z" fill="url(#water)" opacity="0.92"/>
+  <path d="M0 548c260-18 459-8 688 7 286 19 537 12 912-28v103H0z" fill="#f8fafc" opacity="0.82"/>
+  <g fill="#0f172a" opacity="0.82">
+    <rect x="998" y="315" width="48" height="156" rx="4"/>
+    <rect x="1064" y="260" width="62" height="211" rx="5"/>
+    <rect x="1148" y="302" width="80" height="169" rx="6"/>
+    <rect x="1242" y="238" width="68" height="233" rx="5"/>
+    <rect x="1324" y="278" width="92" height="193" rx="7"/>
+    <rect x="1438" y="320" width="56" height="151" rx="4"/>
+  </g>
+  <g transform="translate(1382 88)">
+    <path d="M82 0l18 58v391H64V58z" fill="#e2e8f0"/>
+    <path d="M64 58h36l44 38v353H20V96z" fill="url(#tower)"/>
+    <path d="M82 18v429" stroke="#fef9c3" stroke-width="5" opacity="0.82"/>
+    <g stroke="#e0f2fe" stroke-opacity="0.55" stroke-width="3">
+      <path d="M38 116h88M38 154h88M38 192h88M38 230h88M38 268h88M38 306h88M38 344h88M38 382h88"/>
+      <path d="M57 84v356M108 84v356"/>
+    </g>
+    <path d="M36 422h112v30H36z" fill="#172554"/>
+  </g>
+  <g fill="#ffffff" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-weight="700" opacity="0.92">
+    <text x="160" y="230" font-size="82">广</text>
+    <text x="340" y="232" font-size="52">聚</text>
+    <text x="520" y="232" font-size="52">英</text>
+    <text x="700" y="232" font-size="52">才</text>
+    <text x="910" y="232" font-size="82">晟</text>
+    <text x="1104" y="232" font-size="52">启</text>
+    <text x="1284" y="232" font-size="52">未</text>
+    <text x="1464" y="232" font-size="52">来</text>
+  </g>
+  <g stroke="#fef3c7" stroke-width="4" opacity="0.45">
+    <path d="M0 522c342 6 602 8 821-12 222-20 457-20 779 10"/>
+    <path d="M0 560c330-9 593-5 802 5 254 13 497 8 798-19"/>
+  </g>
+</svg>

@@ -1,0 +1,8 @@
+<view wx:if="{{loading || errorText || empty}}" class="state-view">
+  <t-loading wx:if="{{loading}}" theme="circular" size="44rpx" text="{{loadingText}}" />
+  <block wx:elif="{{errorText}}">
+    <t-empty description="{{errorText}}" />
+    <t-button t-class="state-view__retry" size="small" theme="primary" variant="outline" bind:tap="retry">点击重试</t-button>
+  </block>
+  <t-empty wx:else description="{{emptyText}}" />
+</view>

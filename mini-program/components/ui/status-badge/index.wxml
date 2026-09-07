@@ -1,0 +1,4 @@
+<view class="status-badge status-badge--{{tone}} status-badge--{{size}}">
+  <t-icon wx:if="{{icon}}" t-class="status-badge__icon" name="{{iconName}}" size="24rpx" />
+  <text>{{resolvedLabel}}</text>
+</view>

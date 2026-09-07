@@ -1,0 +1,15 @@
+<view class="green-header">
+  <view class="green-header-statusbar" style="height: {{statusBarHeight}}px;"></view>
+  <view
+    class="green-header-bar"
+    style="height: {{navigationBarHeight}}px; grid-template-columns: {{menuSpaceWidth}}px minmax(0, 1fr) {{menuSpaceWidth}}px;"
+  >
+    <view class="green-header-left" style="width: {{menuSpaceWidth}}px; height: {{navigationBarHeight}}px;">
+      <view wx:if="{{showBack}}" class="green-header-back" bindtap="handleBack">
+        <t-icon t-class="green-header-back-icon" name="chevron-left" size="{{headerTokens.backIconSize}}" color="{{headerTokens.titleColor}}" />
+      </view>
+    </view>
+    <view class="green-header-title">{{title}}</view>
+    <view class="green-header-menu-space" style="width: {{menuSpaceWidth}}px; height: {{navigationBarHeight}}px;"></view>
+  </view>
+</view>

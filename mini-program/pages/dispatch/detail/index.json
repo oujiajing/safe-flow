@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "班组派班详情",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index"
+  }
+}

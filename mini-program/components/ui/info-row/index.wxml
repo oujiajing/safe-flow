@@ -1,0 +1,8 @@
+<view class="info-row">
+  <text class="info-row__label {{required ? 'info-row__label--required' : ''}}">{{label}}</text>
+  <view class="info-row__value">
+    <slot name="value"></slot>
+    <text class="info-row__text">{{displayValue}}</text>
+  </view>
+  <text wx:if="{{arrow}}" class="info-row__arrow">›</text>
+</view>

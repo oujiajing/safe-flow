@@ -1,0 +1,59 @@
+<view class="settings-page">
+  <view class="settings-nav">
+    <view class="settings-status-bar" style="height: {{statusBarHeight}}px;"></view>
+    <view class="settings-nav-bar" style="height: {{navigationBarHeight}}px;">
+      <view
+        class="settings-nav-action"
+        bindtap="goBack"
+        hover-class="settings-nav-action--pressed"
+        aria-role="button"
+        aria-label="返回"
+      >
+        <t-icon name="chevron-left" size="58rpx" color="#20262d" />
+      </view>
+      <text class="settings-nav-title">设置</text>
+      <view class="settings-nav-space"></view>
+    </view>
+  </view>
+
+  <view class="settings-content">
+    <view class="settings-card service-card">
+      <view
+        class="settings-row"
+        wx:for="{{serviceEntries}}"
+        wx:key="route"
+        data-route="{{item.route}}"
+        bindtap="openService"
+        hover-class="settings-row--pressed"
+        aria-role="button"
+      >
+        <view class="settings-row-icon">
+          <t-icon name="{{item.icon}}" size="56rpx" color="#08a864" />
+        </view>
+        <text class="settings-row-label">{{item.label}}</text>
+        <text wx:if="{{item.value}}" class="settings-row-value">{{item.value}}</text>
+        <t-icon name="chevron-right" size="38rpx" color="#7d8582" />
+      </view>
+    </view>
+
+    <view
+      class="account-action-card switch-account-card"
+      bindtap="confirmSwitchAccount"
+      hover-class="account-action-card--pressed"
+      aria-role="button"
+      aria-label="切换账号"
+    >
+      <text>切换账号</text>
+    </view>
+
+    <view
+      class="account-action-card logout-card"
+      bindtap="confirmLogout"
+      hover-class="account-action-card--pressed"
+      aria-role="button"
+      aria-label="退出登录"
+    >
+      <text>退出登录</text>
+    </view>
+  </view>
+</view>

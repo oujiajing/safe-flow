@@ -1,0 +1,98 @@
+<view class="message-page">
+  <green-header title="消息中心" show-back="{{viewMode === 'detail'}}" bind:back="handleHeaderBack" />
+
+  <block wx:if="{{viewMode === 'list'}}">
+    <view class="message-content">
+      <view class="message-panel">
+        <view class="group-tabs">
+          <view class="group-tab {{activeGroup === item.value ? 'active' : ''}}" wx:for="{{groups}}" wx:key="value" data-group="{{item.value}}" bindtap="changeGroup">
+            <text>{{item.label}}</text>
+            <text wx:if="{{item.unreadCount}}" class="group-count">{{item.unreadCount}}</text>
+          </view>
+        </view>
+
+        <view class="filter-row">
+          <picker mode="selector" range="{{moduleOptions}}" range-key="label" value="{{moduleIndex}}" bindchange="changeModule">
+            <view class="filter-pill">
+              <t-icon name="app" size="28rpx" color="#445066" />
+              <text>{{moduleOptions[moduleIndex].label}}</text>
+              <t-icon name="chevron-down" size="24rpx" color="#667085" />
+            </view>
+          </picker>
+          <picker mode="date" value="{{filterDate}}" bindchange="changeDate">
+            <view class="filter-pill date-filter {{filterDate ? 'active' : ''}}">
+              <t-icon name="calendar" size="28rpx" color="{{filterDate ? '#078249' : '#445066'}}" />
+              <text>{{filterDate || '消息日期'}}</text>
+              <t-icon name="chevron-down" size="24rpx" color="#667085" />
+            </view>
+          </picker>
+          <view wx:if="{{filterDate}}" class="date-clear" aria-label="清除日期筛选" bindtap="clearDate"><t-icon name="close-circle" size="30rpx" color="#667085" /></view>
+          <view class="read-all" bindtap="markAllRead">全部已读</view>
+        </view>
+
+        <view wx:if="{{loading}}" class="message-state">
+          <t-loading theme="circular" size="44rpx" text="正在加载消息..." />
+        </view>
+        <view wx:elif="{{errorText}}" class="message-state">
+          <t-empty description="{{errorText}}" />
+          <view class="retry-action" bindtap="refreshPage">重新加载</view>
+        </view>
+        <view wx:elif="{{messages.length === 0}}" class="message-state">
+          <t-empty description="{{activeGroup === 'ACTION' ? '暂无待处理事项' : activeGroup === 'BUSINESS' ? '暂无业务通知' : '暂无系统公告'}}" />
+        </view>
+        <view wx:else class="message-list">
+          <view class="message-card {{item.read ? 'is-read' : 'is-unread'}}" wx:for="{{messages}}" wx:key="id" data-id="{{item.id}}" bindtap="openMessage">
+            <view class="module-icon message-card-icon module-icon--{{item.tone}}"><t-icon name="{{item.icon}}" size="54rpx" color="#ffffff" /></view>
+            <view class="message-main">
+              <view class="message-card-head">
+                <view class="message-meta">
+                  <text class="module-name module-name--{{item.tone}}">{{item.moduleName}}</text>
+                  <view class="status-pill {{item.overdue ? 'danger' : item.handlingStatus === 'PENDING' ? 'warning' : 'neutral'}}">{{item.statusLabel}}</view>
+                  <view wx:if="{{!item.read}}" class="unread-dot"></view>
+                </view>
+                <text class="message-time">{{item.timeLabel}}</text>
+              </view>
+              <view wx:if="{{item.cardTitle}}" class="message-title">{{item.cardTitle}}</view>
+              <view wx:if="{{item.teamName || item.responsibleName}}" class="message-context">
+                <view wx:if="{{item.teamName}}" class="context-item"><text>{{item.teamName}}</text></view>
+                <view wx:if="{{item.responsibleName}}" class="context-item"><text>{{item.responsibleName}}</text></view>
+              </view>
+              <view wx:else class="message-summary">{{item.summary}}</view>
+            </view>
+          </view>
+          <view wx:if="{{loadingMore}}" class="load-more"><t-loading size="32rpx" text="加载更多..." /></view>
+          <view wx:elif="{{!hasMore}}" class="list-end">没有更多消息了</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="detail-content" wx:if="{{activeMessage}}">
+      <view class="detail-card">
+        <view class="detail-heading">
+          <view class="module-icon module-icon--{{activeMessage.tone}}"><t-icon name="{{activeMessage.icon}}" size="42rpx" color="#ffffff" /></view>
+          <view class="detail-heading-copy">
+            <view class="module-name module-name--{{activeMessage.tone}}">{{activeMessage.moduleName}}</view>
+            <view class="detail-time">{{activeMessage.createdAt}}</view>
+          </view>
+          <view class="status-pill {{activeMessage.overdue ? 'danger' : activeMessage.handlingStatus === 'PENDING' ? 'warning' : 'neutral'}}">{{activeMessage.statusLabel}}</view>
+        </view>
+        <view class="detail-title">{{activeMessage.title}}</view>
+        <view class="detail-summary">{{activeMessage.summary}}</view>
+        <view class="detail-divider"></view>
+        <view class="detail-row"><text>业务类型</text><text>{{activeMessage.moduleName}}</text></view>
+        <view class="detail-row" wx:if="{{activeMessage.teamName}}"><text>所属班组</text><text>{{activeMessage.teamName}}</text></view>
+        <view class="detail-row" wx:if="{{activeMessage.responsibleName}}"><text>负责人</text><text>{{activeMessage.responsibleName}}</text></view>
+        <view class="detail-row"><text>业务编号</text><text>{{activeMessage.bizId}}</text></view>
+        <view class="detail-row" wx:if="{{activeMessage.deadlineLabel}}"><text>处理时限</text><text class="{{activeMessage.overdue ? 'danger-text' : ''}}">{{activeMessage.deadlineLabel}}</text></view>
+        <view class="detail-row"><text>消息状态</text><text>{{activeMessage.read ? '已读' : '未读'}}</text></view>
+      </view>
+      <view wx:if="{{activeMessage.actionAvailable}}" class="detail-actions">
+        <view class="detail-primary" data-id="{{activeMessage.id}}" bindtap="handleAction">
+          <text>{{activeMessage.actionLabel}}</text><t-icon name="chevron-right" size="30rpx" color="#ffffff" />
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

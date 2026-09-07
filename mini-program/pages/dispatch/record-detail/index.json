@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "链路洞察",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}

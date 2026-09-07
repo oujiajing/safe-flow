@@ -1,0 +1,102 @@
+.green-header {
+  --green-header-bg: #078249;
+  --green-header-title-color: #ffffff;
+  --green-header-title-size: 34rpx;
+  --green-header-title-weight: 900;
+  --green-header-title-line-height: 48rpx;
+  --green-header-back-left: 28rpx;
+  --green-header-menu-width: 188rpx;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  background: #078249;
+  background: var(--green-header-bg);
+  overflow: visible;
+}
+
+.green-header-statusbar {
+  width: 100%;
+  max-width: none;
+  height: 28px;
+  margin-left: 0;
+  background: #078249;
+  background: var(--green-header-bg);
+}
+
+.green-header-bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: 188rpx minmax(0, 1fr) 188rpx;
+  grid-template-columns: var(--green-header-menu-width) minmax(0, 1fr) var(--green-header-menu-width);
+  align-items: center;
+  width: 100%;
+  max-width: none;
+  height: 54px;
+  margin-top: -1rpx;
+  margin-left: 0;
+  padding: 0;
+  border-top: 0;
+  background: #078249;
+  background: var(--green-header-bg);
+  box-sizing: border-box;
+}
+
+.green-header-left {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 188rpx;
+  width: var(--green-header-menu-width);
+  height: 54px;
+  padding-left: 28rpx;
+  padding-left: var(--green-header-back-left);
+  box-sizing: border-box;
+}
+
+.green-header-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58rpx;
+  height: 70rpx;
+  color: #ffffff;
+  color: var(--green-header-title-color);
+}
+
+.green-header-back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.green-header-title {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 48rpx;
+  height: var(--green-header-title-line-height);
+  overflow: hidden;
+  color: #ffffff;
+  color: var(--green-header-title-color);
+  font-size: 34rpx;
+  font-size: var(--green-header-title-size);
+  font-weight: 900;
+  font-weight: var(--green-header-title-weight);
+  line-height: 48rpx;
+  line-height: var(--green-header-title-line-height);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.green-header-menu-space {
+  width: 188rpx;
+  width: var(--green-header-menu-width);
+  height: 54px;
+  flex: 0 0 188rpx;
+  flex: 0 0 var(--green-header-menu-width);
+}

@@ -1,0 +1,77 @@
+<view class="page">
+  <view class="inspection-page">
+    <block wx:if="{{inspectionMode === 'list'}}">
+      <green-header title="{{moduleTitle}}" bind:back="goBack" />
+
+      <view class="inspection-tabs">
+        <view class="inspection-tab {{inspectionTab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="changeInspectionTab">待提交 ({{tabCounts.pending}})</view>
+        <view class="inspection-tab {{inspectionTab === 'done' ? 'active' : ''}}" data-tab="done" bindtap="changeInspectionTab">已提交 ({{tabCounts.done}})</view>
+        <view class="inspection-tab {{inspectionTab === 'expired' ? 'active' : ''}}" data-tab="expired" bindtap="changeInspectionTab">已逾期 ({{tabCounts.expired}})</view>
+      </view>
+
+      <view class="inspection-filter-row">
+        <view class="inspection-filter-trigger" bindtap="openInspectionFilter">
+          <t-icon t-class="inspection-filter-icon" name="filter" size="44rpx" color="#078249" />
+          <text>筛选</text>
+        </view>
+      </view>
+
+      <view class="inspection-task-list">
+        <view wx:if="{{actionMessage}}" class="inspection-action-message">{{actionMessage}}</view>
+        <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载检查记录" />
+        <state-view wx:elif="{{errorText}}" errorText="{{errorText}}" bind:retry="loadInspections" />
+        <block wx:elif="{{inspectionRows.length > 0}}">
+          <safe-card wx:for="{{inspectionRows}}" wx:key="id" compact="{{true}}" elevated="{{true}}" data-id="{{item.id}}" bindtap="openInspectionDetail" class="inspection-reference-card">
+            <view class="inspection-card-head">
+              <view class="inspection-field-row inspection-field-row--date">
+                <t-icon t-class="inspection-row-icon" name="calendar" size="34rpx" color="#078249" />
+                <text class="inspection-field-value">{{item.date}}</text>
+              </view>
+              <text class="inspection-status-pill {{item.statusClass}}">{{item.status}}</text>
+            </view>
+            <view class="inspection-field-row inspection-field-row--team">
+              <t-icon t-class="inspection-row-icon" name="building" size="34rpx" color="#078249" />
+              <text class="inspection-field-value">{{item.dept}}　{{item.team}}</text>
+            </view>
+            <view class="inspection-field-row inspection-field-row--owner">
+              <t-icon t-class="inspection-row-icon" name="user" size="34rpx" color="#078249" />
+              <text class="inspection-field-value">{{item.owner}}</text>
+            </view>
+            <view class="inspection-field-row inspection-field-row--content">
+              <t-icon t-class="inspection-row-icon" name="file-paste" size="34rpx" color="#078249" />
+              <text class="inspection-field-value">{{item.task}}</text>
+            </view>
+            <view class="inspection-actions {{inspectionTab !== 'pending' ? 'has-rectify' : ''}}">
+              <view wx:if="{{inspectionTab !== 'pending' && canCreateRectificationOrderAction && item.canCreateRectificationOrder}}" class="inspection-action-btn inspection-outline-orange inspection-rectify-entry" data-id="{{item.id}}" data-can-create-rectification-order="{{item.canCreateRectificationOrder}}" catchtap="openRectificationOrder">开整改单</view>
+              <view class="inspection-action-btn inspection-outline-green" data-id="{{item.id}}" catchtap="openInspectionDetail">明细</view>
+              <view wx:if="{{canSubmitAction && item.canSubmit}}" class="inspection-action-btn inspection-primary-btn" data-id="{{item.id}}" catchtap="submitInspection">提交</view>
+              <view wx:if="{{canWithdrawAction && item.canWithdraw}}" class="inspection-action-btn inspection-outline-blue" data-id="{{item.id}}" catchtap="withdrawInspection">撤回</view>
+              <view wx:if="{{canRemindAction && item.canRemind}}" class="inspection-action-btn inspection-outline-green" data-id="{{item.id}}" catchtap="remindInspection">催一下</view>
+            </view>
+          </safe-card>
+        </block>
+        <state-view wx:else empty="{{true}}" emptyText="没有更多了" />
+      </view>
+
+      <block wx:if="{{showInspectionFilter}}">
+        <view class="inspection-filter-mask" bindtap="closeInspectionFilter"></view>
+        <view class="inspection-filter-drawer">
+          <view class="inspection-filter-title"><text>过滤条件</text><button class="inspection-filter-close" bindtap="closeInspectionFilter">×</button></view>
+          <view class="inspection-filter-field">
+            <text>开始日期</text>
+            <picker mode="date" value="{{inspectionDateStart}}" data-field="dateStart" bindchange="changeInspectionFilterDate">
+              <view class="inspection-date-input">{{inspectionDateStart}}</view>
+            </picker>
+          </view>
+          <view class="inspection-filter-field">
+            <text>结束日期</text>
+            <picker mode="date" value="{{inspectionDateEnd}}" data-field="dateEnd" bindchange="changeInspectionFilterDate">
+              <view class="inspection-date-input">{{inspectionDateEnd}}</view>
+            </picker>
+          </view>
+          <button class="inspection-filter-submit" bindtap="applyInspectionFilter">筛选</button>
+        </view>
+      </block>
+    </block>
+  </view>
+</view>

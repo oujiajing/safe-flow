@@ -1,0 +1,75 @@
+.pingan-tabbar-shell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(15, 23, 42, 0.06);
+}
+
+.pingan-tabbar {
+  display: flex;
+  width: 100%;
+  height: 104rpx;
+}
+
+.pingan-tabbar-item {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 104rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #56575d;
+}
+
+.pingan-tabbar-icon-wrap {
+  position: relative;
+  width: 52rpx;
+  height: 52rpx;
+}
+
+.pingan-tabbar-icon {
+  display: block;
+  width: 52rpx;
+  height: 52rpx;
+  opacity: 0.72;
+}
+
+.pingan-tabbar-icon--active {
+  opacity: 1;
+}
+
+.pingan-tabbar-label {
+  display: block;
+  font-size: 23rpx;
+  line-height: 26rpx;
+  padding-top: 8rpx;
+}
+
+.pingan-tabbar-item--active {
+  color: #008c62;
+  font-weight: 600;
+}
+
+.pingan-tabbar-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -12rpx;
+  min-width: 26rpx;
+  height: 26rpx;
+  padding: 0 5rpx;
+  border: 2rpx solid #ffffff;
+  border-radius: 999rpx;
+  background: #e5393f;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-size: 16rpx;
+  line-height: 1;
+}

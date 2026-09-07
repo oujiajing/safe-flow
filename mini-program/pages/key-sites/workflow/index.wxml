@@ -1,0 +1,21 @@
+<view class="ks-workflow-page">
+  <green-header title="单据流" bind:back="goBack" />
+  <view class="ks-workflow-content">
+    <view wx:if="{{loading}}" class="ks-empty">正在加载单据流…</view>
+    <view wx:elif="{{errorText}}" class="ks-error">{{errorText}}</view>
+    <block wx:else>
+      <view class="ks-node-banner"><text>当前节点：</text><text>{{currentNode}}</text><view><text>查看变更历史</text><t-icon name="chevron-right" size="28rpx" color="#4e5969" /></view></view>
+      <view class="ks-timeline">
+        <view wx:for="{{flowSteps}}" wx:key="key" id="flow-step-{{item.index}}" class="ks-flow-step {{item.state}} {{selectedStep === item.index ? 'selected' : ''}}">
+          <view class="ks-flow-marker"><text>{{item.index}}</text></view>
+          <view class="ks-flow-card">
+            <text class="ks-flow-title">{{item.title}}</text>
+            <text class="ks-flow-actor">{{item.actor}}</text>
+            <text wx:if="{{item.time}}" class="ks-flow-time">{{item.time}}</text>
+            <view class="ks-flow-note {{item.noteBox ? '' : 'plain'}}"><text>{{item.note}}</text></view>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

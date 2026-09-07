@@ -1,0 +1,21 @@
+@import "../common.wxss";
+.ks-workflow-page { min-height: 100vh; box-sizing: border-box; background: #f5f6f8; }
+.ks-workflow-content { padding: 20rpx 24rpx 60rpx; }
+.ks-node-banner { min-height: 86rpx; padding: 0 20rpx; display: flex; align-items: center; border: 1rpx solid #b9d8ff; border-radius: 9rpx; background: #f7fbff; font-size: 26rpx; box-sizing: border-box; }
+.ks-node-banner > text:nth-child(2) { color: #1677ff; font-weight: 600; }
+.ks-node-banner > view { margin-left: auto; display: flex; align-items: center; gap: 4rpx; color: #4e5969; }
+.ks-timeline { padding: 38rpx 0 0 76rpx; }
+.ks-flow-step { position: relative; padding-bottom: 40rpx; }
+.ks-flow-step::before { content: ""; width: 3rpx; position: absolute; left: -43rpx; top: 36rpx; bottom: -36rpx; background: #aeb6c2; }
+.ks-flow-step.done::before { background: #1677ff; }
+.ks-flow-step:last-child::before { display: none; }
+.ks-flow-marker { width: 48rpx; height: 48rpx; position: absolute; z-index: 2; left: -66rpx; top: 12rpx; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border: 2rpx solid #aeb6c2; border-radius: 50%; background: #fff; color: #667085; font-size: 25rpx; }
+.ks-flow-step.done .ks-flow-marker { border-color: #1677ff; background: #1677ff; color: #fff; }
+.ks-flow-step.current .ks-flow-marker { border-color: #f45a16; background: #f45a16; color: #fff; }
+.ks-flow-card { min-height: 184rpx; padding: 24rpx 28rpx; display: flex; flex-direction: column; box-sizing: border-box; border: 1rpx solid #e4e7eb; border-radius: 17rpx; background: #fff; box-shadow: 0 6rpx 20rpx rgba(25,45,80,.045); }
+.ks-flow-title { margin-bottom: 12rpx; color: #1677ff; font-size: 30rpx; font-weight: 700; line-height: 42rpx; }
+.ks-flow-step.current .ks-flow-title { color: #f45a16; }
+.ks-flow-step.pending .ks-flow-title { color: #4e5969; }
+.ks-flow-actor, .ks-flow-time { color: #4e5969; font-size: 26rpx; line-height: 38rpx; }
+.ks-flow-note { min-height: 64rpx; margin-top: 16rpx; padding: 0 18rpx; display: flex; align-items: center; border: 1rpx solid #b9d8ff; border-radius: 8rpx; background: #f7fbff; color: #4e5969; font-size: 24rpx; box-sizing: border-box; }
+.ks-flow-note.plain { min-height: 0; padding: 0; border: 0; background: transparent; line-height: 38rpx; }

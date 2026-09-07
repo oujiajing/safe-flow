@@ -1,0 +1,50 @@
+.upload-panel {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.upload-panel__empty {
+  height: 152rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  border: 2rpx dashed #d7dce4;
+  border-radius: 12rpx;
+  background: #ffffff;
+  color: #252b36;
+  font-size: var(--upload-panel-font-size, 27rpx);
+  box-sizing: border-box;
+}
+
+.upload-panel__preview {
+  position: relative;
+  width: 248rpx;
+  height: 190rpx;
+  overflow: hidden;
+  border-radius: 12rpx;
+  background: #eef2f7;
+}
+
+.upload-panel__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.upload-panel__count {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  min-width: 58rpx;
+  height: 42rpx;
+  padding: 0 10rpx;
+  border-radius: 18rpx 0 0 0;
+  background: rgba(0, 0, 0, 0.62);
+  color: #ffffff;
+  font-size: var(--upload-panel-count-font-size, 24rpx);
+  line-height: 42rpx;
+  text-align: center;
+  box-sizing: border-box;
+}

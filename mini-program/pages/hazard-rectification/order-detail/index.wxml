@@ -1,0 +1,220 @@
+<view class="page rectification-detail-page">
+  <green-header title="{{order.detailTitle || '隐患整改工单'}}" bind:back="goBack" />
+
+  <view wx:if="{{loading}}" class="rectification-state">
+    <t-loading theme="circular" size="44rpx" text="正在加载整改单..." />
+  </view>
+  <view wx:elif="{{errorText}}" class="rectification-state">
+    <t-empty description="{{errorText}}" />
+    <t-button t-class="state-retry-btn" size="small" theme="primary" variant="outline" bind:tap="loadOrder">点击重试</t-button>
+  </view>
+
+  <block wx:elif="{{order}}">
+    <view class="detail-card summary-card">
+      <view class="detail-card-head">
+        <section-header title="工单信息" type="order" size="large" />
+      </view>
+      <view class="summary-layout">
+        <view class="summary-column summary-left">
+          <view wx:if="{{order.orderNo}}" class="summary-row"><text>工单号</text><text>{{order.orderNo}}</text></view>
+          <view wx:if="{{order.sourceModuleText}}" class="summary-row"><text>来源</text><text>{{order.sourceModuleText}}</text></view>
+          <view class="summary-row"><text>班组</text><text>{{order.teamText}}</text></view>
+          <view wx:if="{{order.rectificationRequirementText}}" class="summary-row"><text>整改要求</text><text>{{order.rectificationRequirementText}}</text></view>
+        </view>
+        <view class="summary-column summary-right">
+          <view wx:if="{{order.statusLabel || order.status}}" class="summary-row"><text>状态</text><t-tag t-class="summary-status-tag" theme="{{order.status === 'CLOSED' ? 'success' : order.status === 'CANCELLED' ? 'danger' : order.status === 'PENDING_RECTIFY' ? 'warning' : 'primary'}}" variant="light" size="small">{{order.statusLabel || order.status}}</t-tag></view>
+          <view wx:if="{{order.hazardCountText}}" class="summary-row"><text>隐患数</text><text>{{order.hazardCountText}}</text></view>
+          <view wx:if="{{order.rectificationDeadlineText}}" class="summary-row"><text>整改期限</text><text>{{order.rectificationDeadlineText}}</text></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="detail-card hazard-detail-card">
+      <view class="detail-card-head">
+        <section-header title="隐患明细" type="hazard" size="large" />
+      </view>
+      <view wx:if="{{order.items && order.items.length > 0}}" class="hazard-list">
+        <view class="hazard-item" wx:for="{{order.items}}" wx:key="id">
+          <view class="hazard-index">{{index + 1}}</view>
+          <view class="hazard-content">
+            <view wx:if="{{item.checkItem}}" class="hazard-line"><text class="hazard-label">检查项</text><text class="hazard-value">{{item.checkItem}}</text></view>
+            <view wx:if="{{item.hazardDescription}}" class="hazard-line hazard-desc"><text class="hazard-label">隐患描述</text><text class="hazard-value">{{item.hazardDescription}}</text></view>
+            <view wx:if="{{item.rectificationStatusLabel || item.rectificationStatus}}" class="hazard-line"><text class="hazard-label">整改状态</text><t-tag t-class="hazard-status-tag" theme="{{item.rectificationStatus === 'CLOSED' ? 'success' : item.rectificationStatus === 'PENDING_RECTIFY' ? 'warning' : 'primary'}}" variant="outline" size="small">{{item.rectificationStatusLabel || item.rectificationStatus}}</t-tag></view>
+          </view>
+          <text class="hazard-arrow">›</text>
+        </view>
+      </view>
+      <view wx:else class="section-empty">暂无隐患明细</view>
+    </view>
+
+    <view wx:if="{{order.status === 'PENDING_ACCEPTANCE' && order.rectificationAfterPhoto}}" class="detail-card after-photo-card">
+      <view class="detail-card-head">
+        <section-header title="整改后照片" type="submit" size="large" showAccent="{{true}}" />
+      </view>
+      <view class="after-photo-list">
+        <image class="after-photo-image" mode="aspectFill" src="{{order.rectificationAfterPhoto}}" bindtap="previewAfterPhoto" />
+      </view>
+    </view>
+
+    <view wx:if="{{order.status === 'CLOSED' || order.status === 'CANCELLED'}}" class="detail-card closure-flow-card">
+      <view class="detail-card-head">
+        <section-header title="流程详情" type="flow" size="large" />
+      </view>
+      <view wx:if="{{order.flowDetailSteps && order.flowDetailSteps.length > 0}}" class="closure-flow-timeline">
+        <view class="closure-flow-step {{item.key === 'cancel' ? 'closure-flow-step-cancel' : ''}}" wx:for="{{order.flowDetailSteps}}" wx:key="key">
+          <view class="closure-flow-side">
+            <view class="closure-flow-icon closure-flow-icon-{{item.icon}}"></view>
+            <view class="closure-flow-side-title">{{item.title}}</view>
+            <view class="closure-flow-time">{{item.time}}</view>
+          </view>
+          <view class="closure-flow-panel">
+            <view class="closure-flow-row {{row.length > 1 ? 'closure-flow-row-two' : ''}}" wx:for="{{item.rows}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="rowIndex">
+              <view class="closure-flow-field {{row.length > 1 ? 'closure-flow-field-half' : ''}}" wx:for="{{row}}" wx:for-item="field" wx:key="label">
+                <text class="closure-flow-label">{{field.label}}：</text>
+                <text wx:if="{{field.value}}" class="closure-flow-value {{field.value === '是' ? 'closure-flow-value-success' : ''}}">{{field.value}}</text>
+              </view>
+            </view>
+            <view wx:if="{{item.photos && item.photos.length > 0}}" class="closure-flow-photos">
+              <image wx:for="{{item.photos}}" wx:key="*this" class="closure-flow-photo" mode="aspectFill" src="{{item}}" bindtap="previewAfterPhoto" />
+            </view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="section-empty">暂无流程详情</view>
+    </view>
+
+    <view wx:if="{{order.status === 'CLOSED' && order.flowLogs && order.flowLogs.length > 0}}" class="detail-card flow-log-card">
+      <view class="detail-card-head">
+        <section-header title="流程日志" type="flow" icon="view-list" size="large" />
+      </view>
+      <view class="flow-log-table">
+        <view class="flow-log-tr flow-log-head-row">
+          <view class="flow-log-th">动作</view>
+          <view class="flow-log-th">操作人</view>
+          <view class="flow-log-th">时间</view>
+          <view class="flow-log-th">备注</view>
+        </view>
+        <view class="flow-log-tr" wx:for="{{order.flowLogs}}" wx:key="id">
+          <view class="flow-log-td">{{item.actionLabel || item.action || '-'}}</view>
+          <view class="flow-log-td">{{item.operatorName || '-'}}</view>
+          <view class="flow-log-td">{{item.createdAtText || '-'}}</view>
+          <view class="flow-log-td">{{item.remark || '-'}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{order.status !== 'CLOSED' && order.status !== 'CANCELLED'}}" class="detail-card flow-detail-card">
+      <view class="detail-card-head">
+        <section-header title="流转记录" type="flow" size="large" />
+      </view>
+      <view wx:if="{{order.flowLogs && order.flowLogs.length > 0}}" class="flow-timeline">
+        <view class="flow-item {{item.isCurrent ? 'flow-item-current' : ''}}" wx:for="{{order.flowLogs}}" wx:key="id">
+          <view class="flow-node"></view>
+          <view class="flow-content">
+            <view class="flow-card-head">
+              <text class="flow-title">{{item.actionLabel || item.action || '-'}}</text>
+              <text class="flow-time">{{item.createdAtText || '-'}}</text>
+            </view>
+            <view class="flow-line">
+              <text>操作人：</text>
+              <text>{{item.operatorName || '-'}}</text>
+            </view>
+            <view class="flow-line">
+              <text>备注：</text>
+              <text>{{item.remark || '-'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="section-empty">暂无流转记录</view>
+    </view>
+
+    <view wx:if="{{order.status === 'PENDING_ASSIGN'}}" class="detail-card action-card issue-action-card">
+      <view class="detail-card-head">
+        <section-header title="下发整改" type="dispatch" size="medium" showAccent="{{true}}" />
+      </view>
+      <view class="form-cell required issue-user-cell"><text>整改责任人</text><input data-field="rectificationResponsibleUserId" value="{{actionForm.rectificationResponsibleUserId}}" bindinput="updateActionField" placeholder="请输入整改责任人" /></view>
+      <view class="form-cell issue-dept-cell"><text>整改部门</text><input data-field="rectificationDepartmentId" value="{{actionForm.rectificationDepartmentId}}" bindinput="updateActionField" placeholder="请输入整改部门" /></view>
+      <view class="form-cell issue-user-cell"><text>验收人</text><input data-field="acceptanceUserId" value="{{actionForm.acceptanceUserId}}" bindinput="updateActionField" placeholder="请输入验收人" /></view>
+      <view class="form-cell form-cell-block required issue-requirement-cell"><text>整改要求</text><textarea class="issue-requirement-input" style="height: 86rpx; min-height: 86rpx; max-height: 86rpx;" auto-height="{{false}}" data-field="rectificationRequirement" value="{{actionForm.rectificationRequirement}}" bindinput="updateActionField" placeholder="请输入整改要求"></textarea></view>
+      <picker mode="date" value="{{deadlineDate}}" bindchange="updateDeadlineDate">
+        <view class="form-cell picker-cell required issue-date-cell"><text>选择整改日期</text><text class="{{deadlineDate ? 'picker-value' : 'picker-placeholder'}}">{{deadlineDate || '请选择日期'}}</text></view>
+      </picker>
+      <picker mode="time" value="{{deadlineTime}}" bindchange="updateDeadlineTime">
+        <view class="form-cell picker-cell required issue-time-cell"><text>选择整改时间</text><text class="{{deadlineTime ? 'picker-value' : 'picker-placeholder'}}">{{deadlineTime || '请选择时间'}}</text></view>
+      </picker>
+      <t-button t-class="primary-action-btn" block loading="{{actioning}}" theme="primary" bind:tap="issueRectification">下发整改</t-button>
+    </view>
+
+    <view wx:if="{{order.status === 'PENDING_RECTIFY'}}" class="detail-card action-card rectify-submit-card">
+      <view class="detail-card-head">
+        <section-header title="提交整改" type="submit" size="large" showAccent="{{true}}" />
+      </view>
+      <view class="rectify-field">
+        <view class="rectify-field-label">整改说明 <text>*</text></view>
+        <view class="rectify-textarea-wrap">
+          <textarea class="rectify-description-input" data-field="rectificationDescription" value="{{actionForm.rectificationDescription}}" bindinput="updateActionField" placeholder="请填写整改说明（不少于10字）" />
+          <view class="rectify-count">{{actionForm.rectificationDescription.length || 0}}/200</view>
+        </view>
+      </view>
+      <view class="rectify-upload-head">
+        <view class="rectify-field-label">选择整改后照片 <text>*</text><text class="rectify-upload-limit">（最多上传 6 张）</text></view>
+        <view class="rectify-selected-count">已选择 {{afterPhoto || order.rectificationAfterPhoto ? 1 : 0}} 张</view>
+      </view>
+      <view class="rectify-photo-grid">
+        <view wx:if="{{afterPhoto || order.rectificationAfterPhoto}}" class="rectify-photo-item">
+          <image class="rectification-photo-preview" mode="aspectFill" src="{{afterPhoto || order.rectificationAfterPhoto}}" bindtap="previewAfterPhoto" />
+        </view>
+        <view class="rectify-photo-add" bindtap="chooseAfterPhoto">
+          <view class="rectify-photo-plus">+</view>
+          <view class="rectify-photo-add-text">{{afterPhoto || order.rectificationAfterPhoto ? '继续添加' : '上传照片'}}</view>
+        </view>
+      </view>
+      <view class="rectify-upload-tip">支持 JPG、PNG 格式，单张不超过 10MB</view>
+      <t-button t-class="primary-action-btn" block loading="{{actioning}}" theme="primary" bind:tap="markRectified">提交整改</t-button>
+    </view>
+
+    <view wx:if="{{order.status === 'RECTIFIED'}}" class="detail-card action-card">
+      <view class="detail-card-head">
+        <section-header title="申请验收" type="accept" size="medium" showAccent="{{true}}" />
+      </view>
+      <view class="form-cell"><text>验收人</text><input data-field="acceptanceUserId" value="{{actionForm.acceptanceUserId}}" bindinput="updateActionField" placeholder="请输入验收人" /></view>
+      <view class="form-cell"><text>验收部门</text><input data-field="acceptanceDepartmentId" value="{{actionForm.acceptanceDepartmentId}}" bindinput="updateActionField" placeholder="请输入验收部门" /></view>
+      <view class="form-cell form-cell-block"><text>验收申请备注</text><textarea data-field="acceptanceRemark" value="{{actionForm.acceptanceRemark}}" bindinput="updateActionField" placeholder="请输入验收申请备注" /></view>
+      <t-button t-class="primary-action-btn" block loading="{{actioning}}" theme="primary" bind:tap="requestAcceptance">申请验收</t-button>
+    </view>
+
+    <view wx:if="{{order.status === 'PENDING_ACCEPTANCE'}}" class="detail-card action-card acceptance-process-card">
+      <view class="detail-card-head">
+        <section-header title="验收处理" type="close" size="medium" showAccent="{{true}}" />
+      </view>
+      <view class="acceptance-form-row">
+        <text class="acceptance-label">验收人</text>
+        <input class="acceptance-input" data-field="acceptanceUserId" value="{{actionForm.acceptanceUserId}}" bindinput="updateActionField" placeholder="请输入验收人" />
+      </view>
+      <view class="acceptance-form-row acceptance-textarea-row">
+        <text class="acceptance-label">验收意见</text>
+        <view class="acceptance-textarea-wrap">
+          <textarea class="acceptance-textarea" data-field="acceptanceRemark" value="{{actionForm.acceptanceRemark}}" bindinput="updateActionField" placeholder="请输入验收意见" />
+          <view class="acceptance-count">{{actionForm.acceptanceRemark.length || 0}}/200</view>
+        </view>
+      </view>
+      <view class="acceptance-form-row acceptance-textarea-row">
+        <text class="acceptance-label">驳回原因</text>
+        <view class="acceptance-textarea-wrap">
+          <textarea class="acceptance-textarea" data-field="rejectReason" value="{{actionForm.rejectReason}}" bindinput="updateActionField" placeholder="请输入驳回原因" />
+          <view class="acceptance-count">{{actionForm.rejectReason.length || 0}}/200</view>
+        </view>
+      </view>
+      <view class="acceptance-action-row">
+        <view class="acceptance-action-item">
+          <t-button t-class="acceptance-pass-btn" block loading="{{actioning}}" theme="primary" bind:tap="acceptOrder">验收通过</t-button>
+        </view>
+        <view class="acceptance-action-item">
+          <t-button t-class="acceptance-reject-btn" block loading="{{actioning}}" theme="danger" bind:tap="rejectAcceptance">驳回验收</t-button>
+        </view>
+      </view>
+    </view>
+
+  </block>
+</view>

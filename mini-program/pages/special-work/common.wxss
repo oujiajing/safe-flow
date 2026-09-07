@@ -1,0 +1,11 @@
+page { background: #f5f6f8; color: #1d2939; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.sw-page { min-height: 100vh; background: #f5f6f8; box-sizing: border-box; }
+.sw-content { padding: 22rpx 24rpx 168rpx; }
+.sw-card { margin-bottom: 20rpx; padding: 26rpx; border: 1rpx solid #e8ebef; border-radius: 20rpx; background: #fff; box-shadow: 0 6rpx 22rpx rgba(23,43,77,.045); }
+.sw-section-title { margin-bottom: 22rpx; padding-left: 18rpx; position: relative; font-size: 30rpx; font-weight: 800; line-height: 40rpx; }
+.sw-section-title::before { content: ""; width: 7rpx; position: absolute; left: 0; top: 3rpx; bottom: 3rpx; border-radius: 8rpx; background: #168a5b; }
+.sw-status { padding: 7rpx 16rpx; border-radius: 999rpx; font-size: 23rpx; font-weight: 700; white-space: nowrap; }.sw-status.pending { background: #fff7e6; color: #d97706; }.sw-status.working { background: #eaf4ff; color: #1677ff; }.sw-status.accepting { background: #fff1e8; color: #ea580c; }.sw-status.completed { background: #e9f8f0; color: #168a5b; }
+.sw-detail-row { min-height: 68rpx; padding: 10rpx 0; display: grid; grid-template-columns: 210rpx 1fr; align-items: start; border-bottom: 1rpx solid #eef0f3; box-sizing: border-box; font-size: 26rpx; line-height: 40rpx; }.sw-detail-row:last-child { border-bottom: 0; }.sw-detail-row text:first-child { color: #8a94a4; }.sw-detail-row text:last-child { color: #273142; word-break: break-all; }
+.sw-empty { padding: 100rpx 24rpx; color: #8a94a4; text-align: center; }.sw-error { margin: 18rpx 24rpx; padding: 18rpx 22rpx; border-radius: 12rpx; background: #fff1ed; color: #d9480f; font-size: 26rpx; }
+.sw-bottom { padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom)); position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 1.25fr; gap: 18rpx; background: #fff; border-top: 1rpx solid #e6e8eb; }
+.sw-primary,.sw-outline { width: 100% !important; min-width: 0 !important; height: 88rpx; min-height: 88rpx; margin: 0 !important; padding: 0 !important; border-radius: 12rpx; font-size: 29rpx; font-weight: 700; line-height: 88rpx; box-sizing: border-box; }.sw-primary { background: #168a5b; color: #fff; }.sw-outline { border: 2rpx solid #168a5b; background: #fff; color: #168a5b; }.sw-primary::after,.sw-outline::after { border: 0; }

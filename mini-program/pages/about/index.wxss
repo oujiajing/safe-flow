@@ -1,0 +1,14 @@
+page { background: #f4f6f5; }
+.about-page { min-height: 100vh; padding: 24rpx; color: #172033; background: #f4f6f5; box-sizing: border-box; }
+.brand-card, .about-card { border: 1rpx solid #e3e9e6; border-radius: 20rpx; background: #fff; }
+.brand-card { display: flex; flex-direction: column; align-items: center; padding: 54rpx 38rpx 44rpx; text-align: center; }
+.brand-mark { display: flex; align-items: center; justify-content: center; width: 116rpx; height: 116rpx; border-radius: 28rpx; background: #078c59; box-shadow: 0 12rpx 26rpx rgba(7, 140, 89, 0.2); }
+.brand-name { margin-top: 24rpx; color: #111827; font-size: 38rpx; font-weight: 900; }
+.brand-version { margin-top: 8rpx; color: #87919b; font-size: 23rpx; }
+.brand-description { margin-top: 30rpx; color: #596673; font-size: 25rpx; line-height: 42rpx; }
+.about-card { margin-top: 20rpx; padding: 0 24rpx; }
+.about-row { display: flex; justify-content: space-between; gap: 24rpx; padding: 26rpx 0; border-bottom: 1rpx solid #e7ebe9; font-size: 24rpx; }
+.about-row:last-child { border-bottom: 0; }
+.about-row text:first-child { color: #7a8491; }
+.about-row text:last-child { color: #263142; text-align: right; }
+.copyright { padding: 44rpx 0; color: #98a2a9; text-align: center; font-size: 22rpx; }

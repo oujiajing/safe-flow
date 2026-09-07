@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "单据明细",
+  "navigationStyle": "custom",
+  "navigationBarBackgroundColor": "#078249",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}

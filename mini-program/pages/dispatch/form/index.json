@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "创建班组派班",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}

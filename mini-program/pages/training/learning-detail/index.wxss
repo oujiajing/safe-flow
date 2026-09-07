@@ -1,0 +1,245 @@
+page {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: #f4f7fa;
+  color: #253042;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 20rpx 24rpx 38rpx;
+  overflow-x: hidden;
+  background: #f4f7fa;
+  box-sizing: border-box;
+}
+
+.detail-summary-card,
+.video-card,
+.requirement-card {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border-radius: 28rpx;
+  box-shadow: 0 12rpx 30rpx rgba(32, 54, 74, 0.08);
+  box-sizing: border-box;
+}
+
+.detail-summary-card {
+  margin-top: 20rpx;
+  padding: 28rpx 30rpx 32rpx;
+  border-radius: 28rpx;
+}
+
+.detail-category {
+  width: fit-content;
+  padding: 8rpx 18rpx;
+  border-radius: 12rpx;
+  background: #e6f6ee;
+  color: #078c54;
+  font-size: 26rpx;
+  font-weight: 900;
+  line-height: 36rpx;
+}
+
+.detail-title {
+  margin-top: 24rpx;
+  color: #1d2432;
+  font-size: 39rpx;
+  font-weight: 900;
+  line-height: 54rpx;
+  word-break: break-all;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  margin-top: 38rpx;
+  color: #737d90;
+  font-size: 28rpx;
+  line-height: 36rpx;
+}
+
+.detail-meta-item {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  white-space: nowrap;
+}
+
+.video-card {
+  margin-top: 22rpx;
+  padding: 28rpx 30rpx 30rpx;
+  border-radius: 28rpx;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.section-title {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 12rpx;
+  color: #1d2432;
+  font-size: 31rpx;
+  font-weight: 900;
+  line-height: 42rpx;
+}
+
+.learning-video {
+  width: 100%;
+  height: 320rpx;
+  display: block;
+  margin-top: 20rpx;
+  overflow: hidden;
+  border-radius: 16rpx;
+  background: #0f172a;
+}
+
+.video-empty {
+  height: 320rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-top: 20rpx;
+  border-radius: 16rpx;
+  background: #eef2f7;
+  color: #64748b;
+  font-size: 26rpx;
+}
+
+.detail-content {
+  margin-top: 26rpx;
+  color: #667085;
+  font-size: 28rpx;
+  line-height: 44rpx;
+  white-space: pre-wrap;
+}
+
+.requirement-card {
+  margin-top: 22rpx;
+  padding: 32rpx 30rpx 18rpx;
+  border-radius: 28rpx;
+}
+
+.requirement-heading {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+}
+
+.requirement-icon {
+  width: 58rpx;
+  height: 58rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 58rpx;
+  border-radius: 50%;
+  background: #e6f6ee;
+}
+
+.requirement-title {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  color: #08a45f;
+  font-size: 30rpx;
+  font-weight: 900;
+  line-height: 42rpx;
+}
+
+.requirement-desc {
+  color: #667085;
+  font-weight: 500;
+}
+
+.watch-stat {
+  margin: 28rpx 0 0 96rpx;
+  color: #667085;
+  font-size: 28rpx;
+  line-height: 38rpx;
+}
+
+.watch-highlight {
+  color: #08a45f;
+  font-weight: 900;
+}
+
+.watch-progress-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 70rpx;
+  align-items: center;
+  gap: 24rpx;
+  margin: 24rpx 20rpx 0 96rpx;
+  color: #08a45f;
+  font-size: 28rpx;
+  font-weight: 900;
+}
+
+.watch-progress-track {
+  height: 18rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: #e5e8ed;
+}
+
+.watch-progress-fill {
+  height: 18rpx;
+  border-radius: 999rpx;
+  background: #08a45f;
+}
+
+.watch-tip {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin: 26rpx 0 0 96rpx;
+  color: #667085;
+  font-size: 26rpx;
+  line-height: 36rpx;
+}
+
+.checkin-action {
+  width: 500rpx;
+  height: 82rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18rpx;
+  margin: 18rpx auto 0;
+  border-radius: 999rpx;
+  background: #08a45f;
+  color: #ffffff;
+  font-size: 33rpx;
+  font-weight: 900;
+  line-height: 82rpx;
+  box-sizing: border-box;
+}
+
+.checkin-action.disabled {
+  background: #c9cbd1;
+  color: #ffffff;
+}
+
+.points-result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 18rpx;
+  color: #087347;
+  font-size: 26rpx;
+  font-weight: 900;
+}

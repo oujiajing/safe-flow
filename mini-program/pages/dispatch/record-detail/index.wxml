@@ -1,0 +1,124 @@
+<view class="dispatch-flow-page">
+  <green-header title="链路洞察" bind:back="goBack" />
+
+  <view wx:if="{{loading}}" class="dispatch-state-card">正在加载链路详情...</view>
+  <view wx:elif="{{errorText}}" class="dispatch-state-card" bindtap="loadDetail">{{errorText}}，点击重试</view>
+
+  <block wx:elif="{{dispatchDetail}}">
+    <view class="dispatch-flow-hero" data-title="一班三查全链路洞察">
+      <view class="dispatch-flow-title-row">
+        <view class="dispatch-flow-title-main">
+          <view class="dispatch-flow-title">{{dispatchDetail.title}}</view>
+          <view class="dispatch-flow-subtitle">{{dispatchDetail.subtitle}}</view>
+        </view>
+        <text class="dispatch-flow-status {{dispatchDetail.statusClass}}">{{dispatchDetail.statusLabel}}</text>
+      </view>
+      <view class="dispatch-flow-actions">
+        <t-button t-class="dispatch-flow-action primary" variant="outline" theme="primary" bind:tap="openOriginal">
+          <t-icon name="edit-1" size="28rpx" color="#1d73f8" />查看原单
+        </t-button>
+        <t-button t-class="dispatch-flow-action" variant="outline" bind:tap="exportDetail">
+          <t-icon name="download" size="28rpx" color="#172033" />导出
+        </t-button>
+        <t-button t-class="dispatch-flow-action" variant="outline" bind:tap="showMoreActions">
+          <t-icon name="ellipsis" size="28rpx" color="#172033" />更多
+        </t-button>
+      </view>
+      <view class="dispatch-insight-grid">
+        <view class="dispatch-insight-card">
+          <t-icon name="git-branch" size="48rpx" color="#2f7df6" />
+          <view><text>链路完成度</text><strong>{{dispatchDetail.progress}}</strong></view>
+        </view>
+        <view class="dispatch-insight-card">
+          <t-icon name="location" size="48rpx" color="#2f7df6" />
+          <view><text>当前节点</text><strong>{{dispatchDetail.currentNode}}</strong></view>
+        </view>
+        <view class="dispatch-insight-card">
+          <t-icon name="error-circle" size="48rpx" color="#2f7df6" />
+          <view><text>待处理节点</text><strong class="warn">{{dispatchDetail.pendingCount}}</strong></view>
+        </view>
+        <view class="dispatch-insight-card">
+          <t-icon name="user" size="48rpx" color="#2f7df6" />
+          <view><text>责任人</text><strong>{{dispatchDetail.owner}}</strong></view>
+        </view>
+        <view class="dispatch-insight-card">
+          <t-icon name="attach" size="48rpx" color="#2f7df6" />
+          <view><text>附件数</text><strong>{{dispatchDetail.attachmentCount}}</strong></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="dispatch-step-card">
+      <view class="dispatch-step-track">
+        <view class="dispatch-step-item {{item.active ? 'active' : ''}}" wx:for="{{dispatchDetail.nodes}}" wx:key="stageKey" data-stage-key="{{item.stageKey}}" bindtap="selectFlowNode">
+          <view class="dispatch-step-dot">{{item.index}}</view>
+          <view class="dispatch-step-line" wx:if="{{index < dispatchDetail.nodes.length - 1}}"></view>
+          <view class="dispatch-step-name">{{item.title}}</view>
+          <text class="dispatch-flow-status {{item.statusClass}}">{{item.statusLabel}}</text>
+          <view class="dispatch-step-meta">{{item.date}}</view>
+          <view class="dispatch-step-meta">{{item.owner}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="dispatch-section-card">
+      <view class="dispatch-section-title">链路节点列表</view>
+      <view wx:for="{{dispatchDetail.nodes}}" wx:key="stageKey" class="dispatch-node-row {{item.active ? 'selected' : ''}}" data-stage-key="{{item.stageKey}}" bindtap="selectFlowNode">
+        <view class="dispatch-node-dot {{item.statusClass}}"></view>
+        <t-icon t-class="dispatch-node-icon" name="{{item.icon}}" size="42rpx" color="#2f7df6" />
+        <view class="dispatch-node-main">
+          <view class="dispatch-node-title">【{{item.shortName}}】{{item.recordNo}}</view>
+          <view class="dispatch-node-meta">日期 {{item.date}} · {{item.owner}}</view>
+        </view>
+        <text class="dispatch-flow-status {{item.statusClass}}">{{item.statusLabel}}</text>
+        <t-icon name="chevron-right" size="30rpx" color="#8a95a3" />
+      </view>
+    </view>
+
+    <view class="dispatch-section-card">
+      <view class="dispatch-section-title">{{dispatchDetail.detailTitle}}</view>
+      <view class="dispatch-detail-subtitle">{{dispatchDetail.selectedNode.title}} · {{dispatchDetail.selectedNode.recordNo}}</view>
+      <view class="dispatch-detail-grid">
+        <view wx:for="{{dispatchDetail.detailCells}}" wx:key="label" class="dispatch-detail-cell">
+          <text>{{item.label}}</text>
+          <strong>{{item.value}}</strong>
+        </view>
+      </view>
+    </view>
+
+    <view class="dispatch-section-card">
+      <view class="dispatch-section-title">真实动作日志</view>
+      <block wx:if="{{dispatchDetail.logs.length > 0}}">
+        <view wx:for="{{dispatchDetail.logs}}" wx:key="title" class="dispatch-log-row">
+          <view class="dispatch-log-dot"></view>
+          <view class="dispatch-log-main">
+            <strong>{{item.title}}</strong>
+            <text>{{item.meta}}</text>
+          </view>
+          <text class="dispatch-log-state">{{item.state}}</text>
+        </view>
+      </block>
+      <view wx:else class="dispatch-attachment-empty">暂无日志</view>
+    </view>
+
+    <view class="dispatch-section-card">
+      <view class="dispatch-section-title">附件（图片或视频）</view>
+      <view wx:if="{{dispatchDetail.attachments.length > 0}}" class="dispatch-attachment-list">
+        <view wx:for="{{dispatchDetail.attachments}}" wx:key="id" class="dispatch-attachment-item">
+          <image wx:if="{{item.isImage}}" class="dispatch-attachment-image" src="{{item.url}}" mode="aspectFill" data-index="{{index}}" bindtap="previewAttachment" />
+          <video wx:elif="{{item.isVideo}}" class="dispatch-attachment-video" src="{{item.url}}" controls object-fit="contain"></video>
+          <view wx:else class="dispatch-attachment-file">
+            <t-icon name="file" size="42rpx" color="#667085" />
+          </view>
+          <view class="dispatch-attachment-info">
+            <strong>{{item.name}}</strong>
+            <text>{{item.kind || '附件'}} {{item.sizeText}}</text>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="dispatch-attachment-empty">{{dispatchDetail.selectedNode.empty ? '暂无单据' : '暂无附件'}}</view>
+    </view>
+  </block>
+
+  <view wx:else class="dispatch-state-card">未找到链路详情</view>
+</view>

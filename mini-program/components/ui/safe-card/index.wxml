@@ -1,0 +1,3 @@
+<view class="safe-card {{compact ? 'safe-card--compact' : ''}} {{elevated ? 'safe-card--elevated' : ''}}">
+  <slot></slot>
+</view>

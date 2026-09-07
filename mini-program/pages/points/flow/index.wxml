@@ -1,0 +1,17 @@
+<green-header title="积分流水" bind:back="goBack" />
+<view class="page">
+  <t-loading wx:if="{{loading}}" text="加载中" />
+  <block wx:else>
+    <view wx:if="{{records.length}}" class="flow-list">
+      <view wx:for="{{records}}" wx:key="id" class="flow-card">
+        <view class="flow-title">{{item.payload.pointsReason || item.recordNo}}</view>
+        <view class="flow-meta">
+          <text>{{item.businessDate}}</text>
+          <text>{{item.payload.pointsChange}}</text>
+        </view>
+        <view class="flow-points">+{{item.payload.pointsQuantity || 0}}</view>
+      </view>
+    </view>
+    <t-empty wx:else description="暂无积分流水" />
+  </block>
+</view>

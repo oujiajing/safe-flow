@@ -1,0 +1,58 @@
+<view class="ks-page">
+  <green-header title="新建重点场所" bind:back="goBack" />
+  <view class="ks-page-content">
+    <view class="ks-card ks-form-card">
+      <view class="ks-section-title">基础信息</view>
+      <picker mode="selector" range="{{companyOptions}}" range-key="label" value="{{companyIndex}}" bindchange="changeCompany"><view class="ks-row"><text class="ks-required">公司</text><text class="ks-value">{{currentCompany.company || '请选择'}}</text><t-icon name="chevron-right" size="32rpx" color="#9ca5b2" /></view></picker>
+      <picker mode="selector" range="{{departmentOptions}}" range-key="label" value="{{departmentIndex}}" bindchange="changeDepartment"><view class="ks-row"><text class="ks-required">部门</text><text class="ks-value">{{currentCompany.workshop || '请选择'}}</text><t-icon name="chevron-right" size="32rpx" color="#9ca5b2" /></view></picker>
+      <picker mode="selector" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeTeam"><view class="ks-row"><text class="ks-required">班组</text><text class="ks-value">{{currentTeam || '请选择'}}</text><t-icon name="chevron-right" size="32rpx" color="#9ca5b2" /></view></picker>
+      <picker mode="selector" range="{{siteTypes}}" value="{{siteTypeIndex}}" bindchange="changeSiteType"><view class="ks-row"><text class="ks-required">场所类型</text><text class="ks-value">{{form.siteType}}</text><t-icon name="chevron-right" size="32rpx" color="#9ca5b2" /></view></picker>
+      <view class="ks-row"><text class="ks-required">检查部门</text><input value="{{form.inspectionDepartment}}" data-field="inspectionDepartment" bindinput="updateField" placeholder="请选择" /><t-icon name="chevron-right" size="32rpx" color="#9ca5b2" /></view>
+      <view class="ks-row"><text class="ks-required">责任部门</text><input value="{{form.responsibleDepartment}}" data-field="responsibleDepartment" bindinput="updateField" placeholder="请选择" /><t-icon name="chevron-right" size="32rpx" color="#9ca5b2" /></view>
+      <view class="ks-row"><text class="ks-required">责任人</text><input value="{{form.responsiblePerson}}" data-field="responsiblePerson" bindinput="updateField" placeholder="请选择" /><t-icon name="chevron-right" size="32rpx" color="#9ca5b2" /></view>
+      <view class="ks-row"><text class="ks-required">验收人</text><input value="{{form.acceptancePerson}}" data-field="acceptancePerson" bindinput="updateField" placeholder="请选择" /><t-icon name="chevron-right" size="32rpx" color="#9ca5b2" /></view>
+      <picker mode="date" value="{{form.inspectionDate}}" bindchange="changeDate"><view class="ks-row"><text class="ks-required">检查日期</text><text class="ks-value">{{form.inspectionDate || '请选择日期'}}</text><t-icon name="calendar" size="30rpx" color="#9ca5b2" /></view></picker>
+    </view>
+    <view class="ks-card ks-attachment-form">
+      <view class="ks-section-title">附件</view>
+      <view class="ks-media-picker-grid">
+        <view class="ks-media-picker">
+          <view class="ks-media-preview {{attachmentImages.length ? 'has-files' : ''}} media-count-{{attachmentImages.length}}">
+            <block wx:if="{{attachmentImages.length}}">
+              <view wx:for="{{attachmentImages}}" wx:key="path" class="ks-media-thumb" data-kind="IMAGE" data-index="{{index}}" bindtap="previewAttachment">
+                <image src="{{item.thumbPath}}" mode="aspectFill" />
+                <view class="ks-media-remove" data-kind="IMAGE" data-index="{{index}}" catchtap="removeAttachment"><t-icon name="close" size="24rpx" color="#ffffff" /></view>
+              </view>
+            </block>
+            <t-icon wx:else name="image" size="52rpx" color="#2563eb" />
+          </view>
+          <text class="ks-media-title">图片打卡</text>
+          <button class="ks-media-select" data-kind="IMAGE" bindtap="chooseAttachments">{{attachmentImages.length ? '继续选择图片' : '选择图片'}}</button>
+          <text wx:if="{{attachmentImages.length}}" class="ks-media-count">已选择 {{attachmentImages.length}} 张</text>
+        </view>
+        <view class="ks-media-picker">
+          <view class="ks-media-preview {{attachmentVideos.length ? 'has-files' : ''}} media-count-{{attachmentVideos.length}}">
+            <block wx:if="{{attachmentVideos.length}}">
+              <view wx:for="{{attachmentVideos}}" wx:key="path" class="ks-video-thumb" data-kind="VIDEO" data-index="{{index}}" bindtap="previewAttachment">
+                <video src="{{item.path}}" poster="{{item.thumbPath}}" controls="{{false}}" muted show-center-play-btn="{{false}}" object-fit="cover" class="ks-video-poster" />
+                <view class="ks-video-play"><t-icon name="play-circle" size="34rpx" color="#ffffff" /></view>
+                <view class="ks-media-remove" data-kind="VIDEO" data-index="{{index}}" catchtap="removeAttachment"><t-icon name="close" size="24rpx" color="#ffffff" /></view>
+              </view>
+            </block>
+            <t-icon wx:else name="video" size="52rpx" color="#2563eb" />
+          </view>
+          <text class="ks-media-title">视频打卡</text>
+          <button class="ks-media-select" data-kind="VIDEO" bindtap="chooseAttachments">{{attachmentVideos.length ? '继续选择视频' : '选择视频'}}</button>
+          <text wx:if="{{attachmentVideos.length}}" class="ks-media-count">已选择 {{attachmentVideos.length}} 个</text>
+        </view>
+      </view>
+      <view wx:if="{{uploadingAttachments}}" class="ks-uploading">附件上传中…</view>
+    </view>
+    <view wx:if="{{errorText}}" class="ks-error">{{errorText}}</view>
+  </view>
+  <view class="ks-bottom"><button class="ks-outline" data-next="draft" bindtap="save" loading="{{saving}}">保存草稿</button><button class="ks-primary" data-next="detail" bindtap="save" loading="{{saving}}">提交登记</button></view>
+  <view wx:if="{{previewVideoUrl}}" class="ks-media-viewer" catchtouchmove="noop">
+    <view class="ks-media-viewer-close" bindtap="closeVideoPreview"><t-icon name="close" size="42rpx" color="#ffffff" /></view>
+    <video src="{{previewVideoUrl}}" autoplay controls direction="90" enable-play-gesture show-fullscreen-btn class="ks-media-viewer-video" />
+  </view>
+</view>

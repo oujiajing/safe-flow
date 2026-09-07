@@ -1,0 +1,63 @@
+<view class="analysis-page">
+  <green-header title="隐患整改分析" bind:back="goBack" />
+  <view class="analysis-content hazard-analysis">
+    <scope-filter compact="{{true}}" context="{{context}}" scopeTree="{{scopeTree}}" scopeAccess="{{scopeAccess}}" rangeText="{{rangeText}}" updatedAt="{{updatedAt}}" bind:apply="handleFilterApply" />
+    <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载隐患分析" />
+    <state-view wx:elif="{{errorMessage}}" errorText="{{errorMessage}}" bind:retry="retryLoad" />
+    <view wx:elif="{{noPermission}}" class="permission-card"><t-icon name="lock-on" size="66rpx" color="#94a3b8" /><view class="permission-title">暂无查看权限</view></view>
+    <block wx:else>
+      <view class="analysis-kpi-strip">
+        <view class="strip-metric"><text class="strip-label">有效隐患</text><text class="strip-value blue">{{model.hazard.total}}<text class="strip-unit">条</text></text></view>
+        <view class="strip-metric"><text class="strip-label">已闭环</text><text class="strip-value">{{model.hazard.closed}}<text class="strip-unit">条</text></text></view>
+        <view class="strip-metric"><text class="strip-label">未闭环</text><text class="strip-value orange">{{model.hazard.open}}<text class="strip-unit">条</text></text></view>
+        <view class="strip-metric"><text class="strip-label">已作废</text><text class="strip-value gray">{{model.hazard.cancelled}}<text class="strip-unit">条</text></text></view>
+      </view>
+
+      <view class="analysis-section hazard-rate-card">
+        <view class="section-head"><view class="section-title">闭环率</view><view class="section-detail-action {{detailCards.hazardClosure ? 'active' : ''}}" data-card="hazardClosure" bindtap="toggleCardDetail">{{detailCards.hazardClosure ? '图表' : '明细'}}</view></view>
+        <view wx:if="{{!detailCards.hazardClosure}}" class="hazard-rate-body">
+          <view class="hazard-rate-donut"><canvas class="donut-canvas" canvas-id="hazardClosureDonut"></canvas></view>
+          <view class="hazard-status-list hazard-rate-legend">
+            <view wx:for="{{model.hazard.closureRows}}" wx:key="name" class="hazard-status-row"><text class="legend-dot {{item.tone}}"></text><text class="status-name">{{item.name}}</text><text>{{item.value}} 条</text><view class="bar-track"><view class="bar-fill {{item.tone}}" style="width:{{item.width}}"></view></view><text>{{item.rate}}</text></view>
+          </view>
+        </view>
+        <view wx:else class="analysis-detail-table">
+          <view class="analysis-detail-head hazard-closure-grid"><text>状态</text><text>数量</text><text>占有效隐患</text></view>
+          <view class="analysis-detail-row hazard-closure-grid"><text>已闭环</text><text>{{model.hazard.closed}} 条</text><text class="green">{{model.hazard.rate}}</text></view>
+          <view class="analysis-detail-row hazard-closure-grid"><text>未闭环</text><text>{{model.hazard.open}} 条</text><text class="orange">--</text></view>
+          <view class="analysis-detail-row hazard-closure-grid"><text>已作废</text><text>{{model.hazard.cancelled}} 条</text><text class="gray">--</text></view>
+        </view>
+      </view>
+
+      <view class="analysis-section hazard-status-card">
+        <view class="section-head"><view class="section-title">整改状态分布</view><view class="section-detail-action {{detailCards.hazardStatus ? 'active' : ''}}" data-card="hazardStatus" bindtap="toggleCardDetail">{{detailCards.hazardStatus ? '图表' : '明细'}}</view></view>
+        <view wx:if="{{!detailCards.hazardStatus}}" class="hazard-status-body">
+          <view class="hazard-status-donut"><canvas class="donut-canvas" canvas-id="hazardStatusDonut"></canvas><text class="emphasis">{{model.hazard.total}}</text><text>条</text></view>
+          <view class="hazard-status-list"><view wx:for="{{model.hazard.statusRows}}" wx:key="name" class="hazard-status-row"><text class="legend-dot {{item.tone}}"></text><text class="status-name">{{item.name}}</text><text>{{item.value}} 条</text><view class="bar-track"><view class="bar-fill {{item.tone}}" style="width:{{item.width}}"></view></view><text>{{item.rate}}</text></view></view>
+        </view>
+        <view wx:else class="analysis-detail-table">
+          <view class="analysis-detail-head hazard-status-grid"><text>整改状态</text><text>数量</text><text>占比</text></view>
+          <view wx:for="{{model.hazard.statusRows}}" wx:key="name" class="analysis-detail-row hazard-status-grid"><text>{{item.name}}</text><text>{{item.value}} 条</text><text class="{{item.tone}}">{{item.rate}}</text></view>
+        </view>
+      </view>
+
+      <view class="analysis-section hazard-org-card">
+        <view class="section-head"><view class="section-title">隐患闭环情况</view></view>
+        <view class="analysis-detail-table">
+          <view class="analysis-detail-head hazard-org-grid"><text>组织名称</text><text>已闭环</text><text>未闭环</text><text>闭环率</text></view>
+          <view wx:for="{{model.hazard.rows}}" wx:key="name" class="analysis-detail-row hazard-org-grid"><text>{{item.name}}</text><text class="green">{{item.closed}} 条</text><text class="orange">{{item.open}} 条</text><text class="green">{{item.rate}}</text></view>
+        </view>
+        <view wx:if="{{!model.hazard.rows.length}}" class="empty-inline">暂无组织隐患数据</view>
+        <view class="hazard-total-row"><text>合计</text><text class="emphasis">{{model.hazard.closed}} 条</text><text class="emphasis orange">{{model.hazard.open}} 条</text><text class="emphasis">{{model.hazard.rate}}</text></view>
+      </view>
+
+      <view class="analysis-section hazard-alert-card">
+        <view class="hazard-alert-head"><view class="section-title">未闭环隐患</view><view class="unfinished-link" data-type="hazard" bindtap="openBusiness">共 {{model.hazard.open}} 条<t-icon name="chevron-right" size="28rpx" color="#ff7100" /></view></view>
+        <view class="hazard-open-grid"><view wx:for="{{model.hazard.openStatusRows}}" wx:key="name" class="hazard-open-item"><text class="legend-dot {{item.tone}}"></text><text>{{item.name}}</text><text class="emphasis">{{item.value}}</text><text>条</text></view></view>
+        <view class="hazard-alert-note">及时跟进未闭环隐患，尽快完成整改并验收闭环。</view>
+      </view>
+
+      <view class="analysis-cta analysis-cta--primary" data-type="hazard" bindtap="openBusiness"><t-icon name="assignment" size="36rpx" color="#ffffff" /><text>查看隐患工单</text><t-icon class="cta-arrow" name="chevron-right" size="34rpx" color="#ffffff" /></view>
+    </block>
+  </view>
+</view>

@@ -1,0 +1,174 @@
+<green-header title="积分榜单" bind:back="goBack" />
+
+<view class="ranking-page">
+  <view class="ranking-tab-hero">
+    <view class="ranking-tabs">
+      <view
+        class="ranking-tab {{activeTab === 'individual' ? 'active' : ''}}"
+        data-tab="individual"
+        bindtap="switchTab"
+      >
+        <text>个人榜单</text>
+      </view>
+      <view
+        class="ranking-tab {{activeTab === 'team' ? 'active' : ''}}"
+        data-tab="team"
+        bindtap="switchTab"
+      >
+        <text>团队榜单</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="ranking-content">
+    <view class="ranking-filters">
+      <picker
+        class="ranking-filter-picker"
+        mode="selector"
+        range="{{periodLabels}}"
+        value="{{periodIndex}}"
+        bindchange="changePeriod"
+      >
+        <view class="ranking-filter">
+          <text>{{periodLabel}}</text>
+          <view class="filter-caret"></view>
+        </view>
+      </picker>
+      <picker
+        wx:if="{{activeTab === 'individual'}}"
+        class="ranking-filter-picker ranking-filter-picker--team"
+        mode="selector"
+        range="{{teamFilterLabels}}"
+        value="{{teamFilterIndex}}"
+        bindchange="changeTeamFilter"
+      >
+        <view class="ranking-filter ranking-filter--secondary">
+          <text>{{teamFilterLabel}}</text>
+          <view class="filter-caret"></view>
+        </view>
+      </picker>
+      <view wx:else class="ranking-filter ranking-filter--secondary ranking-filter--static">
+        <text>按总积分</text>
+      </view>
+    </view>
+
+    <view wx:if="{{loadError && (individualPodium.length || teamPodium.length)}}" class="error-banner">
+      <text>{{loadError}}</text>
+      <text class="error-retry" bindtap="retryLoad">重新加载</text>
+    </view>
+
+    <view wx:if="{{loading && !individualPodium.length && !teamPodium.length}}" class="loading-card">
+      <t-loading text="榜单加载中" />
+    </view>
+
+    <view wx:elif="{{loadError && !individualPodium.length && !teamPodium.length}}" class="error-card">
+      <text class="error-title">暂时无法加载榜单</text>
+      <text class="error-description">{{loadError}}</text>
+      <view class="retry-action" bindtap="retryLoad">重新加载</view>
+    </view>
+
+    <block wx:else>
+      <block wx:if="{{activeTab === 'individual'}}">
+        <view wx:if="{{individualPodium.length}}" class="podium-card">
+          <view class="podium-grid">
+            <view
+              wx:for="{{individualPodium}}"
+              wx:key="key"
+              class="podium-slot podium-slot--rank-{{item.rank}} {{item.rank === 1 ? 'podium-slot--first' : (item.rank === 2 ? 'podium-slot--second' : 'podium-slot--third')}}"
+            >
+              <text wx:if="{{item.rank === 1}}" class="podium-crown">♛</text>
+              <view class="rank-medal rank-medal--{{item.rank}}">{{item.rank}}</view>
+              <text class="podium-name">{{item.name}}</text>
+              <text class="podium-subtitle">{{item.subtitle}}</text>
+              <view class="podium-score">
+                <text class="score-value">{{item.scoreText}}</text>
+                <text class="score-unit">积分</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{currentIndividual}}" class="current-card">
+          <text class="current-label">我的排名</text>
+          <view class="current-card-body">
+            <view class="current-rank">
+              <text>第</text>
+              <text class="current-rank-value">{{currentIndividual.rank}}</text>
+              <text>名</text>
+            </view>
+            <view class="current-identity">
+              <text class="current-name">{{currentIndividual.name}}</text>
+              <text class="current-subtitle">{{currentIndividual.subtitle}}</text>
+            </view>
+            <view class="current-score">
+              <view><text class="current-score-value">{{currentIndividual.scoreText}}</text><text>积分</text></view>
+              <text class="current-note">{{periodLabel}}实时排名</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{individualList.length}}" class="ranking-list">
+          <view wx:for="{{individualList}}" wx:key="key" class="ranking-row">
+            <text class="row-rank">{{item.rank}}</text>
+            <text class="row-name">{{item.name}}</text>
+            <text class="row-subtitle">{{item.subtitle}}</text>
+            <view class="row-score"><text>{{item.scoreText}}</text><text class="row-score-unit">积分</text></view>
+          </view>
+        </view>
+        <t-empty wx:if="{{!loading && !loadError && !individualPodium.length && !individualList.length}}" description="暂无个人榜单" />
+      </block>
+
+      <block wx:if="{{activeTab === 'team'}}">
+        <view wx:if="{{teamPodium.length}}" class="podium-card">
+          <view class="podium-grid">
+            <view
+              wx:for="{{teamPodium}}"
+              wx:key="key"
+              class="podium-slot podium-slot--rank-{{item.rank}} {{item.rank === 1 ? 'podium-slot--first' : (item.rank === 2 ? 'podium-slot--second' : 'podium-slot--third')}}"
+            >
+              <text wx:if="{{item.rank === 1}}" class="podium-crown">♛</text>
+              <view class="rank-medal rank-medal--{{item.rank}}">{{item.rank}}</view>
+              <text class="podium-name">{{item.name}}</text>
+              <text class="podium-subtitle">{{item.subtitle}}</text>
+              <view class="podium-score">
+                <text class="score-value">{{item.scoreText}}</text>
+                <text class="score-unit">积分</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{currentTeam}}" class="current-card">
+          <text class="current-label">我的团队</text>
+          <view class="current-card-body">
+            <view class="current-rank">
+              <text>第</text>
+              <text class="current-rank-value">{{currentTeam.rank}}</text>
+              <text>名</text>
+            </view>
+            <view class="current-identity">
+              <text class="current-name">{{currentTeam.name}}</text>
+              <text class="current-subtitle">{{currentTeam.subtitle}}</text>
+            </view>
+            <view class="current-score">
+              <view><text class="current-score-value">{{currentTeam.scoreText}}</text><text>积分</text></view>
+              <text class="current-note">{{periodLabel}}实时排名</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{teamList.length}}" class="ranking-list">
+          <view wx:for="{{teamList}}" wx:key="key" class="ranking-row">
+            <text class="row-rank">{{item.rank}}</text>
+            <text class="row-name">{{item.name}}</text>
+            <text class="row-subtitle">{{item.subtitle}}</text>
+            <view class="row-score"><text>{{item.scoreText}}</text><text class="row-score-unit">积分</text></view>
+          </view>
+        </view>
+        <t-empty wx:if="{{!loading && !loadError && !teamPodium.length && !teamList.length}}" description="暂无团队榜单" />
+      </block>
+    </block>
+
+    <text wx:if="{{individualPodium.length || teamPodium.length}}" class="ranking-footnote">榜单数据与 PC 端实时同步</text>
+  </view>
+</view>

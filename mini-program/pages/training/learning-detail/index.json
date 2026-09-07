@@ -1,0 +1,9 @@
+{
+  "navigationStyle": "custom",
+  "pageOrientation": "auto",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-loading": "tdesign-miniprogram/loading/loading"
+  }
+}
