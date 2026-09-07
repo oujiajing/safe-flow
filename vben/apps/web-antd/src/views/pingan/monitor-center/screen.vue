@@ -1050,7 +1050,7 @@ function renderCharts() {
           </div>
           <div class="ai-body">
             <div class="ai-visual">
-              <img alt="AI监控无人机与摄像头画面" src="/pingan-monitor/ai-monitor-drone.png" />
+              <div class="ai-visual-placeholder" role="img" aria-label="Demo camera feed">Demo camera feed</div>
               <button type="button" aria-label="放大AI监控画面">点击放大</button>
             </div>
             <div class="ai-alert-card">
@@ -1759,6 +1759,17 @@ function renderCharts() {
   overflow: hidden;
   background: #07162c;
   border-radius: 7px;
+}
+
+.ai-visual-placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: #9cc7f5;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, #0b2445, #102d52 55%, #07162c);
 }
 
 .ai-visual button {

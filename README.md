@@ -26,7 +26,7 @@ This repository is an independent portfolio candidate derived from the audited `
 
 ## Quick start status
 
-The portfolio candidate is currently `PARTIAL`, not READY. Backend compile/tests, Demo account lifecycle, isolated PostgreSQL startup and API-level workflow evidence are complete. PC dependency installation/build, page-level E2E and real screenshots remain outstanding.
+The portfolio candidate is currently `PARTIAL`, not READY. Backend compile/tests, Demo account lifecycle, isolated PostgreSQL startup, PC dependency installation/build/typecheck and PC Demo login are verified. Page-level workflow E2E and real screenshots remain outstanding.
 
 Do not connect this candidate to any production or enterprise service. Use only a new local Demo database and local attachment storage. See [docs/PORTFOLIO_AUDIT.md](docs/PORTFOLIO_AUDIT.md) and [PORTFOLIO_READINESS.md](PORTFOLIO_READINESS.md).
 
