@@ -54,10 +54,10 @@ test("inspection detail page saves edited check results and remarks", async () =
           teamId: 1011002,
           ownerUserId: 7,
           businessDate: "2026-06-17",
-          companyName: "广东广晟有色金属光电新材料有限公司",
+          companyName: "Demo Materials Company",
           departmentName: "废水处理厂",
           teamName: "废水处理2班",
-          ownerName: "沈光明",
+          ownerName: "Demo Leader",
           status: "DRAFT",
           payload: {
             remarks: "原备注",
@@ -130,7 +130,7 @@ test("inspection detail page loads one selected module record", async () => {
           businessDate: "2026-06-16",
           departmentName: "幕墙车间",
           teamName: "幕墙组装2班",
-          ownerName: "沈光明",
+          ownerName: "Demo Leader",
           content: "高处作业安全检查",
           status: "OPENED"
         })
@@ -169,7 +169,7 @@ test("inspection detail page loads one selected module record", async () => {
     company: "-",
     dept: "幕墙车间",
     team: "幕墙组装2班",
-    owner: "沈光明",
+    owner: "Demo Leader",
     task: "高处作业安全检查",
     date: "2026-06-16",
     imageCheck: "-",
@@ -199,7 +199,7 @@ test("inspection detail uploads image check attachment then reloads record", asy
           id,
           moduleKey,
           businessDate: "2026-06-16",
-          companyName: "广晟有色",
+          companyName: "Demo有色",
           departmentName: "废水处理厂",
           teamName: "废水处理2班",
           ownerName: "周柏锋",
@@ -270,7 +270,7 @@ test("inspection mapper keeps template check items and hides risk for post-shift
     id: "c301",
     moduleKey: "pre-shift-inspection",
     recordNo: "BQJC0001",
-    company: "广东广晟稀有金属光电新材料有限公司",
+    company: "Demo Materials Company",
     department: "废水处理厂",
     team: "废水处理2班",
     owner: "邹文清",
@@ -292,7 +292,7 @@ test("inspection mapper keeps template check items and hides risk for post-shift
   })
 
   assert.equal(before.code, "BQJC0001")
-  assert.equal(before.company, "广东广晟稀有金属光电新材料有限公司")
+  assert.equal(before.company, "Demo Materials Company")
   assert.equal(before.imageCheck, "未上传")
   assert.equal(before.remark, "班前重点检查")
   assert.equal(before.isPostShiftInspection, false)
@@ -491,3 +491,4 @@ test("inspection detail renders uploaded image previews", () => {
   assert.match(detailWxss, /\.inspection-media-preview-list/)
   assert.match(detailWxss, /\.inspection-media-thumb/)
 })
+

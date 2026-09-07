@@ -12,8 +12,8 @@ const backgroundPath = path.join(projectRoot, "assets/brand/login-background.web
 test("login page presents the Guangsheng Mining brand asset", () => {
   assert.match(markup, /guangsheng-mining-login-transparent\.webp/)
   assert.match(markup, /login-background\.webp/)
-  assert.match(markup, /广晟矿业，广晟控股旗下/)
-  assert.match(markup, /欢迎登录广晟矿业/)
+  assert.match(markup, /Demo Safety Operations，Demo控股旗下/)
+  assert.match(markup, /欢迎登录Demo Safety Operations/)
   assert.match(markup, /更多登录方式/)
   assert.match(markup, /用户协议/)
   assert.equal(fs.existsSync(logoPath), true)
@@ -34,3 +34,5 @@ test("login page keeps the account and password workflow accessible", () => {
   assert.match(styles, /\.login-background-image/)
   assert.match(styles, /\.login-button\[disabled\]/)
 })
+
+

@@ -1,6 +1,6 @@
 UPDATE sys_org
 SET org_code = '1011',
-    org_name = '河源市广晟源成建筑节能系统技术有限公司',
+    org_name = 'Demo Works Company',
     sort_order = 1051,
     status = 'ACTIVE',
     deleted = 0,
@@ -12,12 +12,12 @@ INSERT INTO sys_company_profile (
   safety_manager_username, reporter_l1_usernames, reporter_l2_usernames, reporter_l3_usernames,
   report_l1_time, report_l2_time, report_l3_time, attachment1_url, attachment2_url, company_intro, deleted
 ) VALUES (
-  4, '源成公司', '源成公司', '河源市', '子公司', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司',
+  4, 'Demo Works Company', 'Demo Works Company', '河源市', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company',
   'security', '1011.approval;ministers;security', 'GSMQ_MINISTER1;GSMQ_MINISTER3;GSMQ_MINISTER4;1010.approval', '1000.approval;minister16;minister2',
   1, 2, 3,
   'https://guangzhoubuk-1256975247.cos.ap-guangzhou.myqcloud.com/dmpicte/pabz/20250526/fd8790221efd4086af084db2a761e866.pdf',
   'https://guangzhoubuk-1256975247.cos.ap-guangzhou.myqcloud.com/dmpicte/pabz/20250526/c3eebd1e6216471b81198e4be6372dd0.pdf',
-  '<p style="text-align: center;" data-mce-style="text-align: center;"><strong>河源市广晟源成建筑节能系统技术有限公司</strong></p><p><span>&nbsp; &nbsp; &nbsp; &nbsp; </span><span data-font-family="等线">广晟源成产业园是广晟控股集团所属有色集团广晟幕墙在国内最大的加工和研发创新基地。广晟幕墙作为广晟源成产业园的全资股东，是大型专业化幕墙企业，是中国第一批幕墙设计、施工双甲企业，国家高新技术企业，深耕幕墙与门窗设计、制造、施工领域近40年，承建了广州塔、北京大兴国际机场和迪拜公主塔等3000余项标志性幕墙门窗工程。</span></p><p><span data-font-family="等线"><img src="https://guangzhoubuk-1256975247.cos.ap-guangzhou.myqcloud.com/dmpicte/pabz/20250710/7d4b8085b12a414f8c84db80eab3f5c2.png" width="60%" height="auto" data-mce-src="https://guangzhoubuk-1256975247.cos.ap-guangzhou.myqcloud.com/dmpicte/pabz/20250710/7d4b8085b12a414f8c84db80eab3f5c2.png" style="display: block; margin-left: auto; margin-right: auto;" data-mce-style="display: block; margin-left: auto; margin-right: auto;"></span></p>',
+  '<p style="text-align: center;" data-mce-style="text-align: center;"><strong>Demo Works Company</strong></p><p><span>&nbsp; &nbsp; &nbsp; &nbsp; </span><span data-font-family="等线">Demo Works Company产业园是Demo控股集团所属有色集团Demo Works Company在国内最大的加工和研发创新基地。Demo Works Company作为Demo Works Company产业园的全资股东，是大型专业化幕墙企业，是中国第一批幕墙设计、施工双甲企业，国家高新技术企业，深耕幕墙与门窗设计、制造、施工领域近40年，承建了广州塔、北京大兴国际机场和迪拜公主塔等3000余项标志性幕墙门窗工程。</span></p><p><span data-font-family="等线"><img src="https://guangzhoubuk-1256975247.cos.ap-guangzhou.myqcloud.com/dmpicte/pabz/20250710/7d4b8085b12a414f8c84db80eab3f5c2.png" width="60%" height="auto" data-mce-src="https://guangzhoubuk-1256975247.cos.ap-guangzhou.myqcloud.com/dmpicte/pabz/20250710/7d4b8085b12a414f8c84db80eab3f5c2.png" style="display: block; margin-left: auto; margin-right: auto;" data-mce-style="display: block; margin-left: auto; margin-right: auto;"></span></p>',
   0
 );
 
@@ -42,21 +42,21 @@ INSERT INTO sys_department_profile (
   org_id, company_org_id, department_type, child_sort_order, leader_username, description,
   top_level_name, group_name, level1_unit, level2_unit, leader_level, company_sort_order, deleted
 ) VALUES
-  (101115, 4, '部门', 0, '1011.15.WORKERSHOP001', '广晟源成海安分公司', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 0, 0),
-  (101114, 4, NULL, 1301, 'ministers', '广晟源成领导', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101105, 4, NULL, 1302, 'security', '办公室', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101107, 4, NULL, 1303, 'depart3', '二楼办公室', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101108, 4, NULL, 1304, 'depart4', '办公室', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101106, 4, NULL, 1305, 'depart2', '三楼办公室', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101101, 4, NULL, 1306, 'depart1', '计调', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101102, 4, NULL, 1307, 'depart5', '运营', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101103, 4, NULL, 1308, 'other9', '财务部', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101104, 4, NULL, 1309, 'other20', '技术部', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101109, 4, '车间', 1310, 'workshop3', '1号车间', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101111, 4, '车间', 1311, 'workshop4', '3号车间3楼', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101112, 4, '车间', 1312, 'workshop1', '3号车间1楼', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101113, 4, '车间', 1313, 'workshop2', '3号车间2楼', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0),
-  (101110, 4, '车间', 1314, 'workshop', '2号车间', '广晟控股集团', '广晟矿业集团', '广晟幕墙', '源成公司', NULL, 51, 0);
+  (101115, 4, '部门', 0, '1011.15.WORKERSHOP001', 'Demo Works Company海安分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 0, 0),
+  (101114, 4, NULL, 1301, 'ministers', 'Demo Works Company领导', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101105, 4, NULL, 1302, 'security', '办公室', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101107, 4, NULL, 1303, 'depart3', '二楼办公室', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101108, 4, NULL, 1304, 'depart4', '办公室', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101106, 4, NULL, 1305, 'depart2', '三楼办公室', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101101, 4, NULL, 1306, 'depart1', '计调', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101102, 4, NULL, 1307, 'depart5', '运营', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101103, 4, NULL, 1308, 'other9', '财务部', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101104, 4, NULL, 1309, 'other20', '技术部', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101109, 4, '车间', 1310, 'workshop3', '1号车间', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101111, 4, '车间', 1311, 'workshop4', '3号车间3楼', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101112, 4, '车间', 1312, 'workshop1', '3号车间1楼', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101113, 4, '车间', 1313, 'workshop2', '3号车间2楼', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0),
+  (101110, 4, '车间', 1314, 'workshop', '2号车间', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', NULL, 51, 0);
 
 INSERT INTO sys_org (id, parent_id, org_type, org_code, org_name, org_path, sort_order, status) VALUES
   (1011001, 101109, 'TEAM', '1000-WS0001-002', '幕墙组装1班', '/1/2/3/4/101109/1011001/', 1, 'ACTIVE'),
@@ -83,25 +83,25 @@ INSERT INTO sys_team_profile (
   org_id, company_org_id, workshop_org_id, group_name, level1_unit, level2_unit, workshop_name,
   work_type_code, work_type_name, leader_username, safety_officer_username, points, active, deleted
 ) VALUES
-  (1011001, 4, 101109, '广晟矿业集团', '广晟幕墙', '源成公司', '幕墙组装', '1000-WS0001-0001', '单元式幕墙组装', 'monitor14', 'monitor14', 99, 1, 0),
-  (1011002, 4, 101109, '广晟矿业集团', '广晟幕墙', '源成公司', '幕墙组装', '1000-WS0001-0001', '单元式幕墙组装', 'monitor15', 'monitor15', 100, 1, 0),
-  (1011003, 4, 101110, '广晟矿业集团', '广晟幕墙', '源成公司', '资材仓库', '1000-WS0002-0001', '型材卸车备料', 'monitor1', 'monitor1', 96, 1, 0),
-  (1011004, 4, 101110, '广晟矿业集团', '广晟幕墙', '源成公司', '资材仓库', '1000-WS0002-0002', '配件/危险品管理', '1011.10.MONITOR001', '1011.10.MONITOR001', 97, 1, 0),
-  (1011005, 4, 101110, '广晟矿业集团', '广晟幕墙', '源成公司', '资材仓库', '1000-WS0002-0004', '玻璃铝板外委', 'monitor3', NULL, 100, 1, 0),
-  (1011006, 4, 101110, '广晟矿业集团', '广晟幕墙', '源成公司', '资材仓库', '1000-WS0002-0003', '单元板/门窗产品装车发货', 'monitor', 'monitor', 98, 1, 0),
-  (1011007, 4, 101111, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor16', 'monitor16', 99, 1, 0),
-  (1011008, 4, 101111, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor17', 'monitor17', 100, 1, 0),
-  (1011009, 4, 101111, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor18', 'monitor18', 100, 1, 0),
-  (1011010, 4, 101111, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor19', 'monitor19', 100, 1, 0),
-  (1011011, 4, 101111, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor20', 'monitor20', 100, 1, 0),
-  (1011012, 4, 101112, '广晟矿业集团', '广晟幕墙', '源成公司', '幕墙机加', '1000--0004', '铝合金型材切割开料(幕墙)', 'monitor6', 'monitor6', 99, 1, 0),
-  (1011013, 4, 101112, '广晟矿业集团', '广晟幕墙', '源成公司', '幕墙机加', '1000-WS0004-0002', '铝合金型材钻/铣/冲加工(幕墙)', 'monitor7', 'monitor7', 100, 1, 0),
-  (1011014, 4, 101112, '广晟矿业集团', '广晟幕墙', '源成公司', '幕墙机加', '1000-WS0004-0002', '铝合金型材钻/铣/冲加工(幕墙)', 'monitor8', 'monitor8', 100, 1, 0),
-  (1011015, 4, 101112, '广晟矿业集团', '广晟幕墙', '源成公司', '幕墙机加', '1000-WS0004-0002', '铝合金型材钻/铣/冲加工(幕墙)', 'monitor4;member24', 'monitor9', 100, 1, 0),
-  (1011016, 4, 101113, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗机加', '1000-WS0005-0001', '铝合金型材切割开料(门窗)', 'monitor10', 'monitor10', 100, 1, 0),
-  (1011017, 4, 101113, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗机加', '1000-WS0005-0002', '铝合金型材钻/铣/冲加工(门窗)', 'monitor11', 'monitor11', 100, 1, 0),
-  (1011018, 4, 101113, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗机加', '1000-WS0005-0002', '铝合金型材钻/铣/冲加工(门窗)', 'monitor12', 'monitor12', 100, 1, 0),
-  (1011019, 4, 101113, '广晟矿业集团', '广晟幕墙', '源成公司', '门窗机加', '1000-WS0005-0002', '铝合金型材钻/铣/冲加工(门窗)', 'monitor13', 'monitor13', 99, 1, 0);
+  (1011001, 4, 101109, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '幕墙组装', '1000-WS0001-0001', '单元式幕墙组装', 'monitor14', 'monitor14', 99, 1, 0),
+  (1011002, 4, 101109, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '幕墙组装', '1000-WS0001-0001', '单元式幕墙组装', 'monitor15', 'monitor15', 100, 1, 0),
+  (1011003, 4, 101110, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '资材仓库', '1000-WS0002-0001', '型材卸车备料', 'monitor1', 'monitor1', 96, 1, 0),
+  (1011004, 4, 101110, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '资材仓库', '1000-WS0002-0002', '配件/危险品管理', '1011.10.MONITOR001', '1011.10.MONITOR001', 97, 1, 0),
+  (1011005, 4, 101110, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '资材仓库', '1000-WS0002-0004', '玻璃铝板外委', 'monitor3', NULL, 100, 1, 0),
+  (1011006, 4, 101110, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '资材仓库', '1000-WS0002-0003', '单元板/门窗产品装车发货', 'monitor', 'monitor', 98, 1, 0),
+  (1011007, 4, 101111, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor16', 'monitor16', 99, 1, 0),
+  (1011008, 4, 101111, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor17', 'monitor17', 100, 1, 0),
+  (1011009, 4, 101111, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor18', 'monitor18', 100, 1, 0),
+  (1011010, 4, 101111, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor19', 'monitor19', 100, 1, 0),
+  (1011011, 4, 101111, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗组装', '1000-WS0003-0001', '门窗组装', 'monitor20', 'monitor20', 100, 1, 0),
+  (1011012, 4, 101112, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '幕墙机加', '1000--0004', '铝合金型材切割开料(幕墙)', 'monitor6', 'monitor6', 99, 1, 0),
+  (1011013, 4, 101112, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '幕墙机加', '1000-WS0004-0002', '铝合金型材钻/铣/冲加工(幕墙)', 'monitor7', 'monitor7', 100, 1, 0),
+  (1011014, 4, 101112, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '幕墙机加', '1000-WS0004-0002', '铝合金型材钻/铣/冲加工(幕墙)', 'monitor8', 'monitor8', 100, 1, 0),
+  (1011015, 4, 101112, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '幕墙机加', '1000-WS0004-0002', '铝合金型材钻/铣/冲加工(幕墙)', 'monitor4;member24', 'monitor9', 100, 1, 0),
+  (1011016, 4, 101113, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗机加', '1000-WS0005-0001', '铝合金型材切割开料(门窗)', 'monitor10', 'monitor10', 100, 1, 0),
+  (1011017, 4, 101113, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗机加', '1000-WS0005-0002', '铝合金型材钻/铣/冲加工(门窗)', 'monitor11', 'monitor11', 100, 1, 0),
+  (1011018, 4, 101113, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗机加', '1000-WS0005-0002', '铝合金型材钻/铣/冲加工(门窗)', 'monitor12', 'monitor12', 100, 1, 0),
+  (1011019, 4, 101113, 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company', '门窗机加', '1000-WS0005-0002', '铝合金型材钻/铣/冲加工(门窗)', 'monitor13', 'monitor13', 99, 1, 0);
 
 INSERT INTO sys_team_member (team_org_id, username, member_name, member_role, deleted) VALUES
   (1011001, 'member52', 'member52', 'MEMBER', 0),
@@ -207,3 +207,4 @@ UPDATE pre_shift_meeting SET company_id = 4, department_id = 101109, team_id = 1
 UPDATE shift_task SET company_id = 4, department_id = 101112, team_id = 1011012 WHERE id = 1002;
 UPDATE pre_shift_meeting SET company_id = 4, department_id = 101112, team_id = 1011012 WHERE id = 2002;
 UPDATE sys_user SET org_id = 1011001 WHERE id = 2;
+

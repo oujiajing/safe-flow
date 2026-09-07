@@ -53,7 +53,7 @@ test("meeting detail page saves edited owner attendees remarks and confirmation 
           teamId: 1011002,
           ownerUserId: 2,
           businessDate: "2026-06-16",
-          companyName: "广东广晟有色金属光电新材料有限公司",
+          companyName: "Demo Materials Company",
           departmentName: "废水处理厂",
           teamName: "废水处理2班",
           ownerName: "郭文清",
@@ -127,13 +127,13 @@ test("meeting detail page loads one pre-shift meeting", async () => {
         return Promise.resolve({
           id,
           meetingDate: "2026-06-16",
-          companyName: "广东广晟有色金属光电新材料有限公司",
+          companyName: "Demo Materials Company",
           departmentName: "废水处理厂",
           teamName: "废水处理2班",
           ownerName: "周柏锋",
           payload: {
             meetingContent: "班前安全交底",
-            companyName: "广东广晟有色金属光电新材料有限公司",
+            companyName: "Demo Materials Company",
             departmentName: "废水处理厂",
             teamName: "废水处理2班",
             ownerName: "周柏锋",
@@ -170,7 +170,7 @@ test("meeting detail page loads one pre-shift meeting", async () => {
   assert.equal(global.__meetingDetailPage.data.activeDetailTab, "detail")
   assert.deepEqual(global.__meetingDetailPage.data.meetingRecord, {
     id: "m300",
-    company: "广东广晟有色金属光电新材料有限公司",
+    company: "Demo Materials Company",
     dept: "废水处理厂",
     team: "废水处理2班",
     owner: "周柏锋",
@@ -202,7 +202,7 @@ test("meeting detail uploads image and video check attachments then reloads reco
         return Promise.resolve({
           id,
           meetingDate: "2026-06-16",
-          companyName: "广晟有色",
+          companyName: "Demo有色",
           departmentName: "废水处理厂",
           teamName: "废水处理2班",
           ownerName: "周柏锋",
@@ -347,7 +347,7 @@ test("meeting detail auto saves after choosing confirmation status", async () =>
           teamId: 1011002,
           ownerUserId: 2,
           businessDate: "2026-06-16",
-          companyName: "广东广晟有色金属光电新材料有限公司",
+          companyName: "Demo Materials Company",
           departmentName: "废水处理厂",
           teamName: "废水处理2班",
           ownerName: "郭文清",
@@ -613,3 +613,4 @@ test("meeting detail renders redesigned basic and detail reference sections", ()
   assert.match(detailWxss, /\.meeting-detail-content\s*\{[^}]*background:\s*#f4f6f8/s)
   assert.doesNotMatch(detailWxml, /three-check-statusbar|meeting-detail-native-bar/)
 })
+

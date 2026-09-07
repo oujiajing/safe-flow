@@ -19,7 +19,7 @@ export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
     defaultHomePath: '/pingan/three-checks/pre-shift-meeting',
-    name: '广晟矿业“平安班组”微流程管控系统',
+    name: 'Demo Safety Operations“平安班组”微流程管控系统',
   },
 });
 
@@ -71,3 +71,5 @@ export const preferencesExtension =
       },
     ],
   });
+
+

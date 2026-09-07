@@ -36,7 +36,7 @@ class SafetyLedgerDocumentApiTest {
 
   @Test
   void createsListsAndBatchDeletesDocumentLedgersWithManagedCompanyAndWordFile() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     MockMultipartFile docx =
         new MockMultipartFile(
             "file",
@@ -64,7 +64,7 @@ class SafetyLedgerDocumentApiTest {
 
     long id = created.path("id").asLong();
     assertThat(created.path("companyId").asLong()).isEqualTo(SOURCE_COMPANY_ID);
-    assertThat(created.path("company").asText()).isEqualTo("广晟源成");
+    assertThat(created.path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(created.path("attachment").path("fileKind").asText()).isEqualTo("DOCUMENT");
     assertThat(created.path("attachment").path("originalName").asText()).isEqualTo("安全规章.docx");
 
@@ -105,7 +105,7 @@ class SafetyLedgerDocumentApiTest {
 
   @Test
   void updatesAndDeletesDocumentLedgerFromOperationColumnActions() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     MockMultipartFile docx =
         new MockMultipartFile(
             "file",
@@ -168,7 +168,7 @@ class SafetyLedgerDocumentApiTest {
 
   @Test
   void supportsOrgDocumentHeadersAndRejectsNonManagedCompanyOrUnsupportedFiles() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     MockMultipartFile pdf =
         new MockMultipartFile("file", "风险文档.pdf", "application/pdf", "%PDF-1.4".getBytes(StandardCharsets.UTF_8));
 
@@ -193,7 +193,7 @@ class SafetyLedgerDocumentApiTest {
                     .getContentAsString(StandardCharsets.UTF_8))
             .path("data");
 
-    assertThat(created.path("company").asText()).isEqualTo("广晟源成");
+    assertThat(created.path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(created.path("department").asText()).isEqualTo("安全部");
     assertThat(created.path("team").asText()).isEqualTo("一班");
     assertThat(created.path("type").asText()).isEqualTo("风险管控");
@@ -245,7 +245,7 @@ class SafetyLedgerDocumentApiTest {
         .perform(get("/api/pingan/safety-ledger/documents").header("Authorization", "Bearer " + viewOnlyToken))
         .andExpect(status().isOk());
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     MockMultipartFile adminDoc =
         new MockMultipartFile(
             "file",
@@ -322,13 +322,13 @@ class SafetyLedgerDocumentApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         userId,
         username,
         username,
         SOURCE_COMPANY_ID);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", userId, roleId);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private JsonNode getJson(String url, String token) throws Exception {
@@ -367,3 +367,5 @@ class SafetyLedgerDocumentApiTest {
     return objectMapper.missingNode();
   }
 }
+
+

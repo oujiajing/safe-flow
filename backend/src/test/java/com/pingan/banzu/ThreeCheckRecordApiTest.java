@@ -34,7 +34,7 @@ class ThreeCheckRecordApiTest {
   private static final long SOURCE_COMPANY_ID = 4L;
   private static final long SOURCE_DEPARTMENT_ID = 101109L;
   private static final long SOURCE_TEAM_ID = 1011001L;
-  private static final String SOURCE_COMPANY_NAME = "广晟源成";
+  private static final String SOURCE_COMPANY_NAME = "Demo Works Company";
   private static final List<String> MODULE_KEYS =
       List.of(
           "team-dispatch",
@@ -77,7 +77,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void listsSeedRecordsForEveryGenericOneShiftThreeCheckModule() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     for (String moduleKey : MODULE_KEYS) {
       JsonNode list =
@@ -100,7 +100,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void filtersGenericRecordListByExactOrganizationIds() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode byCompany =
         getJson(
@@ -170,7 +170,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void paginatesAndSummarizesGenericRecordsWithEnterpriseFilters() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     List<String> createdIds = new ArrayList<>();
     jdbcTemplate.update(
         "delete from three_check_record where module_key = 'pre-shift-inspection' and payload_json like '%enterprise-query-test%'");
@@ -237,13 +237,13 @@ class ThreeCheckRecordApiTest {
     jdbcTemplate.update(
         "insert into sys_role_menu (role_id, menu_id) select 9101, id from sys_menu where permission_code = 'PINGAN_ONE_SHIFT_THREE_CHECKS_VIEW'");
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (9101, 'self_three_check', '{noop}123456', '本人范围用户', ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (9101, 'self_three_check', '{noop}SAFE_TEST_PASSWORD', '本人范围用户', ?, 'ACTIVE', 0)",
         SOURCE_TEAM_ID);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (9101, 9101)");
     insertRecordForEnterpriseQuery("TCR-SELF-OWNED", 9101L, "2026-07-01");
     insertRecordForEnterpriseQuery("TCR-SELF-OTHER", 2L, "2026-07-02");
 
-    String token = login("self_three_check", "123456");
+    String token = login("self_three_check", "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records"
@@ -274,7 +274,7 @@ class ThreeCheckRecordApiTest {
     insertRecordForEnterpriseQuery(
         "TCR-TM-HIDDEN", "pre-shift-inspection", 2L, 1011002L, "2036-08-23");
 
-    String token = login(username, "123456");
+    String token = login(username, "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records"
@@ -319,7 +319,7 @@ class ThreeCheckRecordApiTest {
     insertRecordForEnterpriseQuery(
         "TCR-QS-MEMBER-OWN", "quick-shot", memberUserId, SOURCE_TEAM_ID, "2036-09-22");
 
-    String token = login(username, "123456");
+    String token = login(username, "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson(
                 "/api/pingan/three-checks/quick-shot/records"
@@ -348,7 +348,7 @@ class ThreeCheckRecordApiTest {
     insertRecordForEnterpriseQuery(
         "TCR-TL-HIDDEN", "pre-shift-inspection", 2L, 1011002L, "2036-07-13");
 
-    String token = login("team_leader_three_check", "123456");
+    String token = login("team_leader_three_check", "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records"
@@ -386,7 +386,7 @@ class ThreeCheckRecordApiTest {
     insertRecordForEnterpriseQuery(
         "TCR-CW-OUTSIDE", "curtain-wall-routine-check", 4L, 10L, "2036-07-23");
 
-    String token = login("curtain_wall_three_check", "123456");
+    String token = login("curtain_wall_three_check", "SAFE_TEST_PASSWORD");
     JsonNode curtainWallList =
         getJson(
                 "/api/pingan/three-checks/curtain-wall-routine-check/records"
@@ -458,7 +458,7 @@ class ThreeCheckRecordApiTest {
     setRootDispatchRecordId(curtainWallChildId, curtainWallRootId);
     setRootDispatchRecordId(ordinaryChildId, ordinaryRootId);
 
-    String token = login("curtain_wall_child_three_check", "123456");
+    String token = login("curtain_wall_child_three_check", "SAFE_TEST_PASSWORD");
     JsonNode genericList =
         getJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records"
@@ -495,7 +495,7 @@ class ThreeCheckRecordApiTest {
         "insert into sys_role (id, role_code, role_name, data_scope) values (?, 'TEAM_LEADER_CROSS_SCOPE_TEST', '跨范围班长测试角色', 'ORG_AND_CHILDREN')",
         roleId);
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, 'team_leader_cross_scope', '{noop}123456', '跨范围班长用户', ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, 'team_leader_cross_scope', '{noop}SAFE_TEST_PASSWORD', '跨范围班长用户', ?, 'ACTIVE', 0)",
         leaderUserId,
         SOURCE_DEPARTMENT_ID);
     jdbcTemplate.update(
@@ -515,7 +515,7 @@ class ThreeCheckRecordApiTest {
         insertRecordForEnterpriseQueryAndReturnId(
             "TCR-TL-OUTSIDE-OPENED", "pre-shift-inspection", leaderUserId, 10L, "2026-08-01", "OPENED");
 
-    String token = login("team_leader_cross_scope", "123456");
+    String token = login("team_leader_cross_scope", "SAFE_TEST_PASSWORD");
 
     mockMvc
         .perform(get("/api/pingan/three-checks/pre-shift-inspection/records/" + draftId)
@@ -560,7 +560,7 @@ class ThreeCheckRecordApiTest {
     insertRecordForEnterpriseQuery(
         "TCR-TG-SECOND", "pre-shift-inspection", 2L, 1011002L, "2026-08-12");
 
-    String token = login("team_group_three_check", "123456");
+    String token = login("team_group_three_check", "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records"
@@ -586,7 +586,7 @@ class ThreeCheckRecordApiTest {
     insertRecordForEnterpriseQuery(
         "TCR-CG-GENERIC", "pre-shift-inspection", 2L, SOURCE_TEAM_ID, "2026-08-21");
 
-    String token = login("curtain_group_three_check", "123456");
+    String token = login("curtain_group_three_check", "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records"
@@ -618,7 +618,7 @@ class ThreeCheckRecordApiTest {
       insertRecordForEnterpriseQuery(
           "TCR-STL-TEAM", "pre-shift-inspection", 2L, SOURCE_TEAM_ID, "2026-09-01");
 
-      String token = login("self_team_leader_three_check", "123456");
+      String token = login("self_team_leader_three_check", "SAFE_TEST_PASSWORD");
       JsonNode list =
           getJson(
                   "/api/pingan/three-checks/pre-shift-inspection/records"
@@ -666,7 +666,7 @@ class ThreeCheckRecordApiTest {
           SOURCE_TEAM_ID,
           "2026-09-12");
 
-      String token = login("self_curtain_leader_three_check", "123456");
+      String token = login("self_curtain_leader_three_check", "SAFE_TEST_PASSWORD");
       JsonNode list =
           getJson(
                   "/api/pingan/three-checks/pre-shift-inspection/records"
@@ -696,7 +696,7 @@ class ThreeCheckRecordApiTest {
     createThreeCheckRoleUser(
         userId, username, "部门派班经理", SOURCE_DEPARTMENT_ID, "DEPARTMENT_MANAGER");
 
-    String token = login(username, "123456");
+    String token = login(username, "SAFE_TEST_PASSWORD");
     JsonNode dispatch =
         postJson(
                 "/api/pingan/three-checks/team-dispatch/records",
@@ -732,7 +732,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void createsUpdatesSubmitsWithdrawsRemindsAndUploadsGenericRecord() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     String today = futureBusinessDate();
 
     JsonNode created =
@@ -859,7 +859,7 @@ class ThreeCheckRecordApiTest {
     cleanupThreeCheckAccessFixture(memberUserId, memberUsername, "TCR-TL-SUBMIT-OWNER-");
     createThreeCheckRoleUser(memberUserId, memberUsername, "提交前组员", SOURCE_TEAM_ID);
     createTeamMember(SOURCE_TEAM_ID, memberUserId, memberUsername, "提交前组员");
-    String token = login("HB_MONITOR", "123456");
+    String token = login("HB_MONITOR", "SAFE_TEST_PASSWORD");
 
     try {
       for (String moduleKey :
@@ -911,7 +911,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void deletesAttachmentFromThreeCheckRecordDetail() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records",
@@ -980,7 +980,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void createsUpdatesAndFiltersPointsFlowRecords() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -1082,14 +1082,14 @@ class ThreeCheckRecordApiTest {
         "POINTS_FLOW_VIEWER",
         "PINGAN_POINTS_FLOW_VIEW");
 
-    String threeCheckOnlyToken = login("points_flow_three_check_only", "123456");
+    String threeCheckOnlyToken = login("points_flow_three_check_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             get("/api/pingan/three-checks/points-flow/records?status=all")
                 .header("Authorization", "Bearer " + threeCheckOnlyToken))
         .andExpect(status().isForbidden());
 
-    String pointsViewerToken = login("points_flow_viewer", "123456");
+    String pointsViewerToken = login("points_flow_viewer", "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson(
                 "/api/pingan/three-checks/points-flow/records?status=all&dateStart=2026-11-06&dateEnd=2026-11-06",
@@ -1138,7 +1138,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_PRE_SHIFT_MEETING_VIEW",
         "PINGAN_PRE_SHIFT_MEETING_CREATE");
 
-    String teamDispatchToken = login("team_dispatch_creator", "123456");
+    String teamDispatchToken = login("team_dispatch_creator", "SAFE_TEST_PASSWORD");
     JsonNode teamDispatch =
         postJson(
                 "/api/pingan/three-checks/team-dispatch/records",
@@ -1156,7 +1156,7 @@ class ThreeCheckRecordApiTest {
                         genericThreeCheckPayload(teamDispatchUserId, "2026-11-21", "幕墙派班越权"))))
         .andExpect(status().isForbidden());
 
-    String oneShiftToken = login("one_shift_creator", "123456");
+    String oneShiftToken = login("one_shift_creator", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post("/api/pingan/three-checks/pre-shift-meeting/records")
@@ -1184,7 +1184,7 @@ class ThreeCheckRecordApiTest {
                         genericThreeCheckPayload(oneShiftUserId, "2026-11-24", "安全活动越权"))))
         .andExpect(status().isForbidden());
 
-    String meetingToken = login("pre_shift_meeting_creator", "123456");
+    String meetingToken = login("pre_shift_meeting_creator", "SAFE_TEST_PASSWORD");
     JsonNode meeting =
         postJson(
                 "/api/pingan/three-checks/pre-shift-meeting/records",
@@ -1193,7 +1193,7 @@ class ThreeCheckRecordApiTest {
             .path("data");
     assertThat(meeting.path("moduleKey").asText()).isEqualTo("pre-shift-meeting");
 
-    String safetyActivityToken = login("pre_shift_safety_activity_creator", "123456");
+    String safetyActivityToken = login("pre_shift_safety_activity_creator", "SAFE_TEST_PASSWORD");
     JsonNode activity =
         postJson(
                 "/api/pingan/three-checks/pre-shift-safety-activity/records",
@@ -1233,7 +1233,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_ONE_SHIFT_THREE_CHECKS_VIEW",
         "PINGAN_ONE_SHIFT_THREE_CHECKS_SUBMIT");
 
-    String createOnlyToken = login("one_shift_create_only", "123456");
+    String createOnlyToken = login("one_shift_create_only", "SAFE_TEST_PASSWORD");
     JsonNode createOnlyDraft =
         postJson(
                 "/api/pingan/three-checks/mid-shift-inspection/records",
@@ -1254,7 +1254,7 @@ class ThreeCheckRecordApiTest {
     JsonNode submitDraft =
         postJson(
                 "/api/pingan/three-checks/mid-shift-inspection/records",
-                login("admin", "123456"),
+                login("admin", "SAFE_TEST_PASSWORD"),
                 inspectionThreeCheckPayload(submitUserId, "2026-11-28", "提交权限可提交"))
             .path("data");
     JsonNode submitted =
@@ -1262,7 +1262,7 @@ class ThreeCheckRecordApiTest {
                 "/api/pingan/three-checks/mid-shift-inspection/records/"
                     + submitDraft.path("id").asText()
                     + "/submit",
-                login("one_shift_submitter", "123456"),
+                login("one_shift_submitter", "SAFE_TEST_PASSWORD"),
                 Map.of())
             .path("data");
 
@@ -1272,7 +1272,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void aggregatesSafetyPointsRankingFromPointsFlowRecords() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     createPointsFlowRecord(token, "2026-06-01", SOURCE_TEAM_ID, "榜单甲", "学习-应急管理", "加分", 20);
     createPointsFlowRecord(token, "2026-06-02", SOURCE_TEAM_ID, "榜单甲", "考试不通过", "扣分", 4);
@@ -1365,13 +1365,13 @@ class ThreeCheckRecordApiTest {
                     + "?dateStart=2026-06-01&dateEnd=2026-06-03&keyword=榜单&rankBy=COMPANY",
                 token)
             .path("data");
-    assertThat(companyCharts.path("teamTop5").get(0).path("name").asText()).isEqualTo("广晟源成");
+    assertThat(companyCharts.path("teamTop5").get(0).path("name").asText()).isEqualTo("Demo Works Company");
     assertThat(companyCharts.path("teamTop5").get(0).path("score").asInt()).isEqualTo(26);
   }
 
   @Test
   void safetyPointsRankingEndpointsAllowPointsViewWithoutManagePermission() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     createPointsFlowRecord(adminToken, "2026-06-08", SOURCE_TEAM_ID, "查看权限用户", "安全学习", "加分", 6);
     createPermissionFixtureUser(
         9523L,
@@ -1383,7 +1383,7 @@ class ThreeCheckRecordApiTest {
     jdbcTemplate.update(
         "update sys_role set data_scope = 'ORG_AND_CHILDREN' where role_code = 'POINTS_RANKING_VIEWER'");
 
-    String viewerToken = login("points_ranking_viewer", "123456");
+    String viewerToken = login("points_ranking_viewer", "SAFE_TEST_PASSWORD");
     String query = "?dateStart=2026-06-08&dateEnd=2026-06-08&keyword=查看权限";
 
     mockMvc
@@ -1404,7 +1404,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void scopesSafetyPointsRankingChartsBySelectedTeamRankDimension() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     createPointsFlowRecord(token, "2026-06-10", SOURCE_TEAM_ID, "图表维度甲", "学习-应急管理", "加分", 30);
     createPointsFlowRecord(token, "2026-06-11", 1011002L, "图表维度乙", "学习-安全课程", "加分", 5);
@@ -1439,7 +1439,7 @@ class ThreeCheckRecordApiTest {
                     + "?dateStart=2026-06-10&dateEnd=2026-06-11&keyword=图表维度&rankBy=COMPANY",
                 token)
             .path("data");
-    assertThat(companyCharts.path("teamTop5").get(0).path("name").asText()).isEqualTo("广晟源成");
+    assertThat(companyCharts.path("teamTop5").get(0).path("name").asText()).isEqualTo("Demo Works Company");
     assertThat(companyCharts.path("trend").size()).isEqualTo(2);
     assertThat(companyCharts.path("trend").get(0).path("score").asInt()).isEqualTo(50);
     assertThat(companyCharts.path("trend").get(1).path("score").asInt()).isEqualTo(55);
@@ -1449,7 +1449,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void deletesGenericRecordWithSoftDeleteAndKeepsAuditData() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -1529,7 +1529,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void derivesAndFiltersOverdueWithoutChangingOriginalStatusAcrossPcAndMiniProgram()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     String yesterday = LocalDate.now(com.pingan.banzu.service.ThreeCheckOverdueSupport.BUSINESS_ZONE)
         .minusDays(1)
         .toString();
@@ -1648,7 +1648,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void createsSafetyCheckWithoutTeamFromMiniProgram() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> payload = new HashMap<>();
     payload.put("companyId", SOURCE_COMPANY_ID);
     payload.put("departmentId", SOURCE_DEPARTMENT_ID);
@@ -1660,7 +1660,7 @@ class ThreeCheckRecordApiTest {
         "payload",
         Map.of(
             "inspectionUnit", "集团",
-            "inspectedUnit", "广晟源成",
+            "inspectedUnit", "Demo Works Company",
             "inspectionType", "综合检查",
             "statusLabel", "待检查"));
 
@@ -1675,7 +1675,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void submitsSafetyCheckWithoutTeamAndCreatesRectificationOrder() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> payload = new HashMap<>();
     payload.put("companyId", SOURCE_COMPANY_ID);
     payload.put("departmentId", SOURCE_DEPARTMENT_ID);
@@ -1687,7 +1687,7 @@ class ThreeCheckRecordApiTest {
         "payload",
         Map.of(
             "inspectionUnit", "集团",
-            "inspectedUnit", "广晟源成",
+            "inspectedUnit", "Demo Works Company",
             "inspectionType", "综合检查",
             "checkItems",
                 List.of(
@@ -1737,7 +1737,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void rejectsOrdinaryThreeCheckRecordWithoutTeam() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> payload = new HashMap<>();
     payload.put("companyId", SOURCE_COMPANY_ID);
     payload.put("departmentId", SOURCE_DEPARTMENT_ID);
@@ -1756,7 +1756,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void batchProcessesGenericRecordsWithPartialSuccess() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode draft =
         createGenericRecord(
             token,
@@ -1811,7 +1811,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void exposesGenericRecordWorkflowFromRealStatusLogs() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     String today = futureBusinessDate();
 
     JsonNode created =
@@ -1873,7 +1873,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void linksFullChainByRootDispatchRecordIdInsteadOfOnlyTeamAndDate() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode firstDispatch =
         postJson(
@@ -1974,7 +1974,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void autoCreatesFullChainChildrenOnlyWhenDispatchIsSubmittedAndKeepsThemIdempotent()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     List<String> childModules =
         List.of(
             "pre-shift-meeting",
@@ -2078,7 +2078,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void autoCreatesInspectionChildrenWithTeamCheckItemSnapshots() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     deleteExistingTeamCheckTemplate("PRE_SHIFT_INSPECTION");
 
     JsonNode libraryItem =
@@ -2146,7 +2146,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void autoCreatesPreShiftMeetingSafetyConfirmItemsAndRequiresConfirmation()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     deleteExistingTeamCheckTemplate("PRE_SHIFT_MEETING_CONFIRMATION");
 
     JsonNode libraryItem =
@@ -2268,7 +2268,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void preShiftMeetingRequiresAtLeastOneMediaCheckBeforeSubmit() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -2325,7 +2325,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void submitInspectionRecordBackfillsTeamCheckItemsButRequiresManualResults() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     deleteExistingTeamCheckTemplate("POST_SHIFT_INSPECTION");
 
     JsonNode libraryItem =
@@ -2386,7 +2386,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void submitInspectionRecordRejectsRequiredCheckItemFieldViolations() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     assertInspectionSubmitRejected(
         token,
@@ -2421,7 +2421,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void submitInspectionRecordCreatesOneRectificationOrderForMultipleHazardItems()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     List<Map<String, Object>> checkItems =
         List.of(
             Map.of(
@@ -2554,7 +2554,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void submitInspectionRecordCopiesRectificationDescriptionToOrderItemHazardDescription()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records",
@@ -2617,7 +2617,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void miniCanOpenRectificationOrderForSubmittedThreeCheckInspection() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         createGenericRecord(
             token,
@@ -2680,7 +2680,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_ONE_SHIFT_THREE_CHECKS_VIEW",
         "PINGAN_ONE_SHIFT_THREE_CHECKS_RECTIFICATION_ORDER_CREATE");
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode viewOnlyRecord =
         postJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records",
@@ -2689,7 +2689,7 @@ class ThreeCheckRecordApiTest {
                     viewOnlyUserId, "2036-10-02", "只读用户有隐患记录", "有隐患"))
             .path("data");
     String viewOnlyId = viewOnlyRecord.path("id").asText();
-    String viewOnlyToken = login("three_check_rectification_view_only", "123456");
+    String viewOnlyToken = login("three_check_rectification_view_only", "SAFE_TEST_PASSWORD");
     assertThat(
             getJson(
                     "/api/pingan/three-checks/pre-shift-inspection/records/" + viewOnlyId,
@@ -2723,7 +2723,7 @@ class ThreeCheckRecordApiTest {
                     enabledUserId, "2036-10-03", "授权用户有隐患记录", "有隐患"))
             .path("data");
     String enabledId = enabledRecord.path("id").asText();
-    String enabledToken = login("three_check_rectification_enabled", "123456");
+    String enabledToken = login("three_check_rectification_enabled", "SAFE_TEST_PASSWORD");
     assertThat(
             getJson(
                     "/api/pingan/three-checks/pre-shift-inspection/records/" + enabledId,
@@ -2786,9 +2786,9 @@ class ThreeCheckRecordApiTest {
   @Test
   void rectificationOrderActionsRejectAcceptanceAndCloseBackfillThreeCheckItems()
       throws Exception {
-    String adminToken = login("admin", "123456");
-    String safetyToken = login("MQ_SAFE", "123456");
-    String teamLeaderToken = login("HB_MONITOR", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
+    String safetyToken = login("MQ_SAFE", "SAFE_TEST_PASSWORD");
+    String teamLeaderToken = login("HB_MONITOR", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -2967,7 +2967,7 @@ class ThreeCheckRecordApiTest {
         where permission_code = 'PINGAN_HAZARD_RECTIFICATION_ACCEPT'
         """,
         acceptRoleId);
-    String acceptanceToken = login("HB_MONITOR", "123456");
+    String acceptanceToken = login("HB_MONITOR", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post("/api/pingan/hazard-rectification/orders/" + orderId + "/actions")
@@ -3032,7 +3032,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void cancelsPendingHazardRectificationOrderAndBackfillsSourceItems() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/three-checks/pre-shift-inspection/records",
@@ -3126,9 +3126,9 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void closedHazardRectificationOrderCannotBeCancelled() throws Exception {
-    String adminToken = login("admin", "123456");
-    String safetyToken = login("MQ_SAFE", "123456");
-    String teamLeaderToken = login("HB_MONITOR", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
+    String safetyToken = login("MQ_SAFE", "SAFE_TEST_PASSWORD");
+    String teamLeaderToken = login("HB_MONITOR", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/hazard-rectification/orders",
@@ -3204,7 +3204,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void singleAccountCanOperateAcceptanceActionsWithSelectedAcceptanceUser()
       throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -3303,7 +3303,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void uploadsRectificationAfterPhotoThroughOrderAttachmentEndpoint()
       throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -3419,7 +3419,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void manuallyCreatesHazardRectificationOrderWithMultipleItems() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -3463,7 +3463,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void batchDeletesHazardRectificationOrders() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -3503,7 +3503,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void submitSafetyCheckCanCreateHazardRectificationOrder() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -3580,7 +3580,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void submitSafetyCheckHazardLinesCanCreateHazardRectificationOrder() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -3685,7 +3685,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void submitSafetyCheckCopiesBeforeRectificationPhotoToOrderItem() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -3759,7 +3759,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void autoCreatesFullChainChildrenWhenDispatchIsCreatedAsEffective()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode effectiveDispatch =
         postJson(
@@ -3807,7 +3807,7 @@ class ThreeCheckRecordApiTest {
           leaderUsername,
           SOURCE_TEAM_ID);
 
-      String token = login("admin", "123456");
+      String token = login("admin", "SAFE_TEST_PASSWORD");
       JsonNode effectiveDispatch =
           postJson(
                   "/api/pingan/three-checks/team-dispatch/records",
@@ -3847,7 +3847,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void autoCreatesFullChainChildrenWhenDispatchIsUpdatedAsEffective()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode draftDispatch =
         postJson(
@@ -3888,7 +3888,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void autoCreatedChildrenAreScopedToTheirOwnRootDispatchWhenSameTeamHasTwoDispatches()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     long firstRootId =
         postJson(
@@ -3937,7 +3937,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void connectsHazardInspectionModulesToGenericRecordsWithRequestedStatusesAndAttachments()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     for (HazardModuleCase module : HAZARD_MODULE_CASES) {
       JsonNode draft =
@@ -4011,7 +4011,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void returnsHazardInspectionDocumentFlow() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         createGenericRecord(
@@ -4117,7 +4117,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void legacyQuickShotWithoutUnifiedOrderRejectsRectificationActionsButKeepsDocumentFlowReadable()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         createGenericRecord(
@@ -4180,7 +4180,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void approvedQuickShotCreatesUnifiedHazardRectificationOrderButRejectedDoesNot()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode rejectedCreated =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -4324,7 +4324,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void approvedQuickShotCopiesUploadedAttachmentUrlToOrderItemMedia() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -4410,7 +4410,7 @@ class ThreeCheckRecordApiTest {
   @Test
   void withdrawApprovedQuickShotReturnsToPendingReviewAndCancelsLinkedOrder()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -4509,7 +4509,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_ONE_SHIFT_THREE_CHECKS_VIEW",
         "PINGAN_ONE_SHIFT_THREE_CHECKS_VOID");
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -4523,7 +4523,7 @@ class ThreeCheckRecordApiTest {
             "APPROVE",
             created.path("version").asInt());
 
-    String withdrawOnlyToken = login("quick_shot_withdraw_only", "123456");
+    String withdrawOnlyToken = login("quick_shot_withdraw_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post(
@@ -4549,7 +4549,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_ONE_SHIFT_THREE_CHECKS_VIEW",
         "PINGAN_ONE_SHIFT_THREE_CHECKS_VOID");
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/mini/pingan/three-checks/quick-shot/records",
@@ -4567,7 +4567,7 @@ class ThreeCheckRecordApiTest {
             "APPROVE",
             created.path("version").asInt());
 
-    String withdrawOnlyToken = login("mini_quick_shot_withdraw_only", "123456");
+    String withdrawOnlyToken = login("mini_quick_shot_withdraw_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post(
@@ -4582,7 +4582,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void migratedQuickShotRejectsLegacyRectificationActions() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -4643,7 +4643,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void miniProgramQuickShotWorkflowActionsSyncToPcDocumentFlowWithSnapshots() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/mini/pingan/three-checks/quick-shot/records",
@@ -4736,7 +4736,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_HAZARD_QUICK_SHOT_VIEW",
         "PINGAN_HAZARD_QUICK_SHOT_REPORT");
 
-    String executeOnlyToken = login("quick_shot_execute_only", "123456");
+    String executeOnlyToken = login("quick_shot_execute_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post("/api/pingan/three-checks/quick-shot/records")
@@ -4745,7 +4745,7 @@ class ThreeCheckRecordApiTest {
                 .content(objectMapper.writeValueAsString(quickShotPayload(executeOnlyUserId, "2026-11-01"))))
         .andExpect(status().isForbidden());
 
-    String reportToken = login("quick_shot_reporter", "123456");
+    String reportToken = login("quick_shot_reporter", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -4778,7 +4778,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_HAZARD_RECTIFICATION_VIEW",
         "PINGAN_HAZARD_RECTIFICATION_REPORT");
 
-    String createOnlyToken = login("hazard_rectification_create_only", "123456");
+    String createOnlyToken = login("hazard_rectification_create_only", "SAFE_TEST_PASSWORD");
     JsonNode createOnlyDraft =
         postJson(
                 "/api/pingan/three-checks/hazard-rectification/records",
@@ -4811,7 +4811,7 @@ class ThreeCheckRecordApiTest {
     JsonNode reportDraft =
         postJson(
                 "/api/pingan/three-checks/hazard-rectification/records",
-                login("admin", "123456"),
+                login("admin", "SAFE_TEST_PASSWORD"),
                 Map.of(
                     "companyId",
                     SOURCE_COMPANY_ID,
@@ -4831,7 +4831,7 @@ class ThreeCheckRecordApiTest {
                 "/api/pingan/three-checks/hazard-rectification/records/"
                     + reportDraft.path("id").asText()
                     + "/submit",
-                login("hazard_rectification_reporter", "123456"),
+                login("hazard_rectification_reporter", "SAFE_TEST_PASSWORD"),
                 Map.of())
             .path("data");
 
@@ -4860,7 +4860,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_HAZARD_QUICK_SHOT_VIEW",
         "PINGAN_HAZARD_QUICK_SHOT_REPORT");
 
-    String executeOnlyToken = login("mini_quick_shot_execute_only", "123456");
+    String executeOnlyToken = login("mini_quick_shot_execute_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post("/api/mini/pingan/three-checks/quick-shot/records")
@@ -4875,7 +4875,7 @@ class ThreeCheckRecordApiTest {
                             "wx-quick-shot-rbac-denied-req"))))
         .andExpect(status().isForbidden());
 
-    String reportToken = login("mini_quick_shot_reporter", "123456");
+    String reportToken = login("mini_quick_shot_reporter", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/mini/pingan/three-checks/quick-shot/records",
@@ -4914,14 +4914,14 @@ class ThreeCheckRecordApiTest {
         "PINGAN_HAZARD_QUICK_SHOT_VIEW",
         "PINGAN_HAZARD_RECTIFICATION_RECTIFY");
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode executeOnlyRecord =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
                 adminToken,
                 quickShotPayload(executeOnlyUserId, "2026-11-05"))
             .path("data");
-    String executeOnlyToken = login("quick_shot_workflow_execute_only", "123456");
+    String executeOnlyToken = login("quick_shot_workflow_execute_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post(
@@ -4947,7 +4947,7 @@ class ThreeCheckRecordApiTest {
                 adminToken,
                 quickShotPayload(rectificationUserId, "2026-11-06"))
             .path("data");
-    String rectificationToken = login("quick_shot_rectification_user", "123456");
+    String rectificationToken = login("quick_shot_rectification_user", "SAFE_TEST_PASSWORD");
     String response =
         mockMvc
             .perform(
@@ -4995,14 +4995,14 @@ class ThreeCheckRecordApiTest {
         "PINGAN_HAZARD_QUICK_SHOT_VIEW",
         "PINGAN_HAZARD_QUICK_SHOT_REPORT");
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode executeOnlyRecord =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
                 adminToken,
                 quickShotPayload(executeOnlyUserId, "2026-11-07"))
             .path("data");
-    String executeOnlyToken = login("quick_shot_attachment_execute_only", "123456");
+    String executeOnlyToken = login("quick_shot_attachment_execute_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             multipart(
@@ -5020,7 +5020,7 @@ class ThreeCheckRecordApiTest {
         .andExpect(status().isForbidden());
     assertThat(countAttachmentsByOriginalName("quick-shot-execute-only.jpg")).isZero();
 
-    String reportToken = login("quick_shot_attachment_reporter", "123456");
+    String reportToken = login("quick_shot_attachment_reporter", "SAFE_TEST_PASSWORD");
     JsonNode reportRecord =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -5078,7 +5078,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_HAZARD_QUICK_SHOT_VIEW",
         "PINGAN_HAZARD_QUICK_SHOT_REPORT");
 
-    String ownerToken = login("quick_shot_attachment_owner", "123456");
+    String ownerToken = login("quick_shot_attachment_owner", "SAFE_TEST_PASSWORD");
     JsonNode ownerRecord =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -5086,7 +5086,7 @@ class ThreeCheckRecordApiTest {
                 quickShotPayload(ownerUserId, "2026-11-15"))
             .path("data");
 
-    String otherToken = login("quick_shot_attachment_other", "123456");
+    String otherToken = login("quick_shot_attachment_other", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             multipart(
@@ -5167,7 +5167,7 @@ class ThreeCheckRecordApiTest {
         "update sys_role set data_scope = 'ORG_AND_CHILDREN' where role_code = ?",
         "QUICK_SHOT_ATTACHMENT_SCOPE_OTHER");
 
-    String ownerToken = login("quick_shot_attachment_scope_owner", "123456");
+    String ownerToken = login("quick_shot_attachment_scope_owner", "SAFE_TEST_PASSWORD");
     JsonNode ownerRecord =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -5175,7 +5175,7 @@ class ThreeCheckRecordApiTest {
                 quickShotPayload(ownerUserId, "2026-11-17"))
             .path("data");
 
-    String scopedReportToken = login("quick_shot_attachment_scope_other", "123456");
+    String scopedReportToken = login("quick_shot_attachment_scope_other", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             multipart(
@@ -5259,7 +5259,7 @@ class ThreeCheckRecordApiTest {
             "select id from three_check_record where record_no = 'QS-CREATOR-ATTACHMENT-RBAC'",
             Long.class);
 
-    String creatorToken = login("quick_shot_attachment_creator", "123456");
+    String creatorToken = login("quick_shot_attachment_creator", "SAFE_TEST_PASSWORD");
     String uploadResponse =
         mockMvc
             .perform(
@@ -5319,7 +5319,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_HAZARD_ENTRY",
         "PINGAN_HAZARD_SAFETY_CHECK_VIEW");
 
-    String threeCheckOnlyToken = login("hazard_list_three_check_only", "123456");
+    String threeCheckOnlyToken = login("hazard_list_three_check_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             get("/api/pingan/three-checks/safety-check/records?status=all")
@@ -5331,7 +5331,7 @@ class ThreeCheckRecordApiTest {
                 .header("Authorization", "Bearer " + threeCheckOnlyToken))
         .andExpect(status().isForbidden());
 
-    String hazardViewerToken = login("hazard_list_viewer", "123456");
+    String hazardViewerToken = login("hazard_list_viewer", "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson(
                 "/api/pingan/three-checks/safety-check/records?status=all&dateStart=2026-11-05&dateEnd=2026-11-05",
@@ -5387,7 +5387,7 @@ class ThreeCheckRecordApiTest {
         "PINGAN_HAZARD_ENTRY",
         "PINGAN_HAZARD_QUICK_SHOT_VIEW");
 
-    String threeCheckOnlyToken = login("hazard_workflow_three_check_only", "123456");
+    String threeCheckOnlyToken = login("hazard_workflow_three_check_only", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             get("/api/pingan/three-checks/quick-shot/records/" + recordId + "/workflow")
@@ -5397,7 +5397,7 @@ class ThreeCheckRecordApiTest {
     JsonNode workflow =
         getJson(
                 "/api/pingan/three-checks/quick-shot/records/" + recordId + "/workflow",
-                login("hazard_workflow_viewer", "123456"))
+                login("hazard_workflow_viewer", "SAFE_TEST_PASSWORD"))
             .path("data");
     assertThat(workflow.path("documentFlow")).isNotNull();
     assertThat(workflow.path("changeHistory")).isNotNull();
@@ -5405,7 +5405,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void rejectsQuickShotHazardWhenReviewFindsItInvalidAndStoresReviewPayload() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/three-checks/quick-shot/records",
@@ -5452,7 +5452,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void rejectsInvalidAndUnauthorizedQuickShotWorkflowActions() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         createGenericRecord(
             adminToken,
@@ -5471,7 +5471,7 @@ class ThreeCheckRecordApiTest {
                         Map.of("action", "ISSUE_RECTIFICATION", "version", 0))))
         .andExpect(status().isBadRequest());
 
-    String teamLeaderToken = login("HB_MONITOR", "123456");
+    String teamLeaderToken = login("HB_MONITOR", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post("/api/pingan/three-checks/quick-shot/records/" + id + "/workflow-actions")
@@ -5484,7 +5484,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void mapsLegacyQuickShotStatusesToSixStepLabelsWithoutMigratingRows() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     jdbcTemplate.update(
         """
         insert into three_check_record (
@@ -5528,7 +5528,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void rejectsNonHazardModuleDocumentFlowPrefix() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         createGenericRecord(
             token,
@@ -5560,18 +5560,18 @@ class ThreeCheckRecordApiTest {
     jdbcTemplate.update(
         "insert into sys_role_menu (role_id, menu_id) select 9201, id from sys_menu where permission_code = 'PINGAN_HAZARD_SAFETY_CHECK_VIEW'");
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (9201, 'self_hazard_flow', '{noop}123456', '单据流本人范围用户', ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (9201, 'self_hazard_flow', '{noop}SAFE_TEST_PASSWORD', '单据流本人范围用户', ?, 'ACTIVE', 0)",
         SOURCE_TEAM_ID);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (9201, 9201)");
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         createGenericRecord(
             adminToken,
             "safety-check",
             "待检查",
             Map.of("statusLabel", "待检查", "hazardDescription", "other owner hazard"));
-    String selfToken = login("self_hazard_flow", "123456");
+    String selfToken = login("self_hazard_flow", "SAFE_TEST_PASSWORD");
 
     mockMvc
         .perform(
@@ -5585,7 +5585,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void returnsHazardInspectionChangeHistoryWithFieldAndAttachmentChanges() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         createGenericRecord(
@@ -5663,7 +5663,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void rejectsNonHazardModuleChangeHistoryPrefix() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         createGenericRecord(
             token,
@@ -5695,18 +5695,18 @@ class ThreeCheckRecordApiTest {
     jdbcTemplate.update(
         "insert into sys_role_menu (role_id, menu_id) select 9401, id from sys_menu where permission_code = 'PINGAN_HAZARD_SAFETY_CHECK_VIEW'");
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (9401, 'self_hazard_history', '{noop}123456', '变更历史本人范围用户', ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (9401, 'self_hazard_history', '{noop}SAFE_TEST_PASSWORD', '变更历史本人范围用户', ?, 'ACTIVE', 0)",
         SOURCE_TEAM_ID);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (9401, 9401)");
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         createGenericRecord(
             adminToken,
             "safety-check",
             "待检查",
             Map.of("statusLabel", "待检查", "hazardDescription", "other owner hazard"));
-    String selfToken = login("self_hazard_history", "123456");
+    String selfToken = login("self_hazard_history", "SAFE_TEST_PASSWORD");
 
     mockMvc
         .perform(
@@ -5720,7 +5720,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void withdrawsTeamDispatchBackToInactiveAndKeepsDetailEditableIds() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -5773,7 +5773,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void curtainWallTeamDispatchSubmitAndWithdrawSyncDispatchStatusAndControls() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -5822,7 +5822,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void dispatchInactiveStatusFilterIncludesWithdrawnRecords() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode teamDispatch =
         postJson(
@@ -5914,7 +5914,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void keySitesSubmitCreatesOneLinkedRectificationOrderAndExposesMiniWorkflow() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> request = new HashMap<>();
     request.put("companyId", SOURCE_COMPANY_ID);
     request.put("departmentId", SOURCE_DEPARTMENT_ID);
@@ -5993,7 +5993,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void keySitesRejectsHazardWithoutDescription() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> request = new HashMap<>(
         miniKeySitePayload(
             2L,
@@ -6028,7 +6028,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void miniProgramGenericRecordsSharePcDataAndSyncControls() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -6144,7 +6144,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void miniProgramPreShiftMeetingRecordsSyncToPcGenericWorkbench() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     String today = futureBusinessDate();
 
     JsonNode created =
@@ -6256,7 +6256,7 @@ class ThreeCheckRecordApiTest {
     jdbcTemplate.update(
         "update sys_role set data_scope = 'ORG_AND_CHILDREN' where role_code = 'MINI_THREE_CHECK_SCOPED_EXECUTE'");
 
-    String viewOnlyToken = login("mini_three_check_view_only", "123456");
+    String viewOnlyToken = login("mini_three_check_view_only", "SAFE_TEST_PASSWORD");
     Map<String, Object> viewOnlyCreatePayload =
         miniKeySitePayload(
             viewOnlyUserId,
@@ -6277,7 +6277,7 @@ class ThreeCheckRecordApiTest {
     JsonNode ownedDraft =
         postJson(
                 "/api/mini/pingan/three-checks/key-sites/records",
-                login("admin", "123456"),
+                login("admin", "SAFE_TEST_PASSWORD"),
                 miniKeySitePayload(
                     viewOnlyUserId,
                     SOURCE_TEAM_ID,
@@ -6295,7 +6295,7 @@ class ThreeCheckRecordApiTest {
                 .header("Authorization", "Bearer " + viewOnlyToken))
         .andExpect(status().isForbidden());
 
-    String scopedExecuteToken = login("mini_three_check_scoped_execute", "123456");
+    String scopedExecuteToken = login("mini_three_check_scoped_execute", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             post("/api/mini/pingan/three-checks/key-sites/records")
@@ -6320,7 +6320,7 @@ class ThreeCheckRecordApiTest {
     JsonNode outOfScopeDraft =
         postJson(
                 "/api/mini/pingan/three-checks/key-sites/records",
-                login("admin", "123456"),
+                login("admin", "SAFE_TEST_PASSWORD"),
                 miniKeySitePayload(
                     scopedExecuteUserId,
                     1011002L,
@@ -6341,7 +6341,7 @@ class ThreeCheckRecordApiTest {
 
   @Test
   void rejectsUnsupportedGenericModuleKey() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     mockMvc
         .perform(
@@ -6891,7 +6891,7 @@ class ThreeCheckRecordApiTest {
   private void createThreeCheckRoleUser(
       long userId, String username, String realName, long orgId, String... roleCodes) {
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         userId,
         username,
         realName,
@@ -6973,7 +6973,7 @@ class ThreeCheckRecordApiTest {
         roleCode,
         realName + "角色");
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         userId,
         username,
         realName,
@@ -7182,3 +7182,5 @@ class ThreeCheckRecordApiTest {
         memberName);
   }
 }
+
+

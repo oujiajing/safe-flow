@@ -28,7 +28,7 @@ class SystemRealSourceDataSeedTest {
   private static final long SOURCE_COMPANY_ID = 4L;
   private static final long CURTAIN_WALL_ASSEMBLY_DEPARTMENT_ID = 101109L;
   private static final long CURTAIN_WALL_ASSEMBLY_TEAM_ID = 1011001L;
-  private static final String SOURCE_COMPANY_NAME = "广晟源成";
+  private static final String SOURCE_COMPANY_NAME = "Demo Works Company";
 
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private MockMvc mockMvc;
@@ -48,25 +48,25 @@ class SystemRealSourceDataSeedTest {
                   and o.org_type = 'COMPANY'
                   and o.status = 'ACTIVE'
                   and o.deleted = 0
-                  and p.short_name = '广晟源成'
+                  and p.short_name = 'Demo Works Company'
                   and p.company_type = '子公司'
-                  and p.level1_name = '广晟控股集团'
-                  and p.level2_name = '广晟矿业集团'
-                  and p.level3_name = '广晟幕墙'
-                  and p.level4_name = '广晟源成'
+                  and p.level1_name = 'Demo控股集团'
+                  and p.level2_name = 'Demo Safety Holdings'
+                  and p.level3_name = 'Demo Works Company'
+                  and p.level4_name = 'Demo Works Company'
                 """,
                 Integer.class,
                 SOURCE_COMPANY_ID,
                 SOURCE_COMPANY_NAME))
         .isEqualTo(1);
 
-    assertCompanyHierarchy(1L, "集团", "广晟控股集团", null, null, null);
-    assertCompanyHierarchy(2L, "集团", "广晟控股集团", "广晟矿业集团", null, null);
-    assertCompanyHierarchy(3L, "分公司", "广晟控股集团", "广晟矿业集团", "广晟幕墙", null);
-    assertCompanyHierarchy(4L, "子公司", "广晟控股集团", "广晟矿业集团", "广晟幕墙", "广晟源成");
-    assertCompanyHierarchy(11L, "分公司", "广晟控股集团", "广晟矿业集团", "广晟矿投", null);
-    assertCompanyHierarchy(8L, "子公司", "广晟控股集团", "广晟矿业集团", "广晟矿投", "梅州嘉晟");
-    assertCompanyHierarchy(27L, "分公司", "广晟控股集团", "广晟矿业集团", "冶金技校", null);
+    assertCompanyHierarchy(1L, "集团", "Demo控股集团", null, null, null);
+    assertCompanyHierarchy(2L, "集团", "Demo控股集团", "Demo Safety Holdings", null, null);
+    assertCompanyHierarchy(3L, "分公司", "Demo控股集团", "Demo Safety Holdings", "Demo Works Company", null);
+    assertCompanyHierarchy(4L, "子公司", "Demo控股集团", "Demo Safety Holdings", "Demo Works Company", "Demo Works Company");
+    assertCompanyHierarchy(11L, "分公司", "Demo控股集团", "Demo Safety Holdings", "Demo矿投", null);
+    assertCompanyHierarchy(8L, "子公司", "Demo控股集团", "Demo Safety Holdings", "Demo矿投", "Demo East Site");
+    assertCompanyHierarchy(27L, "分公司", "Demo控股集团", "Demo Safety Holdings", "冶金技校", null);
     assertCompanyTypeCount("分公司", 12);
     assertCompanyTypeCount("子公司", 13);
     assertYuanchengOperatingProfileSyncedToGroup(1L);
@@ -120,7 +120,7 @@ class SystemRealSourceDataSeedTest {
 
   @Test
   void realSourceDataIsSelectableFromSystemOptionsAndPreShiftMeetingForms() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode companies = getJson("/api/system/options/companies", token).path("data");
     assertThat(optionLabels(companies)).contains(SOURCE_COMPANY_NAME);
@@ -157,7 +157,7 @@ class SystemRealSourceDataSeedTest {
                     "payload",
                     Map.of(
                         "meetingContent",
-                        "使用源成真实组织数据创建班前会。",
+                        "使用Demo Works真实组织数据创建班前会。",
                         "attendees",
                         List.of("湖贝班长"),
                         "attendeesText",
@@ -415,3 +415,5 @@ class SystemRealSourceDataSeedTest {
     return titles;
   }
 }
+
+

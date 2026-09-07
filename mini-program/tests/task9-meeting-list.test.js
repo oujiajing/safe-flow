@@ -38,7 +38,7 @@ test("meeting mapper converts pre-shift meeting records to prototype task rows",
       meetingDate: "2026-06-16",
       departmentName: "幕墙车间",
       teamName: "幕墙组装2班",
-      ownerName: "蔡燕艳",
+      ownerName: "Demo Admin",
       status: "DRAFT",
       attendeeCount: 12,
       meetingContent: "班前安全交底"
@@ -63,7 +63,7 @@ test("meeting mapper converts pre-shift meeting records to prototype task rows",
       company: "-",
       dept: "幕墙车间",
       team: "幕墙组装2班",
-      owner: "蔡燕艳",
+      owner: "Demo Admin",
       attendees: [],
       attendeesText: "",
       task: "班前安全交底",
@@ -124,7 +124,7 @@ test("meeting list page loads pre-shift meetings into prototype list rows", asyn
                 meetingDate: "2026-07-03",
                 departmentName: "幕墙车间",
                 teamName: "幕墙组装2班",
-                ownerName: "蔡燕艳",
+                ownerName: "Demo Admin",
                 meetingContent: "已撤回班前会",
                 status: "WITHDRAWN"
               }
@@ -139,7 +139,7 @@ test("meeting list page loads pre-shift meetings into prototype list rows", asyn
               meetingDate: "2026-07-03",
               departmentName: "幕墙车间",
               teamName: "幕墙组装2班",
-              ownerName: "蔡燕艳",
+              ownerName: "Demo Admin",
               meetingContent: "班前安全交底",
               status: "DRAFT"
             }
@@ -191,7 +191,7 @@ test("meeting list page loads pre-shift meetings into prototype list rows", asyn
       company: "-",
       dept: "幕墙车间",
       team: "幕墙组装2班",
-      owner: "蔡燕艳",
+      owner: "Demo Admin",
       attendees: [],
       attendeesText: "",
       task: "班前安全交底",
@@ -209,7 +209,7 @@ test("meeting list page loads pre-shift meetings into prototype list rows", asyn
       company: "-",
       dept: "幕墙车间",
       team: "幕墙组装2班",
-      owner: "蔡燕艳",
+      owner: "Demo Admin",
       attendees: [],
       attendeesText: "",
       task: "已撤回班前会",
@@ -563,3 +563,4 @@ test("meeting list renders redesigned one-shift-three-check card shell without c
   assert.match(pageWxss, /\.meeting-filter-trigger\s*\{[\s\S]*margin:\s*0;[\s\S]*padding:\s*0;[\s\S]*position:\s*relative;[\s\S]*left:\s*0;/)
   assert.match(pageWxss, /\.meeting-task-list\s*\{[\s\S]*padding:\s*22rpx 0 0;/)
 })
+

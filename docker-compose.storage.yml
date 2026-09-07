@@ -1,13 +1,13 @@
-name: pingan-banzu-storage
+name: safeteam-portfolio-storage
 
 services:
   postgres:
     image: ${POSTGRES_IMAGE:-registry-1.docker.io/pgvector/pgvector:pg16}
-    container_name: pingan-banzu-postgres
+    container_name: safeteam-portfolio-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-pingan_banzu_verify}
+      POSTGRES_DB: ${POSTGRES_DB:-demo_safeteam}
       POSTGRES_USER: ${POSTGRES_USER:-pingan}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pingan}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}
       TZ: Asia/Shanghai
     ports:
       - "${POSTGRES_PORT:-15433}:5432"
@@ -21,11 +21,11 @@ services:
 
   minio:
     image: ${MINIO_IMAGE:-quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e}
-    container_name: pingan-banzu-minio
+    container_name: safeteam-portfolio-minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-YOUR_MINIO_ACCESS_KEY_HERE}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-YOUR_MINIO_SECRET_KEY_HERE}
       TZ: Asia/Shanghai
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
@@ -35,15 +35,15 @@ services:
 
   minio-init:
     image: ${MINIO_MC_IMAGE:-quay.io/minio/mc@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727}
-    container_name: pingan-banzu-minio-init
+    container_name: safeteam-portfolio-minio-init
     profiles:
       - init
     depends_on:
       - minio
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-      PINGAN_MINIO_BUCKET: ${PINGAN_MINIO_BUCKET:-pingan-banzu}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-YOUR_MINIO_ACCESS_KEY_HERE}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-YOUR_MINIO_SECRET_KEY_HERE}
+      PINGAN_MINIO_BUCKET: ${PINGAN_MINIO_BUCKET:-demo-safeteam}
     entrypoint: /bin/sh
     command: >
       -c "
@@ -59,3 +59,5 @@ services:
 volumes:
   postgres-data:
   minio-data:
+
+

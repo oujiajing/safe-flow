@@ -116,7 +116,7 @@ public class SystemAccountService {
     }
     SysUser user = new SysUser();
     user.username = request.username();
-    user.passwordHash = passwordService.hash(request.password() == null ? "123456" : request.password());
+    user.passwordHash = passwordService.hash(request.password() == null ? "SAFE_TEST_PASSWORD" : request.password());
     user.realName = request.realName();
     user.mobile = request.mobile();
     user.orgId = request.orgId();
@@ -316,3 +316,4 @@ public class SystemAccountService {
         roleResponses);
   }
 }
+

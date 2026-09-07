@@ -34,7 +34,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void managesCompanyMasterDataWithProfileFieldsAndSoftDelete() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -118,7 +118,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void managesDepartmentTeamAndPersonnelMasterDataWithExcelFields() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long companyId = 8L;
 
     JsonNode department =
@@ -142,7 +142,7 @@ class SystemMasterDataApiTest {
                     Map.entry("companySortOrder", 8)))
             .path("data");
     Long departmentId = department.path("id").asLong();
-    assertThat(department.path("companyName").asText()).isEqualTo("梅州嘉晟");
+    assertThat(department.path("companyName").asText()).isEqualTo("Demo East Site");
     assertThat(department.path("leaderLevel").asText()).isEqualTo("L2");
 
     JsonNode team =
@@ -213,7 +213,7 @@ class SystemMasterDataApiTest {
                     Map.entry("name", "测试人员"),
                     Map.entry("username", "TEST_PERSON_USER"),
                     Map.entry("companyOrgId", companyId),
-                    Map.entry("companyShortName", "梅州"),
+                    Map.entry("companyShortName", "Demo East Site"),
                     Map.entry("departmentOrgId", departmentId),
                     Map.entry("teamOrgId", teamId),
                     Map.entry("points", 21),
@@ -232,7 +232,7 @@ class SystemMasterDataApiTest {
                     Map.entry("managementWeight", 9)))
             .path("data");
     Long personnelId = personnel.path("id").asLong();
-    assertThat(personnel.path("companyName").asText()).isEqualTo("梅州嘉晟");
+    assertThat(personnel.path("companyName").asText()).isEqualTo("Demo East Site");
     assertThat(personnel.path("departmentName").asText()).isEqualTo("测试部门");
     assertThat(personnel.path("teamName").asText()).isEqualTo("测试班组更新");
     assertThat(personnel.path("managementWeight").asInt()).isEqualTo(9);
@@ -253,7 +253,7 @@ class SystemMasterDataApiTest {
                     Map.entry("name", "测试人员更新"),
                     Map.entry("username", "TEST_PERSON_USER"),
                     Map.entry("companyOrgId", companyId),
-                    Map.entry("companyShortName", "梅州"),
+                    Map.entry("companyShortName", "Demo East Site"),
                     Map.entry("departmentOrgId", departmentId),
                     Map.entry("teamOrgId", teamId),
                     Map.entry("employeeType", "正式"),
@@ -366,7 +366,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void filtersMasterDataBySelectedOrganizationSubtreeFromDataMap() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long companyId = 8L;
 
     JsonNode department =
@@ -451,26 +451,26 @@ class SystemMasterDataApiTest {
 
   @Test
   void companyManagementIncludesGroupNodesWithHierarchyProfile() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode rows = getJson("/api/system/companies?organizationId=1&pageSize=100", token).path("data").path("items");
 
     JsonNode holdingGroup = findById(rows, 1L);
-    assertThat(holdingGroup.path("name").asText()).isEqualTo("广晟控股集团");
+    assertThat(holdingGroup.path("name").asText()).isEqualTo("Demo控股集团");
     assertThat(holdingGroup.path("companyType").asText()).isEqualTo("集团");
-    assertThat(holdingGroup.path("level1Name").asText()).isEqualTo("广晟控股集团");
+    assertThat(holdingGroup.path("level1Name").asText()).isEqualTo("Demo控股集团");
     assertThat(holdingGroup.path("level2Name").isNull()).isTrue();
 
     JsonNode miningGroup = findById(rows, 2L);
-    assertThat(miningGroup.path("name").asText()).isEqualTo("广晟矿业集团");
+    assertThat(miningGroup.path("name").asText()).isEqualTo("Demo Safety Holdings");
     assertThat(miningGroup.path("companyType").asText()).isEqualTo("集团");
-    assertThat(miningGroup.path("level1Name").asText()).isEqualTo("广晟控股集团");
-    assertThat(miningGroup.path("level2Name").asText()).isEqualTo("广晟矿业集团");
+    assertThat(miningGroup.path("level1Name").asText()).isEqualTo("Demo控股集团");
+    assertThat(miningGroup.path("level2Name").asText()).isEqualTo("Demo Safety Holdings");
 
     JsonNode curtainWall = findById(rows, 3L);
-    assertThat(curtainWall.path("name").asText()).isEqualTo("广晟幕墙");
+    assertThat(curtainWall.path("name").asText()).isEqualTo("Demo Works Company");
     assertThat(curtainWall.path("companyType").asText()).isEqualTo("分公司");
-    assertThat(curtainWall.path("level3Name").asText()).isEqualTo("广晟幕墙");
+    assertThat(curtainWall.path("level3Name").asText()).isEqualTo("Demo Works Company");
 
     assertThat(ids(rows))
         .containsExactlyInAnyOrder(
@@ -488,7 +488,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void createsCompanyUnderHierarchyAndKeepsDataMapsAndDeletionConsistent() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -501,15 +501,15 @@ class SystemMasterDataApiTest {
                     Map.entry("shortName", "层级新增"),
                     Map.entry("status", "ACTIVE"),
                     Map.entry("companyType", "子公司"),
-                    Map.entry("level1Name", "广晟控股集团"),
-                    Map.entry("level2Name", "广晟矿业集团"),
-                    Map.entry("level3Name", "广晟幕墙"),
+                    Map.entry("level1Name", "Demo控股集团"),
+                    Map.entry("level2Name", "Demo Safety Holdings"),
+                    Map.entry("level3Name", "Demo Works Company"),
                     Map.entry("level4Name", "层级新增子公司")))
             .path("data");
     Long companyId = created.path("id").asLong();
 
     JsonNode tree = getJson("/api/pingan/org/company-tree", token).path("data");
-    assertThat(ids(findOrg(tree, "广晟幕墙").path("children"))).contains(companyId);
+    assertThat(ids(findOrg(tree, "Demo Works Company").path("children"))).contains(companyId);
 
     JsonNode groupRows = getJson("/api/system/companies?organizationId=2&pageSize=100", token).path("data").path("items");
     assertThat(ids(groupRows)).contains(companyId);
@@ -526,7 +526,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void serializesUnsafeCompanyIdsAsJsonStringsAndDeletesByStringPathId() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     jdbcTemplate.update(
         """
         insert into sys_org (id, parent_id, org_type, org_code, org_name, org_path, sort_order, status, deleted)
@@ -567,7 +567,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void createsSecondLevelGroupBranchAndSubsidiaryUnderStrictCompanyHierarchy() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode group =
         postJson(
@@ -579,7 +579,7 @@ class SystemMasterDataApiTest {
                     "shortName", "严格二级集团",
                     "status", "ACTIVE",
                     "companyType", "集团",
-                    "level1Name", "广晟控股集团",
+                    "level1Name", "Demo控股集团",
                     "level2Name", "严格二级集团"))
             .path("data");
     Long groupId = group.path("id").asLong();
@@ -594,7 +594,7 @@ class SystemMasterDataApiTest {
                     "shortName", "严格分公司",
                     "status", "ACTIVE",
                     "companyType", "分公司",
-                    "level1Name", "广晟控股集团",
+                    "level1Name", "Demo控股集团",
                     "level2Name", "严格二级集团",
                     "level3Name", "严格分公司"))
             .path("data");
@@ -610,7 +610,7 @@ class SystemMasterDataApiTest {
                     "shortName", "严格子公司",
                     "status", "ACTIVE",
                     "companyType", "子公司",
-                    "level1Name", "广晟控股集团",
+                    "level1Name", "Demo控股集团",
                     "level2Name", "严格二级集团",
                     "level3Name", "严格分公司",
                     "level4Name", "严格子公司"))
@@ -637,7 +637,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void rejectsSubsidiaryWhenThirdLevelBranchDoesNotExist() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode response =
         objectMapper.readTree(
@@ -653,8 +653,8 @@ class SystemMasterDataApiTest {
                                     "name", "找不到分公司的子公司",
                                     "status", "ACTIVE",
                                     "companyType", "子公司",
-                                    "level1Name", "广晟控股集团",
-                                    "level2Name", "广晟矿业集团",
+                                    "level1Name", "Demo控股集团",
+                                    "level2Name", "Demo Safety Holdings",
                                     "level3Name", "不存在的分公司",
                                     "level4Name", "找不到分公司的子公司"))))
                 .andExpect(status().isBadRequest())
@@ -667,7 +667,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void rejectsCompanyCreateWhenCompanyTypeIsMissing() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode response =
         objectMapper.readTree(
@@ -692,7 +692,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void rejectsSiblingOrganizationAccessForScopedUsers() throws Exception {
-    String token = login("HB_MONITOR", "123456");
+    String token = login("HB_MONITOR", "SAFE_TEST_PASSWORD");
 
     mockMvc
         .perform(
@@ -712,7 +712,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void rejectsDepartmentCreateWhenCompanyOrgIdIsNotCompanyNode() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long existingDepartmentId = 101109L;
 
     JsonNode response =
@@ -740,7 +740,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void rejectsDuplicateCompanyCodeWithBusinessError() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     Map<String, Object> payload =
         Map.of(
@@ -769,7 +769,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void adminCompanyListIgnoresDeletedOrganizationFilter() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     Long companyId =
         postJson(
@@ -795,7 +795,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void rejectsDeletingOrganizationThatStillHasActiveChildren() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     Long companyId =
         postJson(
@@ -836,7 +836,7 @@ class SystemMasterDataApiTest {
 
   @Test
   void rejectsDeletingDepartmentThatStillHasActiveTeams() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long companyId = 8L;
 
     Long departmentId =
@@ -995,3 +995,6 @@ class SystemMasterDataApiTest {
     return count;
   }
 }
+
+
+

@@ -59,14 +59,14 @@ class ContainerInfrastructureIT {
   private static final Logger log = LoggerFactory.getLogger(ContainerInfrastructureIT.class);
   private static final String MINIO_ACCESS_KEY = "testminio";
   private static final String MINIO_SECRET_KEY = "testminio-secret";
-  private static final String MINIO_BUCKET = "pingan-banzu-integration";
+  private static final String MINIO_BUCKET = "safeteam-portfolio-integration";
 
   @Container
   static final PostgreSQLContainer postgres =
       new PostgreSQLContainer(
               DockerImageName.parse("registry-1.docker.io/pgvector/pgvector:pg16")
                   .asCompatibleSubstituteFor("postgres"))
-          .withDatabaseName("pingan_banzu_it")
+          .withDatabaseName("demo_safeteam_it")
           .withUsername("pingan")
           .withPassword("pingan");
 
@@ -693,7 +693,7 @@ class ContainerInfrastructureIT {
     return postJson(
             "/api/auth/login",
             null,
-            Map.of("username", "admin", "password", "123456"))
+            Map.of("username", "admin", "password", "SAFE_TEST_PASSWORD"))
         .path("data")
         .path("accessToken")
         .asText();
@@ -763,3 +763,6 @@ class ContainerInfrastructureIT {
     };
   }
 }
+
+
+

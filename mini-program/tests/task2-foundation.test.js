@@ -54,7 +54,7 @@ test("root project config disables url domain checks for local backend developme
 
   assert.equal(rootConfig.miniprogramRoot, "mini-program/")
   assert.equal(rootConfig.setting.urlCheck, false)
-  assert.equal(rootConfig.appid, "wx0b5b886e6c491545")
+  assert.equal(rootConfig.appid, "YOUR_WECHAT_APPID_HERE")
   assert.equal(fs.existsSync(path.join(__dirname, "../project.config.json")), false)
 })
 
@@ -127,7 +127,7 @@ test("request adds bearer token and unwraps successful ApiResponse data", async 
   const promise = request({ url: "/api/demo", method: "POST", data: { ok: true } })
   const requestOptions = global.wx.calls.request[0]
 
-  assert.equal(requestOptions.url, "http://10.43.122.12:8080/api/demo")
+  assert.equal(requestOptions.url, "http://localhost:8080/api/demo")
   assert.equal(requestOptions.method, "POST")
   assert.equal(requestOptions.header.Authorization, "Bearer abc-token")
 
@@ -195,7 +195,7 @@ test("uploadFile adds bearer token and unwraps JSON ApiResponse data", async () 
   const promise = uploadFile({ url: "/api/files", filePath: "/tmp/a.png", fileKind: "IMAGE" })
   const uploadOptions = global.wx.calls.uploadFile[0]
 
-  assert.equal(uploadOptions.url, "http://10.43.122.12:8080/api/files")
+  assert.equal(uploadOptions.url, "http://localhost:8080/api/files")
   assert.equal(uploadOptions.header.Authorization, "Bearer abc-token")
   assert.deepEqual(uploadOptions.formData, { fileKind: "IMAGE" })
 
@@ -271,3 +271,4 @@ test("uploadFile preserves ordinary business errors", async () => {
   await assert.rejects(promise, /图片大小不能超过 10MB/)
   assert.equal(global.wx.calls.uploadFile.length, 1)
 })
+

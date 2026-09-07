@@ -52,10 +52,10 @@ const screenCompanyOptions: Array<{
   value: PinganMonitorCenterApi.Id | 'all-company';
 }> = [
   { label: '全部公司', value: 'all-company' },
-  { label: '广晟幕墙', value: 3 },
-  { label: '广晟源成', value: 4 },
-  { label: '资源公司', value: 24 },
-  { label: '广晟新材', value: 28 },
+  { label: 'Demo Works Company', value: 3 },
+  { label: 'Demo Works Company', value: 4 },
+  { label: 'Demo Company', value: 24 },
+  { label: 'Demo Materials', value: 28 },
 ];
 const screenCompanyNames = screenCompanyOptions
   .filter((item) => item.value !== 'all-company')
@@ -492,7 +492,7 @@ function formatDateValue(value: Date) {
 }
 
 function companyLabel(sourceName: string | undefined, index: number) {
-  const shortName = screenCompanyNames[index % screenCompanyNames.length] ?? '广晟公司';
+  const shortName = screenCompanyNames[index % screenCompanyNames.length] ?? 'Demo公司';
   return {
     fullName: shortName,
     originalName: sourceName ?? shortName,
@@ -774,7 +774,7 @@ function renderCharts() {
         </span>
       </div>
       <div class="header-title">
-        <h1>广晟矿业平安班组监控中心</h1>
+        <h1>Demo Safety Operations平安班组监控中心</h1>
       </div>
       <div class="header-right">
         <span class="date-range">{{ currentDateTime }}</span>
@@ -1826,3 +1826,5 @@ function renderCharts() {
   }
 }
 </style>
+
+

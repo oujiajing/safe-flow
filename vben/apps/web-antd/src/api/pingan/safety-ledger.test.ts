@@ -31,7 +31,7 @@ describe('safety-ledger api adapter', () => {
             originalName: '制度.pdf',
             url: '/uploads/safety-ledger/制度.pdf',
           },
-          company: '源成公司',
+          company: 'Demo Works Company',
           createdAt: '2026-05-20T10:00:00.640438',
           id: 16,
           name: '安全生产制度',
@@ -55,7 +55,7 @@ describe('safety-ledger api adapter', () => {
       },
     );
     expect(result.items[0]).toMatchObject({
-      enterprise: '源成公司',
+      enterprise: 'Demo Works Company',
       file: '制度.pdf',
       fileUrl: '/uploads/safety-ledger/制度.pdf',
       name: '安全生产制度',
@@ -170,7 +170,7 @@ describe('safety-ledger api adapter', () => {
       items: [
         {
           businessDate: '2026-05-15',
-          company: '源成公司',
+          company: 'Demo Works Company',
           department: '幕墙车间',
           id: '11',
           imageCheck: '现场照片',
@@ -201,7 +201,7 @@ describe('safety-ledger api adapter', () => {
     expect(result.items[0]).toMatchObject({
       date: '2026-05-15',
       department: '幕墙车间',
-      enterprise: '源成公司',
+      enterprise: 'Demo Works Company',
       id: '11',
       imageCheck: '现场照片',
       imagePreviewUrl: '/uploads/pre-shift-meeting/11/image/a.jpg',
@@ -216,7 +216,7 @@ describe('safety-ledger api adapter', () => {
       .mockResolvedValueOnce({
         items: [
           {
-            company: '源成公司',
+            company: 'Demo Works Company',
             currentScore: 88,
             department: '安全部',
             lastBusinessDate: '2026-05-18',
@@ -229,7 +229,7 @@ describe('safety-ledger api adapter', () => {
         items: [
           {
             businessDate: '2026-05-19',
-            company: '源成公司',
+            company: 'Demo Works Company',
             department: '安全部',
             id: 'PF-1',
             payload: {
@@ -264,7 +264,7 @@ describe('safety-ledger api adapter', () => {
       },
     );
     expect(ranking.items[0]).toMatchObject({
-      company: '源成公司',
+      company: 'Demo Works Company',
       name: '张三',
       points: 88,
     });
@@ -281,7 +281,7 @@ describe('safety-ledger api adapter', () => {
       items: [
         {
           applicationTime: '2026-05-20 10:00:00',
-          company: '源成公司',
+          company: 'Demo Works Company',
           id: 8,
           workType: '动火作业',
         },
@@ -303,8 +303,9 @@ describe('safety-ledger api adapter', () => {
     );
     expect(result.items[0]).toMatchObject({
       date: '2026-05-20 10:00:00',
-      enterprise: '源成公司',
+      enterprise: 'Demo Works Company',
       operationType: '动火作业',
     });
   });
 });
+

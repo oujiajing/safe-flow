@@ -25,17 +25,17 @@ describe('risk-four-color-map api', () => {
   });
 
   it('maps four-color map CRUD and background upload endpoints', async () => {
-    const payload = { companyId: 4, name: '源成厂区四色图', remark: '厂区总图' };
+    const payload = { companyId: 4, name: 'Demo Works厂区四色图', remark: '厂区总图' };
     const file = new File(['png'], 'four-color.png', { type: 'image/png' });
 
-    await getRiskFourColorMapsApi({ companyId: 4, keyword: '源成', page: 1, pageSize: 20 });
+    await getRiskFourColorMapsApi({ companyId: 4, keyword: 'Demo Works', page: 1, pageSize: 20 });
     await createRiskFourColorMapApi(payload);
-    await updateRiskFourColorMapApi(12, { ...payload, name: '源成车间四色图' });
+    await updateRiskFourColorMapApi(12, { ...payload, name: 'Demo Works车间四色图' });
     await deleteRiskFourColorMapApi(12);
     await uploadRiskFourColorMapBackgroundApi(12, file);
 
     expect(requestClient.get).toHaveBeenCalledWith('/pingan/risk-four-color-maps', {
-      params: { companyId: 4, keyword: '源成', page: 1, pageSize: 20 },
+      params: { companyId: 4, keyword: 'Demo Works', page: 1, pageSize: 20 },
     });
     expect(requestClient.post).toHaveBeenNthCalledWith(
       1,
@@ -44,7 +44,7 @@ describe('risk-four-color-map api', () => {
     );
     expect(requestClient.put).toHaveBeenCalledWith('/pingan/risk-four-color-maps/12', {
       ...payload,
-      name: '源成车间四色图',
+      name: 'Demo Works车间四色图',
     });
     expect(requestClient.delete).toHaveBeenCalledWith('/pingan/risk-four-color-maps/12');
     expect(requestClient.post).toHaveBeenNthCalledWith(
@@ -57,3 +57,4 @@ describe('risk-four-color-map api', () => {
     );
   });
 });
+

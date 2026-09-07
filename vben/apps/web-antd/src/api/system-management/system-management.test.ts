@@ -125,18 +125,18 @@ describe('system management api clients', () => {
   });
 
   it('maps master data CRUD calls to /system endpoints', async () => {
-    await getCompanyListApi({ keyword: '源成', page: 1, pageSize: 20 });
-    await createCompanyApi({ code: 'YC', name: '源成公司', status: 'ACTIVE' });
+    await getCompanyListApi({ keyword: 'Demo Works', page: 1, pageSize: 20 });
+    await createCompanyApi({ code: 'YC', name: 'Demo Works Company', status: 'ACTIVE' });
     await updateTeamApi('7', { name: '湖贝班组', status: 'ACTIVE' });
     await deleteDepartmentApi('3');
     await updatePersonnelStatusApi('9', 'INACTIVE');
 
     expect(requestClient.get).toHaveBeenCalledWith('/system/companies', {
-      params: { keyword: '源成', page: 1, pageSize: 20 },
+      params: { keyword: 'Demo Works', page: 1, pageSize: 20 },
     });
     expect(requestClient.post).toHaveBeenCalledWith('/system/companies', {
       code: 'YC',
-      name: '源成公司',
+      name: 'Demo Works Company',
       status: 'ACTIVE',
     });
     expect(requestClient.put).toHaveBeenCalledWith('/system/teams/7', {
@@ -275,14 +275,14 @@ describe('system management api clients', () => {
     const image = new File(['image'], '简介.png', { type: 'image/png' });
     const video = new File(['video'], '宣传片.mp4', { type: 'video/mp4' });
 
-    await getContentProfileListApi({ keyword: '源成', status: 'ACTIVE' });
+    await getContentProfileListApi({ keyword: 'Demo Works', status: 'ACTIVE' });
     await createContentProfileApi({
       description: '简介正文',
       orgId: 4,
       status: 'ACTIVE',
-      title: '源成简介',
+      title: 'Demo Works简介',
       videoSortOrder: 7,
-      videoTitle: '源成宣传片',
+      videoTitle: 'Demo Works宣传片',
     });
     await updateContentProfileApi('8', { title: '更新简介' });
     await updateContentProfileStatusApi('8', 'INACTIVE');
@@ -293,7 +293,7 @@ describe('system management api clients', () => {
 
     expect(requestClient.get).toHaveBeenCalledWith(
       '/system/content-profiles',
-      { params: { keyword: '源成', status: 'ACTIVE' } },
+      { params: { keyword: 'Demo Works', status: 'ACTIVE' } },
     );
     expect(requestClient.post).toHaveBeenCalledWith(
       '/system/content-profiles',
@@ -301,9 +301,9 @@ describe('system management api clients', () => {
         description: '简介正文',
         orgId: 4,
         status: 'ACTIVE',
-        title: '源成简介',
+        title: 'Demo Works简介',
         videoSortOrder: 7,
-        videoTitle: '源成宣传片',
+        videoTitle: 'Demo Works宣传片',
       },
     );
     expect(requestClient.put).toHaveBeenCalledWith(
@@ -440,3 +440,5 @@ describe('system management api clients', () => {
     );
   });
 });
+
+

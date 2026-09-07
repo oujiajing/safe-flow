@@ -85,7 +85,7 @@ class SystemAnnouncementApiTest {
         mockMvc.perform(
                 post("/api/auth/login")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"username\":\"admin\",\"password\":\"123456\"}"))
+                    .content("{\"username\":\"admin\",\"password\":\"SAFE_TEST_PASSWORD\"}"))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -97,3 +97,4 @@ class SystemAnnouncementApiTest {
     return objectMapper.readTree(value);
   }
 }
+

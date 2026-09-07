@@ -843,7 +843,7 @@ export function isThreeCheckDataMapEnabled(routeName: string) {
 }
 
 export function getThreeCheckFixedCompanyName(routeName: string) {
-  return curtainWallOnlyRouteNames.has(routeName) ? '广晟幕墙' : undefined;
+  return curtainWallOnlyRouteNames.has(routeName) ? 'Demo Works Company' : undefined;
 }
 
 export function isPointsFlowRoute(routeName: string) {
@@ -1770,3 +1770,4 @@ export function resolvePreShiftMeetingRuntime(
     routeTitle,
   });
 }
+

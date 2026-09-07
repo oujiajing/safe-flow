@@ -15,12 +15,12 @@ class ProductionConfigurationValidatorTest {
   void rejectsPublishedDevelopmentCredentialsWithoutLoggingTheirValues() {
     ProductionConfigurationValidator validator =
         validator(
-            "jdbc:postgresql://localhost:5432/pingan_banzu_verify",
+            "jdbc:postgresql://localhost:5432/demo_safeteam",
             "pingan",
             "pingan",
-            "pingan-banzu-local-dev-secret-at-least-32-bytes",
-            "minioadmin",
-            "minioadmin");
+            "safeteam-portfolio-local-dev-secret-at-least-32-bytes",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE");
 
     assertThatThrownBy(validator::afterPropertiesSet)
         .isInstanceOf(IllegalStateException.class)
@@ -29,15 +29,15 @@ class ProductionConfigurationValidatorTest {
             "PINGAN_DB_PASSWORD",
             "PINGAN_MINIO_ACCESS_KEY",
             "PINGAN_MINIO_SECRET_KEY")
-        .hasMessageNotContaining("pingan-banzu-local-dev-secret")
-        .hasMessageNotContaining("minioadmin");
+        .hasMessageNotContaining("safeteam-portfolio-local-dev-secret")
+        .hasMessageNotContaining("YOUR_MINIO_ACCESS_KEY_HERE");
   }
 
   @Test
   void acceptsExplicitProductionSecrets() {
     ProductionConfigurationValidator validator =
         validator(
-            "jdbc:postgresql://db.internal:5432/pingan_banzu",
+            "jdbc:postgresql://db.internal:5432/demo_safeteam",
             "pingan_app",
             "database-secret-from-vault",
             "jwt-signing-secret-from-vault-at-least-32-bytes",
@@ -55,7 +55,7 @@ class ProductionConfigurationValidatorTest {
     ProductionConfigurationValidator validator =
         new ProductionConfigurationValidator(
             dataSource,
-            new JwtProperties("pingan-banzu", "jwt-secret-from-vault-at-least-32-bytes", 60),
+            new JwtProperties("safeteam-portfolio", "jwt-secret-from-vault-at-least-32-bytes", 60),
             local);
 
     assertThatCode(validator::afterPropertiesSet).doesNotThrowAnyException();
@@ -81,7 +81,7 @@ class ProductionConfigurationValidatorTest {
             15);
     return new ProductionConfigurationValidator(
         dataSource(url, username, password),
-        new JwtProperties("pingan-banzu", jwtSecret, 60),
+        new JwtProperties("safeteam-portfolio", jwtSecret, 60),
         storage);
   }
 
@@ -93,3 +93,6 @@ class ProductionConfigurationValidatorTest {
     return properties;
   }
 }
+
+
+

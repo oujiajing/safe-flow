@@ -2,7 +2,7 @@ const EXAM_RECORDS = [
   {
     id: "KSPC00000072-190",
     code: "KSPC00000072-190",
-    company: "广东广晟有色金属光电新材料有限公司",
+    company: "Demo Materials Company",
     department: "火法厂",
     person: "霍永清",
     exam: "2026年防灾减灾知识考试",
@@ -15,7 +15,7 @@ const EXAM_RECORDS = [
   {
     id: "KSPC00000072-191",
     code: "KSPC00000072-191",
-    company: "广东广晟有色金属光电新材料有限公司",
+    company: "Demo Materials Company",
     department: "火法厂",
     person: "张神红",
     exam: "2026年防灾减灾知识考试",
@@ -28,7 +28,7 @@ const EXAM_RECORDS = [
   {
     id: "KSPC00000072-192",
     code: "KSPC00000072-192",
-    company: "广东广晟有色金属光电新材料有限公司",
+    company: "Demo Materials Company",
     department: "火法厂",
     person: "李奕伦",
     exam: "2026年防灾减灾知识考试",
@@ -41,7 +41,7 @@ const EXAM_RECORDS = [
   {
     id: "KSPC00000072-193",
     code: "KSPC00000072-193",
-    company: "广东广晟有色金属光电新材料有限公司",
+    company: "Demo Materials Company",
     department: "火法厂",
     person: "张方严",
     exam: "2026年防灾减灾知识考试",
@@ -54,7 +54,7 @@ const EXAM_RECORDS = [
   {
     id: "KSPC00000072-194",
     code: "KSPC00000072-194",
-    company: "广东广晟有色金属光电新材料有限公司",
+    company: "Demo Materials Company",
     department: "火法厂",
     person: "黄慧勤",
     exam: "2026年防灾减灾知识考试",
@@ -247,3 +247,4 @@ module.exports = {
   normalizeExamRecord,
   normalizeExamQuestions
 }
+

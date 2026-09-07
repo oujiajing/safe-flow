@@ -26,7 +26,7 @@ describe('monitor center page', () => {
 
   it('keeps the original blue large-screen dashboard as its own module', () => {
     for (const text of [
-      '广晟矿业平安班组监控中心',
+      'Demo Safety Operations平安班组监控中心',
       '平安大视界',
       '风险分级管控',
       '一班三查',
@@ -45,10 +45,10 @@ describe('monitor center page', () => {
 
   it('renders the approved large-screen visual treatment', () => {
     for (const text of [
-      '广晟幕墙',
-      '资源公司',
-      '广晟新材',
-      '广晟源成',
+      'Demo Works Company',
+      'Demo Company',
+      'Demo Materials',
+      'Demo Works Company',
       '重大风险: \'#ff3b30\'',
       '较大风险: \'#ff9f0a\'',
       '一般风险: \'#ffd60a\'',
@@ -172,10 +172,10 @@ describe('monitor center page', () => {
       'selectedCompanyId',
       'screenCompanyOptions',
       '全部公司',
-      '广晟幕墙',
-      '广晟源成',
-      '资源公司',
-      '广晟新材',
+      'Demo Works Company',
+      'Demo Works Company',
+      'Demo Company',
+      'Demo Materials',
       'dateStart',
       'dateEnd',
       "selectedCompanyId.value === 'all-company'",
@@ -184,14 +184,14 @@ describe('monitor center page', () => {
     ]) {
       expect(screenSource).toContain(text);
     }
-    expect(screenSource.indexOf('广晟幕墙')).toBeLessThan(
-      screenSource.indexOf('广晟源成'),
+    expect(screenSource.indexOf('Demo Works Company')).toBeLessThan(
+      screenSource.indexOf('Demo Works Company'),
     );
-    expect(screenSource.indexOf('广晟源成')).toBeLessThan(
-      screenSource.indexOf('资源公司'),
+    expect(screenSource.indexOf('Demo Works Company')).toBeLessThan(
+      screenSource.indexOf('Demo Company'),
     );
-    expect(screenSource.indexOf('资源公司')).toBeLessThan(
-      screenSource.indexOf('广晟新材'),
+    expect(screenSource.indexOf('Demo Company')).toBeLessThan(
+      screenSource.indexOf('Demo Materials'),
     );
   });
 
@@ -557,3 +557,5 @@ describe('monitor center page', () => {
     expect(teamSource).toContain('summary-tip');
   });
 });
+
+

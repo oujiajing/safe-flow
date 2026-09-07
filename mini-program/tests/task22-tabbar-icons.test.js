@@ -145,8 +145,9 @@ test("home banners are loaded from remotely served banner assets", () => {
   assert.match(homeScript, /env\.assetBaseUrl/)
   assert.match(envScript, /LAN_HOST/)
   assert.equal(env.currentEnv, "device")
-  assert.equal(env.baseUrl, "http://10.43.122.12:8080")
-  assert.equal(env.assetBaseUrl, "http://10.43.122.12:8080/api/assets")
+  assert.equal(env.baseUrl, "http://localhost:8080")
+  assert.equal(env.assetBaseUrl, "http://localhost:8080/api/assets")
   assert.doesNotMatch(homeScript, /src:\s*"\/assets\/banners\//)
   assert.doesNotMatch(homeScript, /\/uploads\/\$\{normalizedPath\}/)
 })
+

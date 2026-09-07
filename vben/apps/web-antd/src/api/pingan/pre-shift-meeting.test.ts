@@ -37,7 +37,7 @@ describe('pre-shift-meeting api', () => {
     await getPinganCompanyOrgTreeApi();
     await getPinganUsersApi();
     await getPreShiftMeetingsApi({
-      company: '源成公司',
+      company: 'Demo Works Company',
       companyId: 4,
       dateStart: '2025-05-01',
       departmentId: 101_109,
@@ -59,7 +59,7 @@ describe('pre-shift-meeting api', () => {
       '/pingan/pre-shift-meetings',
       {
         params: {
-          company: '源成公司',
+          company: 'Demo Works Company',
           companyId: 4,
           dateStart: '2025-05-01',
           departmentId: 101_109,
@@ -150,3 +150,4 @@ describe('pre-shift-meeting api', () => {
     );
   });
 });
+

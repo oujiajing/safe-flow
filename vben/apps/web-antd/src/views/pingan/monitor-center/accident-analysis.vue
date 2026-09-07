@@ -43,8 +43,8 @@ const groupOptions = computed(() => {
     value: item.id,
   }));
   return companyOptions.length
-    ? [{ label: '广晟矿业集团', value: 'guangsheng' }, ...companyOptions]
-    : [{ label: '广晟矿业集团', value: 'guangsheng' }];
+    ? [{ label: 'Demo Safety Holdings', value: 'guangsheng' }, ...companyOptions]
+    : [{ label: 'Demo Safety Holdings', value: 'guangsheng' }];
 });
 const summary = computed(() => {
   const source = overview.value.summary;
@@ -1210,3 +1210,4 @@ function renderCharts() {
   }
 }
 </style>
+

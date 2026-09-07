@@ -17,19 +17,19 @@ const nodes: OrganizationNode[] = [
         id: 'group-nested',
         key: 'group-nested',
         orgType: 'GROUP',
-        title: '矿业集团',
+        title: 'Safety Operations Group',
         children: [
           {
             id: 'company-nested',
             key: 'company-nested',
             orgType: 'COMPANY',
-            title: '矿业一公司',
+            title: 'Safety Operations Company A',
             children: [
               {
                 id: 'subcompany-nested',
                 key: 'subcompany-nested',
                 orgType: 'COMPANY',
-                title: '矿业一子公司',
+                title: 'Safety Operations Subsidiary',
               },
             ],
           },
@@ -39,13 +39,13 @@ const nodes: OrganizationNode[] = [
         id: 'company-1',
         key: 'company-1',
         orgType: 'COMPANY',
-        title: '广晟矿投',
+        title: 'Demo矿投',
         children: [
           {
             id: 'department-1',
             key: 'department-1',
             orgType: 'DEPARTMENT',
-            title: '梅州嘉晟',
+            title: 'Demo East Site',
             children: [
               {
                 id: 'team-1',
@@ -143,10 +143,10 @@ describe('organization relationship view state', () => {
     expect(relation.graphView?.mode).toBe('GROUP');
     expect(relation.graphView?.chain.map((item) => item.node.title)).toEqual([
       '平安班组集团',
-      '矿业集团',
+      'Safety Operations Group',
     ]);
     expect(relation.graphView?.groups.map((group) => group.parent.node.title)).toEqual([
-      '矿业一公司',
+      'Safety Operations Company A',
     ]);
     expect(relation.graphView?.groups[0]?.parent.collapsedChildCount).toBe(1);
     expect(relation.graphView?.groups[0]?.children).toEqual([]);
@@ -157,20 +157,20 @@ describe('organization relationship view state', () => {
     const relation = resolveOrganizationRelationship(organizationTree, 'group-guangsheng');
 
     expect(relation.graphView?.chain.map((item) => item.node.title)).toEqual([
-      '广晟控股集团',
-      '广晟矿业集团',
+      'Demo控股集团',
+      'Demo Safety Holdings',
     ]);
     expect(relation.graphView?.groups.map((group) => group.parent.node.title)).toEqual([
-      '广晟幕墙',
-      '广晟矿投',
+      'Demo Works Company',
+      'Demo矿投',
       '南储仓储',
-      '广晟冶金',
-      '瑶岭矿业',
+      'Demo冶金',
+      'Demo Site',
       '阳春金同',
       '黄金集团',
       '冶金技校',
-      '广晟新材',
-      '广晟仓储',
+      'Demo Materials',
+      'Demo仓储',
       '金粤幕墙',
       '泛澳公司',
     ]);
@@ -179,7 +179,7 @@ describe('organization relationship view state', () => {
     ).toEqual([]);
     expect(
       relation.graphView?.groups.map((group) => group.parent.node.title),
-    ).not.toContain('广晟源成');
+    ).not.toContain('Demo Works Company');
   });
 
   it('expands a clicked third-level company under the group graph without switching roots', () => {
@@ -190,26 +190,26 @@ describe('organization relationship view state', () => {
     );
 
     expect(relation.graphView?.mode).toBe('GROUP');
-    expect(relation.rootNode?.title).toBe('广晟控股集团');
+    expect(relation.rootNode?.title).toBe('Demo控股集团');
     expect(relation.graphView?.chain.map((item) => item.node.title)).toEqual([
-      '广晟控股集团',
-      '广晟矿业集团',
+      'Demo控股集团',
+      'Demo Safety Holdings',
     ]);
     expect(
       relation.graphView?.groups
-        .find((group) => group.parent.node.title === '广晟矿投')
+        .find((group) => group.parent.node.title === 'Demo矿投')
         ?.children.map((item) => item.node.title),
     ).toEqual([
-      '梅州嘉晟',
+      'Demo East Site',
       '河源古云',
       '博泰实业',
       '潮安立源',
       '广东省冶金工业总公司',
-      '广晟禾尚田',
+      'Demo禾尚田',
     ]);
     expect(
       relation.graphView?.groups
-        .filter((group) => group.parent.node.title !== '广晟矿投')
+        .filter((group) => group.parent.node.title !== 'Demo矿投')
         .flatMap((group) => group.children),
     ).toEqual([]);
   });
@@ -223,20 +223,20 @@ describe('organization relationship view state', () => {
 
     expect(
       relation.graphView?.groups
-        .find((group) => group.parent.node.title === '广晟幕墙')
+        .find((group) => group.parent.node.title === 'Demo Works Company')
         ?.children.map((item) => item.node.title),
-    ).toEqual(['广晟源成']);
+    ).toEqual(['Demo Works Company']);
     expect(
       relation.graphView?.groups
-        .find((group) => group.parent.node.title === '广晟矿投')
+        .find((group) => group.parent.node.title === 'Demo矿投')
         ?.children.map((item) => item.node.title),
     ).toEqual([
-      '梅州嘉晟',
+      'Demo East Site',
       '河源古云',
       '博泰实业',
       '潮安立源',
       '广东省冶金工业总公司',
-      '广晟禾尚田',
+      'Demo禾尚田',
     ]);
     expect(
       relation.graphView?.groups
@@ -249,10 +249,10 @@ describe('organization relationship view state', () => {
     const relation = resolveOrganizationRelationship(nodes, 'group-nested');
 
     expect(relation.graphView?.chain.map((item) => item.node.title)).toEqual([
-      '矿业集团',
+      'Safety Operations Group',
     ]);
     expect(relation.graphView?.groups.map((group) => group.parent.node.title)).toEqual([
-      '矿业一公司',
+      'Safety Operations Company A',
     ]);
   });
 
@@ -261,10 +261,10 @@ describe('organization relationship view state', () => {
 
     expect(relation.graphView?.mode).toBe('COMPANY');
     expect(relation.graphView?.chain.map((item) => item.node.title)).toEqual([
-      '广晟矿投',
+      'Demo矿投',
     ]);
     expect(relation.graphView?.groups.map((group) => group.parent.node.title)).toEqual([
-      '梅州嘉晟',
+      'Demo East Site',
     ]);
     expect(relation.graphView?.groups[0]?.parent.kindLabel).toBe('班组');
     expect(relation.graphView?.groups[0]?.children.map((item) => item.node.title)).toEqual([
@@ -278,7 +278,7 @@ describe('organization relationship view state', () => {
 
     expect(relation.graphView?.mode).toBe('COMPANY');
     expect(relation.graphView?.groups.map((group) => group.parent.node.title)).toEqual([
-      '梅州嘉晟',
+      'Demo East Site',
     ]);
     expect(relation.graphView?.groups[0]?.children).toEqual([]);
   });
@@ -317,3 +317,6 @@ describe('organization relationship view state', () => {
     expect(relation.graphView?.groups).toEqual([]);
   });
 });
+
+
+

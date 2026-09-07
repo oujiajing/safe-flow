@@ -83,25 +83,25 @@ export const organizationTree: OrganizationNode[] = [
     id: 1,
     key: 'group-guangsheng',
     orgType: 'GROUP',
-    title: '广晟控股集团',
+    title: 'Demo控股集团',
     children: [
       {
         id: 2,
         key: 'group-mining',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
         children: [
           {
             id: 3,
             key: 'company-muqian',
             orgType: 'COMPANY',
-            title: '广晟幕墙',
+            title: 'Demo Works Company',
             children: [
               {
                 id: 4,
                 key: 'company-yuancheng',
                 orgType: 'COMPANY',
-                title: '广晟源成',
+                title: 'Demo Works Company',
               },
             ],
           },
@@ -109,13 +109,13 @@ export const organizationTree: OrganizationNode[] = [
             id: 11,
             key: 'company-mining-invest',
             orgType: 'COMPANY',
-            title: '广晟矿投',
+            title: 'Demo矿投',
             children: [
               {
                 id: 8,
                 key: 'company-meizhou-jiasheng',
                 orgType: 'COMPANY',
-                title: '梅州嘉晟',
+                title: 'Demo East Site',
               },
               {
                 id: 12,
@@ -145,7 +145,7 @@ export const organizationTree: OrganizationNode[] = [
                 id: 16,
                 key: 'company-heshangtian',
                 orgType: 'COMPANY',
-                title: '广晟禾尚田',
+                title: 'Demo禾尚田',
               },
             ],
           },
@@ -179,7 +179,7 @@ export const organizationTree: OrganizationNode[] = [
             id: 21,
             key: 'company-guangsheng-metallurgy',
             orgType: 'COMPANY',
-            title: '广晟冶金',
+            title: 'Demo冶金',
             children: [
               {
                 id: 22,
@@ -193,13 +193,13 @@ export const organizationTree: OrganizationNode[] = [
             id: 23,
             key: 'company-yaoling',
             orgType: 'COMPANY',
-            title: '瑶岭矿业',
+            title: 'Demo Site',
             children: [
               {
                 id: 24,
                 key: 'company-ziyuan',
                 orgType: 'COMPANY',
-                title: '资源公司',
+                title: 'Demo Company',
               },
             ],
           },
@@ -225,7 +225,7 @@ export const organizationTree: OrganizationNode[] = [
             id: 28,
             key: 'company-new-material',
             orgType: 'COMPANY',
-            title: '广晟新材',
+            title: 'Demo Materials',
             children: [
               {
                 id: 29,
@@ -239,7 +239,7 @@ export const organizationTree: OrganizationNode[] = [
             id: 30,
             key: 'company-guangsheng-storage',
             orgType: 'COMPANY',
-            title: '广晟仓储',
+            title: 'Demo仓储',
           },
           {
             id: 31,
@@ -275,9 +275,9 @@ export function collectExpandableOrganizationKeys(
 export const meetingRows: MeetingRow[] = [
   {
     attendees: '5人',
-    company: '广晟源成',
+    company: 'Demo Works Company',
     date: '2025-04-23',
-    department: '广晟源成',
+    department: 'Demo Works Company',
     id: 'pre-shift-001',
     imageCheck: '现场照片',
     organizationPath: [
@@ -288,14 +288,14 @@ export const meetingRows: MeetingRow[] = [
     ],
     owner: 'HB_MONITOR',
     status: 'OPENED',
-    team: '广晟源成',
+    team: 'Demo Works Company',
     videoCheck: '视频已传',
   },
   {
     attendees: '8人',
-    company: '梅州嘉晟',
+    company: 'Demo East Site',
     date: '2025-04-18',
-    department: '梅州嘉晟',
+    department: 'Demo East Site',
     id: 'pre-shift-002',
     imageCheck: '待补传',
     organizationPath: [
@@ -306,7 +306,7 @@ export const meetingRows: MeetingRow[] = [
     ],
     owner: 'ZY_SUPERVISOR',
     status: 'DRAFT',
-    team: '梅州嘉晟',
+    team: 'Demo East Site',
     videoCheck: '未上传',
   },
   {
@@ -346,9 +346,9 @@ export const meetingRows: MeetingRow[] = [
   },
   {
     attendees: '9人',
-    company: '广晟源成',
+    company: 'Demo Works Company',
     date: '2025-05-06',
-    department: '广晟源成',
+    department: 'Demo Works Company',
     id: 'pre-shift-005',
     imageCheck: '现场照片',
     organizationPath: [
@@ -359,14 +359,14 @@ export const meetingRows: MeetingRow[] = [
     ],
     owner: 'MQ_FOREMAN',
     status: 'OPENED',
-    team: '广晟源成',
+    team: 'Demo Works Company',
     videoCheck: '视频已传',
   },
   {
     attendees: '6人',
-    company: '广晟源成',
+    company: 'Demo Works Company',
     date: '2025-04-26',
-    department: '广晟源成',
+    department: 'Demo Works Company',
     id: 'pre-shift-006',
     imageCheck: '待补传',
     organizationPath: [
@@ -377,14 +377,14 @@ export const meetingRows: MeetingRow[] = [
     ],
     owner: 'MQ_SAFE',
     status: 'DRAFT',
-    team: '广晟源成',
+    team: 'Demo Works Company',
     videoCheck: '未上传',
   },
   {
     attendees: '10人',
-    company: '广晟源成',
+    company: 'Demo Works Company',
     date: '2025-03-18',
-    department: '广晟源成',
+    department: 'Demo Works Company',
     id: 'pre-shift-007',
     imageCheck: '现场照片',
     organizationPath: [
@@ -395,14 +395,14 @@ export const meetingRows: MeetingRow[] = [
     ],
     owner: 'LM_MONITOR',
     status: 'ARCHIVED',
-    team: '广晟源成',
+    team: 'Demo Works Company',
     videoCheck: '视频已传',
   },
   {
     attendees: '4人',
-    company: '广晟源成',
+    company: 'Demo Works Company',
     date: '2025-05-12',
-    department: '广晟源成',
+    department: 'Demo Works Company',
     id: 'pre-shift-008',
     imageCheck: '现场照片',
     organizationPath: [
@@ -413,14 +413,14 @@ export const meetingRows: MeetingRow[] = [
     ],
     owner: 'CL_MANAGER',
     status: 'DRAFT',
-    team: '广晟源成',
+    team: 'Demo Works Company',
     videoCheck: '未上传',
   },
   {
     attendees: '8人',
-    company: '广晟源成',
+    company: 'Demo Works Company',
     date: '2025-02-27',
-    department: '广晟源成',
+    department: 'Demo Works Company',
     id: 'pre-shift-009',
     imageCheck: '现场照片',
     organizationPath: [
@@ -431,14 +431,14 @@ export const meetingRows: MeetingRow[] = [
     ],
     owner: 'QA_SUPERVISOR',
     status: 'OPENED',
-    team: '广晟源成',
+    team: 'Demo Works Company',
     videoCheck: '视频已传',
   },
   {
     attendees: '7人',
-    company: '广晟源成',
+    company: 'Demo Works Company',
     date: '2025-04-30',
-    department: '广晟源成',
+    department: 'Demo Works Company',
     id: 'pre-shift-010',
     imageCheck: '待补传',
     organizationPath: [
@@ -449,7 +449,7 @@ export const meetingRows: MeetingRow[] = [
     ],
     owner: 'AQ_MONITOR',
     status: 'ARCHIVED',
-    team: '广晟源成',
+    team: 'Demo Works Company',
     videoCheck: '未上传',
   },
 ];
@@ -477,7 +477,7 @@ function createTemplateRow(
     canRemind: status === 'OPENED',
     canSubmit: status === 'DRAFT' || status === 'WITHDRAWN',
     canWithdraw: status === 'OPENED',
-    company: '广晟源成',
+    company: 'Demo Works Company',
     date,
     department: '幕墙组装',
     id,
@@ -1203,3 +1203,5 @@ export function filterOrganizationTree(
     })
     .filter(Boolean) as OrganizationNode[];
 }
+
+

@@ -265,12 +265,12 @@ INSERT INTO sys_role (id, role_code, role_name, data_scope) VALUES
   (8, 'TEAM_MEMBER', '组员', 'SELF');
 
 INSERT INTO sys_user (id, username, password_hash, real_name, mobile, org_id, status) VALUES
-  (10001, 'company_leader', '{noop}123456', '公司领导', '13810000001', 2, 'ACTIVE'),
-  (10002, 'enterprise_leader', '{noop}123456', '企业领导', '13810000002', 8, 'ACTIVE'),
-  (10003, 'department_manager', '{noop}123456', '部门经理', '13810000003', 8, 'ACTIVE'),
-  (10004, 'workshop_director', '{noop}123456', '车间主任', '13810000004', 8, 'ACTIVE'),
-  (10005, 'team_leader', '{noop}123456', '班长', '13810000005', 8, 'ACTIVE'),
-  (10006, 'team_member', '{noop}123456', '组员', '13810000006', 8, 'ACTIVE');
+  (10001, 'company_leader', '{noop}DISABLED_UNTIL_LOCAL_INIT', '公司领导', NULL, 2, 'ACTIVE'),
+  (10002, 'enterprise_leader', '{noop}DISABLED_UNTIL_LOCAL_INIT', '企业领导', NULL, 8, 'ACTIVE'),
+  (10003, 'department_manager', '{noop}DISABLED_UNTIL_LOCAL_INIT', '部门经理', NULL, 8, 'ACTIVE'),
+  (10004, 'workshop_director', '{noop}DISABLED_UNTIL_LOCAL_INIT', '车间主任', NULL, 8, 'ACTIVE'),
+  (10005, 'team_leader', '{noop}DISABLED_UNTIL_LOCAL_INIT', '班长', NULL, 8, 'ACTIVE'),
+  (10006, 'team_member', '{noop}DISABLED_UNTIL_LOCAL_INIT', '组员', NULL, 8, 'ACTIVE');
 
 INSERT INTO sys_user_role (user_id, role_id) VALUES
   (10001, 4),
@@ -367,3 +367,4 @@ WHERE r.role_code = 'TEAM_MEMBER'
     'PINGAN_HAZARD_REPORT',
     'PINGAN_TRAINING_STUDY_EXAM'
   );
+

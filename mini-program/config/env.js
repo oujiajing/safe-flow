@@ -1,10 +1,10 @@
-const LAN_HOST = "10.43.122.12"
-const CURRENT_ENV = "device"
+const LAN_HOST = "localhost"
+const CURRENT_ENV = "dev"
 
 const ENV = {
   dev: {
     baseUrl: "http://localhost:8080",
-    assetBaseUrl: "http://localhost:9000/pingan-banzu",
+    assetBaseUrl: "http://localhost:9000/demo-safeteam",
     uploadTimeout: 60000,
     requestTimeout: 15000
   },

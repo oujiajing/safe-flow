@@ -22,26 +22,26 @@ function assetUrl(path) {
 const companyProfiles = [
   {
     key: "gs",
-    tab: "广晟幕墙",
-    company: "深圳广晟幕墙科技有限公司",
+    tab: "Demo Works Company",
+    company: "Demo Works Company",
     department: "幕墙项目部",
-    user: "蔡燕艳",
+    user: "Demo Admin",
     role: "安全环保部副部长",
     teams: ["幕墙组装2班", "玻璃铝板外委件班", "门窗组装2班", "门窗组装3班", "门窗组装4班", "门窗组装5班", "幕墙机加2班", "幕墙机加3班"]
   },
   {
     key: "yc",
-    tab: "源成公司",
-    company: "河源市广晟源成建筑节能系统技术有限公司",
-    department: "源成生产部",
-    user: "沈光明",
+    tab: "Demo Works Company",
+    company: "Demo Works Company",
+    department: "Demo Works生产部",
+    user: "Demo Leader",
     role: "安全员",
     teams: ["幕墙机加班组", "幕墙组装班组", "幕墙机加1班", "幕墙机加4班", "湖州一车间", "广州鸣驹班组"]
   },
   {
     key: "zy",
-    tab: "资源公司",
-    company: "广东省广晟矿业集团有限公司",
+    tab: "Demo Company",
+    company: "Demo Safety Holdings",
     department: "资源安全环保部",
     user: "戴军权",
     role: "安全管理员",
@@ -49,8 +49,8 @@ const companyProfiles = [
   },
   {
     key: "xc",
-    tab: "广晟新材",
-    company: "广东广晟稀有金属光电新材料有限公司",
+    tab: "Demo Materials",
+    company: "Demo Materials Company",
     department: "新材安全环保部",
     user: "陈志斌",
     role: "安全管理员",
@@ -419,3 +419,5 @@ module.exports = {
   isAdminUser,
   resolveHomeOrganizationNames
 }
+
+

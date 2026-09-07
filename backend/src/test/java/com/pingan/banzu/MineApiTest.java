@@ -77,7 +77,7 @@ class MineApiTest {
 
   @Test
   void overviewAndRecordsAreStrictlyScopedToCurrentUser() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode overview = getJson("/api/mini/pingan/me/overview", token).path("data");
     assertThat(overview.path("profile").path("username").asText()).isEqualTo("admin");
@@ -104,13 +104,13 @@ class MineApiTest {
     mockMvc
         .perform(
             get("/api/mini/pingan/me/records/unknown")
-                .header("Authorization", "Bearer " + login("admin", "123456")))
+                .header("Authorization", "Bearer " + login("admin", "SAFE_TEST_PASSWORD")))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void uploadsAndReturnsCurrentUserAvatar() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     MockMultipartFile file =
         new MockMultipartFile("file", "avatar.png", "image/png", new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a});
 
@@ -187,3 +187,4 @@ class MineApiTest {
             .getContentAsString(StandardCharsets.UTF_8));
   }
 }
+

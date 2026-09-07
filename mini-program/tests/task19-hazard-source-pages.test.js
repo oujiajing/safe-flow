@@ -76,7 +76,7 @@ function mockOrganizationService() {
         return Promise.resolve([
           {
             id: 4,
-            title: "广晟源成",
+            title: "Demo Works Company",
             orgType: "COMPANY",
             children: [
               {
@@ -106,7 +106,7 @@ function mockOrganizationServiceWithTwoTeams() {
         return Promise.resolve([
           {
             id: 4,
-            title: "广东广晟稀有金属光电新材料有限公司",
+            title: "Demo Materials Company",
             orgType: "COMPANY",
             children: [
               {
@@ -145,7 +145,7 @@ function mockOrganizationServiceWithTwoCompanies() {
         return Promise.resolve([
           {
             id: 4,
-            title: "广东广晟稀有金属光电新材料有限公司",
+            title: "Demo Materials Company",
             orgType: "COMPANY",
             children: [
               {
@@ -199,18 +199,18 @@ function mockSafetyCheckOrganizationService() {
         return Promise.resolve([
           {
             id: 1,
-            title: "广东省广晟控股集团有限公司",
+            title: "广东省Demo控股集团有限公司",
             orgType: "GROUP",
             children: [
               {
                 id: 4,
-                title: "广东广晟稀有金属光电新材料有限公司",
+                title: "Demo Materials Company",
                 orgType: "COMPANY",
                 children: []
               },
               {
                 id: 5,
-                title: "广东广晟有色金属光电新材料有限公司",
+                title: "Demo Materials Company",
                 orgType: "COMPANY",
                 children: []
               }
@@ -283,7 +283,7 @@ test("quick-shot source list defaults to pending review tabs and renders screens
               departmentName: "安全环保部",
               teamName: "一班"
             },
-            companyName: "广东广晟稀有金属光电新材料有限公司",
+            companyName: "Demo Materials Company",
             departmentName: "安全环保部",
             businessDate: "2026-07-01"
           }
@@ -388,15 +388,15 @@ test("safety-check source list has pending and completed tabs matching screensho
             status: query.status,
             statusLabel: query.status === "ARCHIVED" ? "已完成" : "待检查",
             payload: {
-              inspectedUnitName: "广晟幕墙",
-              inspectionUnitName: "广晟控股集团",
+              inspectedUnitName: "Demo Works Company",
+              inspectionUnitName: "Demo控股集团",
               checkType: "1111",
               checkTime: "2026-07-01 15:25",
               checkMethod: "四不两直对安全管理情况开展检查，召开现场安全会议",
               inspectors: ["系统管理员"],
               acceptancePassed: "--"
             },
-            companyName: "广晟幕墙",
+            companyName: "Demo Works Company",
             businessDate: "2026-07-01"
           }
         ],
@@ -429,8 +429,8 @@ test("safety-check source list has pending and completed tabs matching screensho
   assert.deepEqual(global.wx.navigateToCalls, [
     { url: "/pages/hazard/source-detail/index?id=41&moduleKey=safety-check&title=%E5%AE%89%E5%85%A8%E6%A3%80%E6%9F%A5&companyKey=gs" }
   ])
-  assert.equal(page.data.records[0].safetyTitle, "广晟幕墙")
-  assert.equal(page.data.records[0].safetyInspectionUnit, "广晟控股集团")
+  assert.equal(page.data.records[0].safetyTitle, "Demo Works Company")
+  assert.equal(page.data.records[0].safetyInspectionUnit, "Demo控股集团")
   assert.equal(page.data.records[0].safetyCheckType, "1111")
   assert.equal(page.data.records[0].safetyCheckTime, "2026-07-01 15:25")
   assert.equal(page.data.records[0].safetyCheckMethod, "四不两直对安全管理情况开展检查，召开现场安全会议")
@@ -831,7 +831,7 @@ test("quick-shot source form creates and uploads selected photo without generic 
   const page = capturePage("../pages/hazard/source-form/index")
   await page.onLoad({ moduleKey: "quick-shot" })
   assert.deepEqual(page.data.companyOptions.map(item => item.label), [
-    "广东广晟稀有金属光电新材料有限公司",
+    "Demo Materials Company",
     "海安加工厂"
   ])
   page.changeCompany({ detail: { value: 1 } })
@@ -991,13 +991,13 @@ test("safety-check create page matches screenshot fields and maps payload", asyn
   assert.equal(page.data.safetyFormTab, "base")
 
   assert.deepEqual(page.data.inspectionUnitOptions.map(item => item.label), [
-    "广东省广晟控股集团有限公司",
-    "广东广晟稀有金属光电新材料有限公司",
-    "广东广晟有色金属光电新材料有限公司"
+    "广东省Demo控股集团有限公司",
+    "Demo Materials Company",
+    "Demo Materials Company"
   ])
   assert.deepEqual(page.data.inspectedUnitOptions.map(item => item.label), [
-    "广东广晟稀有金属光电新材料有限公司",
-    "广东广晟有色金属光电新材料有限公司"
+    "Demo Materials Company",
+    "Demo Materials Company"
   ])
   assert.match(page.data.form.checkDate, /^\d{4}-\d{2}-\d{2}$/)
   assert.match(page.data.form.checkTime, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
@@ -1317,7 +1317,7 @@ test("safety-check detail renders inspection fields, selectable units, and hazar
         status: "CLOSED",
         statusLabel: "已完成",
         companyId: 5,
-        companyName: "广东广晟有色金属光电新材料有限公司",
+        companyName: "Demo Materials Company",
         businessDate: "2026-06-04",
         payload: {
           inspectionUnitId: 1,
@@ -1360,13 +1360,13 @@ test("safety-check detail renders inspection fields, selectable units, and hazar
   assert.equal(page.data.title, "安全检查")
   assert.equal(page.data.safetyDetailTab, "basic")
   assert.deepEqual(page.data.inspectionUnitOptions.map(item => item.label), [
-    "广东省广晟控股集团有限公司",
-    "广东广晟稀有金属光电新材料有限公司",
-    "广东广晟有色金属光电新材料有限公司"
+    "广东省Demo控股集团有限公司",
+    "Demo Materials Company",
+    "Demo Materials Company"
   ])
   assert.deepEqual(page.data.inspectedUnitOptions.map(item => item.label), [
-    "广东广晟稀有金属光电新材料有限公司",
-    "广东广晟有色金属光电新材料有限公司"
+    "Demo Materials Company",
+    "Demo Materials Company"
   ])
   assert.equal(page.data.selectedInspectionUnitId, 1)
   assert.equal(page.data.selectedInspectedUnitId, 5)
@@ -1451,3 +1451,4 @@ test("snapshot and safety-check routes point to source list while hazard points 
   assert.equal(routes.getEntryRoute("snapshot", "gs"), "/pages/hazard/source-list/index?moduleKey=quick-shot&title=%E9%9A%8F%E6%89%8B%E6%8B%8D&companyKey=gs")
   assert.equal(routes.getEntryRoute("safety-check", "gs"), "/pages/hazard/source-list/index?moduleKey=safety-check&title=%E5%AE%89%E5%85%A8%E6%A3%80%E6%9F%A5&companyKey=gs")
 })
+

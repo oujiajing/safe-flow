@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:pingan_banzu;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:demo_safeteam;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
     username: sa
     password:
   flyway:
@@ -10,9 +10,11 @@ spring:
 
 pingan:
   jwt:
-    issuer: pingan-banzu-test
-    secret: pingan-banzu-test-secret-at-least-32-bytes
+    issuer: safeteam-portfolio-test
+    secret: safeteam-portfolio-test-secret-at-least-32-bytes
     ttl-minutes: 60
   storage:
     provider: local
-    root-dir: ${java.io.tmpdir}/pingan-banzu-test-uploads
+    root-dir: ${java.io.tmpdir}/safeteam-portfolio-test-uploads
+
+

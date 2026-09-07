@@ -99,13 +99,13 @@ class MonitorCenterApiTest {
     seedHazardRectificationOrder("MC-HRO-OUT-COMPANY", 8, 101109, 1011001, "2026-05-30", "CLOSED");
 
     seedRiskLibrary(9001, 3, "监控大屏幕墙风险库");
-    seedRiskLibrary(9002, 4, "监控大屏源成风险库");
+    seedRiskLibrary(9002, 4, "监控大屏Demo Works风险库");
     seedRiskLibrary(9003, 8, "监控大屏白名单外风险库");
     seedRiskHazard(9101, 9001, 3, "监控大屏重大风险", "重大风险", "高处坠落", "防护缺失");
     seedRiskHazard(9102, 9001, 3, "监控大屏较大风险", "较大风险", "起重伤害", "警戒不足");
     seedRiskHazard(9103, 9001, 3, "监控大屏一般风险", "一般风险", "机械伤害", "设备缺陷");
     seedRiskHazard(9104, 9001, 3, "监控大屏低风险", "低风险", "触电", "临电不规范");
-    seedRiskHazard(9105, 9002, 4, "监控大屏源成一般风险", "一般风险", "机械伤害", "设备缺陷");
+    seedRiskHazard(9105, 9002, 4, "监控大屏Demo Works一般风险", "一般风险", "机械伤害", "设备缺陷");
     seedRiskHazard(9106, 9003, 8, "监控大屏白名单外风险", "重大风险", "车辆伤害", "外部数据");
 
     seedSafetyLearning("MC-LEARN-001", 3, "2026-05-30", "ACTIVE", 0);
@@ -126,7 +126,7 @@ class MonitorCenterApiTest {
   @Test
   void usesUnifiedHazardRectificationOrdersForStatisticsAndKeepsLegacyRecordsSeparate()
       throws Exception {
-    JsonNode data = getJson(OVERVIEW_PATH, login("admin", "123456")).path("data");
+    JsonNode data = getJson(OVERVIEW_PATH, login("admin", "SAFE_TEST_PASSWORD")).path("data");
 
     JsonNode summary = data.path("summary");
     assertThat(summary.path("hazardTotal").asInt()).isEqualTo(4);
@@ -143,20 +143,20 @@ class MonitorCenterApiTest {
     JsonNode legacyStats = data.path("legacyHazardRectificationRecords");
     assertThat(legacyStats.path("total").asInt()).isEqualTo(4);
 
-    assertThat(byName(data.path("hazardBars"), "广晟幕墙").path("done").asInt()).isEqualTo(1);
-    assertThat(byName(data.path("hazardBars"), "广晟幕墙").path("open").asInt()).isEqualTo(2);
-    assertThat(byName(data.path("hazardBars"), "广晟源成").path("open").asInt()).isEqualTo(1);
+    assertThat(byName(data.path("hazardBars"), "Demo Works Company").path("done").asInt()).isEqualTo(1);
+    assertThat(byName(data.path("hazardBars"), "Demo Works Company").path("open").asInt()).isEqualTo(2);
+    assertThat(byName(data.path("hazardBars"), "Demo Works Company").path("open").asInt()).isEqualTo(1);
     assertThat(data.path("teamAnalysis").path("summary").path("openHazards").asInt()).isEqualTo(3);
   }
 
   @Test
   void returnsOverviewForApprovedFourCompaniesWithBusinessStatistics() throws Exception {
-    JsonNode data = getJson(OVERVIEW_PATH, login("admin", "123456")).path("data");
+    JsonNode data = getJson(OVERVIEW_PATH, login("admin", "SAFE_TEST_PASSWORD")).path("data");
 
     assertThat(names(data.path("companies")))
-        .containsExactly("广晟幕墙", "广晟源成", "资源公司", "广晟新材");
+        .containsExactly("Demo Works Company", "Demo Works Company", "Demo Company", "Demo Materials");
     assertThat(names(data.path("scopeOptions")))
-        .contains("广晟幕墙", "广晟源成", "资源公司", "广晟新材", "幕墙组装", "幕墙组装1班");
+        .contains("Demo Works Company", "Demo Works Company", "Demo Company", "Demo Materials", "幕墙组装", "幕墙组装1班");
     assertThat(data.path("dateStart").asText()).isEqualTo("2026-05-30");
     assertThat(data.path("dateEnd").asText()).isEqualTo("2026-05-30");
 
@@ -180,33 +180,33 @@ class MonitorCenterApiTest {
     assertThat(summary.path("threeCheckRates").path("mid").asText()).isEqualTo("66.67%");
     assertThat(summary.path("threeCheckRates").path("post").asText()).isEqualTo("33.33%");
 
-    assertThat(valueByName(data.path("dispatchBars"), "广晟幕墙")).isEqualTo(2);
-    assertThat(valueByName(data.path("dispatchBars"), "广晟源成")).isEqualTo(2);
-    assertThat(valueByName(data.path("dispatchBars"), "资源公司")).isZero();
-    assertThat(valueByName(data.path("dispatchFinishedBars"), "广晟幕墙")).isEqualTo(2);
-    assertThat(valueByName(data.path("dispatchFinishedBars"), "广晟源成")).isEqualTo(1);
-    assertThat(seriesValue(data.path("threeCheckSeries"), "班前会", "广晟幕墙")).isEqualTo(2);
-    assertThat(seriesValue(data.path("threeCheckSeries"), "班前检查", "广晟幕墙")).isEqualTo(1);
-    assertThat(seriesValue(data.path("threeCheckSeries"), "班中检查", "广晟幕墙")).isEqualTo(1);
-    assertThat(seriesValue(data.path("threeCheckSeries"), "班后检查", "广晟幕墙")).isZero();
-    assertThat(seriesValue(data.path("threeCheckSeries"), "班后检查", "广晟源成")).isEqualTo(1);
+    assertThat(valueByName(data.path("dispatchBars"), "Demo Works Company")).isEqualTo(2);
+    assertThat(valueByName(data.path("dispatchBars"), "Demo Works Company")).isEqualTo(2);
+    assertThat(valueByName(data.path("dispatchBars"), "Demo Company")).isZero();
+    assertThat(valueByName(data.path("dispatchFinishedBars"), "Demo Works Company")).isEqualTo(2);
+    assertThat(valueByName(data.path("dispatchFinishedBars"), "Demo Works Company")).isEqualTo(1);
+    assertThat(seriesValue(data.path("threeCheckSeries"), "班前会", "Demo Works Company")).isEqualTo(2);
+    assertThat(seriesValue(data.path("threeCheckSeries"), "班前检查", "Demo Works Company")).isEqualTo(1);
+    assertThat(seriesValue(data.path("threeCheckSeries"), "班中检查", "Demo Works Company")).isEqualTo(1);
+    assertThat(seriesValue(data.path("threeCheckSeries"), "班后检查", "Demo Works Company")).isZero();
+    assertThat(seriesValue(data.path("threeCheckSeries"), "班后检查", "Demo Works Company")).isEqualTo(1);
 
-    JsonNode curtainRisk = byName(data.path("riskControlBars"), "广晟幕墙");
+    JsonNode curtainRisk = byName(data.path("riskControlBars"), "Demo Works Company");
     assertThat(curtainRisk.path("major").asInt()).isEqualTo(1);
     assertThat(curtainRisk.path("serious").asInt()).isEqualTo(1);
     assertThat(curtainRisk.path("normal").asInt()).isEqualTo(1);
     assertThat(curtainRisk.path("low").asInt()).isEqualTo(1);
-    assertThat(byName(data.path("riskControlBars"), "广晟源成").path("normal").asInt()).isEqualTo(1);
+    assertThat(byName(data.path("riskControlBars"), "Demo Works Company").path("normal").asInt()).isEqualTo(1);
 
     assertThat(byName(data.path("hazardRectificationPie"), "已整改隐患").path("value").asInt()).isEqualTo(1);
     assertThat(byName(data.path("hazardRectificationPie"), "未整改隐患").path("value").asInt()).isEqualTo(3);
     assertThat(byName(data.path("hazardRectificationPie"), "已作废").path("value").asInt()).isEqualTo(1);
-    assertThat(byName(data.path("hazardBars"), "广晟幕墙").path("done").asInt()).isEqualTo(1);
-    assertThat(byName(data.path("hazardBars"), "广晟幕墙").path("open").asInt()).isEqualTo(2);
-    assertThat(byName(data.path("hazardBars"), "广晟源成").path("open").asInt()).isEqualTo(1);
-    assertThat(valueByName(data.path("learningBars"), "广晟幕墙")).isEqualTo(2);
-    assertThat(valueByName(data.path("learningBars"), "广晟源成")).isEqualTo(1);
-    assertThat(valueByName(data.path("learningBars"), "资源公司")).isZero();
+    assertThat(byName(data.path("hazardBars"), "Demo Works Company").path("done").asInt()).isEqualTo(1);
+    assertThat(byName(data.path("hazardBars"), "Demo Works Company").path("open").asInt()).isEqualTo(2);
+    assertThat(byName(data.path("hazardBars"), "Demo Works Company").path("open").asInt()).isEqualTo(1);
+    assertThat(valueByName(data.path("learningBars"), "Demo Works Company")).isEqualTo(2);
+    assertThat(valueByName(data.path("learningBars"), "Demo Works Company")).isEqualTo(1);
+    assertThat(valueByName(data.path("learningBars"), "Demo Company")).isZero();
     assertThat(valueByName(data.path("learningTrend"), "2026-05-29")).isEqualTo(1);
     assertThat(valueByName(data.path("learningTrend"), "2026-05-30")).isEqualTo(3);
     assertThat(byName(data.path("dispatchTrend"), "2026-05-30").path("total").asInt()).isEqualTo(4);
@@ -226,7 +226,7 @@ class MonitorCenterApiTest {
     assertThat(data.path("hazardRecordRows").toString()).contains("隐患");
 
     String json = data.toString();
-    assertThat(json).doesNotContain("梅州嘉晟");
+    assertThat(json).doesNotContain("Demo East Site");
     assertThat(json).doesNotContain("MC-TD-OUT-COMPANY");
     assertThat(json).doesNotContain("MC-LEARN-OUT-COMPANY");
     assertThat(json).doesNotContain("MC-SW-OUT-COMPANY");
@@ -246,7 +246,7 @@ class MonitorCenterApiTest {
     jdbcLogger.setLevel(Level.DEBUG);
     jdbcLogger.setAdditive(false);
     try {
-      getJson(OVERVIEW_PATH, login("admin", "123456"));
+      getJson(OVERVIEW_PATH, login("admin", "SAFE_TEST_PASSWORD"));
     } finally {
       jdbcLogger.detachAppender(appender);
       jdbcLogger.setLevel(previousLevel);
@@ -272,7 +272,7 @@ class MonitorCenterApiTest {
     linkAutoChild("MC-AUTO-TD-001", "MC-AUTO-MSI-001", "mid-shift-inspection", "DRAFT");
     linkAutoChild("MC-AUTO-TD-001", "MC-AUTO-POST-001", "post-shift-inspection", "DRAFT");
 
-    JsonNode data = getJson(OVERVIEW_PATH + "&orgId=24", login("admin", "123456")).path("data");
+    JsonNode data = getJson(OVERVIEW_PATH + "&orgId=24", login("admin", "SAFE_TEST_PASSWORD")).path("data");
 
     assertThat(data.path("summary").path("dispatchTotal").asInt()).isEqualTo(1);
     assertThat(data.path("summary").path("dispatchFinished").asInt()).isEqualTo(1);
@@ -283,7 +283,7 @@ class MonitorCenterApiTest {
 
     jdbcTemplate.update("update three_check_record set status = 'OPENED' where record_no = 'MC-AUTO-PRE-001'");
     JsonNode afterMeetingDone =
-        getJson(OVERVIEW_PATH + "&orgId=24", login("admin", "123456")).path("data");
+        getJson(OVERVIEW_PATH + "&orgId=24", login("admin", "SAFE_TEST_PASSWORD")).path("data");
     assertThat(afterMeetingDone.path("summary").path("threeCheckRates").path("pre").asText())
         .isEqualTo("100.00%");
     assertThat(afterMeetingDone.path("summary").path("threeCheckRates").path("preInspection").asText())
@@ -296,7 +296,7 @@ class MonitorCenterApiTest {
     seedThreeCheckRecord("MC-AUTO-WITHDRAWN-TD", "team-dispatch", 24, 101109, 1011001, "2026-05-30", "WITHDRAWN");
     linkAutoChild("MC-AUTO-WITHDRAWN-TD", "MC-AUTO-WITHDRAWN-PRE", "pre-shift-meeting", "OPENED");
 
-    JsonNode data = getJson(OVERVIEW_PATH + "&orgId=24", login("admin", "123456")).path("data");
+    JsonNode data = getJson(OVERVIEW_PATH + "&orgId=24", login("admin", "SAFE_TEST_PASSWORD")).path("data");
 
     assertThat(data.path("summary").path("dispatchTotal").asInt()).isEqualTo(1);
     assertThat(data.path("summary").path("dispatchFinished").asInt()).isZero();
@@ -306,7 +306,7 @@ class MonitorCenterApiTest {
   @Test
   void rejectsOverviewWhenUserCannotEnterMonitorCenter() throws Exception {
     mockMvc
-        .perform(get(OVERVIEW_PATH).header("Authorization", "Bearer " + login("team_member", "123456")))
+        .perform(get(OVERVIEW_PATH).header("Authorization", "Bearer " + login("team_member", "SAFE_TEST_PASSWORD")))
         .andExpect(status().isForbidden());
   }
 
@@ -317,7 +317,7 @@ class MonitorCenterApiTest {
     jdbcTemplate.update("delete from sys_user_role where user_id = ?", userId);
     jdbcTemplate.update("delete from sys_user where id = ? or username = ?", userId, username);
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', '幕墙看板领导', 1, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', '幕墙看板领导', 1, 'ACTIVE', 0)",
         userId,
         username);
     jdbcTemplate.update(
@@ -327,48 +327,48 @@ class MonitorCenterApiTest {
         """,
         userId);
 
-    JsonNode data = getJson(OVERVIEW_PATH, login(username, "123456")).path("data");
+    JsonNode data = getJson(OVERVIEW_PATH, login(username, "SAFE_TEST_PASSWORD")).path("data");
 
-    assertThat(names(data.path("companies"))).containsExactly("广晟幕墙");
-    assertThat(names(data.path("dispatchBars"))).containsExactly("广晟幕墙");
+    assertThat(names(data.path("companies"))).containsExactly("Demo Works Company");
+    assertThat(names(data.path("dispatchBars"))).containsExactly("Demo Works Company");
     assertThat(names(data.path("dispatchScopeBars"))).isNotEmpty();
     assertThat(data.path("summary").path("dispatchTotal").asInt()).isEqualTo(2);
-    assertThat(data.toString()).doesNotContain("广晟源成", "资源公司", "广晟新材");
+    assertThat(data.toString()).doesNotContain("Demo Works Company", "Demo Company", "Demo Materials");
   }
 
   @Test
   void filtersOverviewBySelectedApprovedCompanyButKeepsSwitchOptions() throws Exception {
     JsonNode data =
-        getJson(OVERVIEW_PATH + "&orgId=3", login("admin", "123456")).path("data");
+        getJson(OVERVIEW_PATH + "&orgId=3", login("admin", "SAFE_TEST_PASSWORD")).path("data");
 
     assertThat(names(data.path("companies")))
-        .containsExactly("广晟幕墙", "广晟源成", "资源公司", "广晟新材");
+        .containsExactly("Demo Works Company", "Demo Works Company", "Demo Company", "Demo Materials");
     assertThat(names(data.path("dispatchBars")))
         .contains("幕墙组装")
-        .doesNotContain("广晟幕墙");
+        .doesNotContain("Demo Works Company");
     assertThat(valueByName(data.path("dispatchBars"), "幕墙组装")).isEqualTo(2);
     assertThat(names(data.path("dispatchScopeBars")))
         .contains("幕墙组装")
-        .doesNotContain("广晟幕墙");
+        .doesNotContain("Demo Works Company");
     assertThat(valueByName(data.path("dispatchScopeBars"), "幕墙组装")).isEqualTo(2);
     assertThat(data.path("summary").path("dispatchTotal").asInt()).isEqualTo(2);
     assertThat(data.path("summary").path("dispatchFinished").asInt()).isEqualTo(2);
     assertThat(data.path("summary").path("riskTotal").asInt()).isEqualTo(4);
     assertThat(data.path("summary").path("hazardTotal").asInt()).isEqualTo(3);
     assertThat(data.path("summary").path("learningTotal").asInt()).isEqualTo(2);
-    assertThat(valueByName(data.path("learningBars"), "广晟幕墙")).isEqualTo(2);
+    assertThat(valueByName(data.path("learningBars"), "Demo Works Company")).isEqualTo(2);
     assertThat(valueByName(data.path("riskAccidentTypeBars"), "机械伤害")).isEqualTo(1);
     assertThat(valueByName(data.path("specialWorkTypeBars"), "动火作业")).isEqualTo(1);
-    assertThat(seriesValue(data.path("threeCheckSeries"), "班前会", "广晟幕墙")).isEqualTo(2);
-    assertThat(data.toString()).doesNotContain("广晟源成一般风险");
+    assertThat(seriesValue(data.path("threeCheckSeries"), "班前会", "Demo Works Company")).isEqualTo(2);
+    assertThat(data.toString()).doesNotContain("Demo Works Company一般风险");
   }
 
   @Test
   void filtersOverviewBySelectedDataMapDepartmentLevel() throws Exception {
     JsonNode data =
-        getJson(OVERVIEW_PATH + "&orgId=101109", login("admin", "123456")).path("data");
+        getJson(OVERVIEW_PATH + "&orgId=101109", login("admin", "SAFE_TEST_PASSWORD")).path("data");
 
-    assertThat(names(data.path("scopeOptions"))).contains("广晟源成", "幕墙组装", "幕墙组装1班");
+    assertThat(names(data.path("scopeOptions"))).contains("Demo Works Company", "幕墙组装", "幕墙组装1班");
     assertThat(names(data.path("dispatchBars")))
         .containsExactly("幕墙组装1班", "幕墙组装2班");
     assertThat(names(data.path("dispatchScopeBars")))
@@ -418,14 +418,14 @@ class MonitorCenterApiTest {
 
   @Test
   void nonAdminOnlySeesApprovedCompaniesWithinDataScope() throws Exception {
-    JsonNode data = getJson(OVERVIEW_PATH, login("MQ_SAFE", "123456")).path("data");
+    JsonNode data = getJson(OVERVIEW_PATH, login("MQ_SAFE", "SAFE_TEST_PASSWORD")).path("data");
 
-    assertThat(names(data.path("companies"))).containsExactly("广晟源成");
+    assertThat(names(data.path("companies"))).containsExactly("Demo Works Company");
     assertThat(valueByName(data.path("dispatchBars"), "幕墙组装")).isEqualTo(2);
-    assertThat(valueByName(data.path("learningBars"), "广晟源成")).isEqualTo(1);
+    assertThat(valueByName(data.path("learningBars"), "Demo Works Company")).isEqualTo(1);
     assertThat(valueByName(data.path("riskAccidentTypeBars"), "机械伤害")).isEqualTo(1);
     assertThat(data.path("summary").path("dispatchTotal").asInt()).isEqualTo(2);
-    assertThat(data.toString()).doesNotContain("广晟幕墙", "梅州嘉晟");
+    assertThat(data.toString()).doesNotContain("Demo Works Company", "Demo East Site");
   }
 
   @Test
@@ -443,7 +443,7 @@ class MonitorCenterApiTest {
 
     JsonNode data = getJson(OVERVIEW_PATH, token).path("data");
 
-    assertThat(names(data.path("companies"))).containsExactly("广晟源成");
+    assertThat(names(data.path("companies"))).containsExactly("Demo Works Company");
     assertThat(names(data.path("dispatchBars")))
         .containsExactly("幕墙组装1班", "幕墙组装2班");
     assertThat(names(data.path("dispatchScopeBars")))
@@ -453,9 +453,9 @@ class MonitorCenterApiTest {
     assertThat(names(data.path("teamAnalysis").path("detailRows")))
         .containsExactly("幕墙组装2班", "幕墙组装1班");
     assertThat(names(data.path("scopeOptions")))
-        .contains("广晟源成", "幕墙组装", "幕墙组装1班", "幕墙组装2班")
-        .doesNotContain("广晟幕墙", "资源公司", "广晟新材");
-    assertThat(data.toString()).doesNotContain("MC-TD-001", "资源公司", "广晟新材");
+        .contains("Demo Works Company", "幕墙组装", "幕墙组装1班", "幕墙组装2班")
+        .doesNotContain("Demo Works Company", "Demo Company", "Demo Materials");
+    assertThat(data.toString()).doesNotContain("MC-TD-001", "Demo Company", "Demo Materials");
   }
 
   @Test
@@ -715,13 +715,13 @@ class MonitorCenterApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         id,
         username,
         username,
         orgId);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", id, id);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private JsonNode getJson(String path, String token) throws Exception {
@@ -763,3 +763,5 @@ class MonitorCenterApiTest {
     throw new AssertionError("Missing item named " + name + " in " + items);
   }
 }
+
+

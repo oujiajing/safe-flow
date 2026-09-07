@@ -2,8 +2,8 @@ const { loginAndBootstrap } = require("../../utils/auth-flow")
 
 Page({
   data: {
-    username: "admin",
-    password: "123456",
+    username: "",
+    password: "",
     submitting: false,
     passwordVisible: false,
     agreementChecked: false

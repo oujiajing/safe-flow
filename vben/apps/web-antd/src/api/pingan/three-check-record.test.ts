@@ -40,7 +40,7 @@ describe('three-check-record api', () => {
 
   it('maps generic one-shift-three-check list and detail endpoints', async () => {
     await getThreeCheckRecordsApi('pre-shift-inspection', {
-      company: '源成公司',
+      company: 'Demo Works Company',
       companyId: 4,
       dateStart: '2026-05-01',
       departmentId: 101_109,
@@ -58,7 +58,7 @@ describe('three-check-record api', () => {
       '/pingan/three-checks/pre-shift-inspection/records',
       {
         params: {
-          company: '源成公司',
+          company: 'Demo Works Company',
           companyId: 4,
           dateStart: '2026-05-01',
           departmentId: 101_109,
@@ -276,3 +276,4 @@ describe('three-check-record api', () => {
     );
   });
 });
+

@@ -126,14 +126,14 @@ INSERT INTO three_check_record (
   (
     'team-dispatch', 'MCTEST-TD-ZY-001', 24, 101109, 1011001, 2,
     DATE '2026-06-01', 'OPENED',
-    '{"teamTask":"资源公司安全巡检联动","dispatchType":"今日","source":"monitor-center-test"}',
+    '{"teamTask":"Demo Company安全巡检联动","dispatchType":"今日","source":"monitor-center-test"}',
     '现场照片', '视频已传', 1, TIMESTAMP '2026-06-01 08:00:00', 0, 1, 1,
     'PC', 'mctest-team-dispatch-zy-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   ),
   (
     'pre-shift-meeting', 'MCTEST-PRE-ZY-001', 24, 101109, 1011001, 2,
     DATE '2026-06-01', 'OPENED',
-    '{"meetingContent":"资源公司班前安全提示。","source":"monitor-center-test"}',
+    '{"meetingContent":"Demo Company班前安全提示。","source":"monitor-center-test"}',
     '现场照片', '视频已传', 1, TIMESTAMP '2026-06-01 08:10:00', 0, 1, 1,
     'PC', 'mctest-pre-shift-meeting-zy-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   ),
@@ -147,7 +147,7 @@ INSERT INTO three_check_record (
   (
     'curtain-wall-team-dispatch', 'MCTEST-TD-XC-001', 28, 101109, 1011001, 2,
     DATE '2026-06-01', 'DRAFT',
-    '{"teamTask":"广晟新材设备点检提醒","dispatchType":"今日","source":"monitor-center-test"}',
+    '{"teamTask":"Demo Materials设备点检提醒","dispatchType":"今日","source":"monitor-center-test"}',
     '未上传', '未上传', NULL, NULL, 1, 1, 1,
     'PC', 'mctest-team-dispatch-xc-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   ),
@@ -160,10 +160,10 @@ INSERT INTO three_check_record (
   );
 
 INSERT INTO risk_control_library (id, name, company_id, created_by, updated_by, created_at, updated_at, deleted) VALUES
-  (9401, '监控中心测试-源成幕墙风险库', 4, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
-  (9402, '监控中心测试-广晟幕墙风险库', 3, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
-  (9403, '监控中心测试-资源公司风险库', 24, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
-  (9404, '监控中心测试-广晟新材风险库', 28, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+  (9401, '监控中心测试-Demo Works幕墙风险库', 4, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
+  (9402, '监控中心测试-Demo Works Company风险库', 3, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
+  (9403, '监控中心测试-Demo Company风险库', 24, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
+  (9404, '监控中心测试-Demo Materials风险库', 28, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
 INSERT INTO risk_control_hazard (
   id, library_id, company_id, risk_point, danger_source, risk_influence_factors,
@@ -178,8 +178,8 @@ INSERT INTO risk_control_hazard (
   (9504, 9401, 4, '监控中心测试-临时配电箱', '带电部位外露', '临电不规范', '触电', '偶尔', '每周', '一般', '60', '低风险', '加装漏保', '电工每日巡查', '触电急救', '设备管理', '幕墙组装', 'monitor15', '人员触电', '规范箱门上锁', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
   (9505, 9402, 3, '监控中心测试-项目临边', '高处作业', '防护缺失', '高处坠落', '可能', '每天', '严重', '300', '重大风险', '挂设安全网', '专项检查', '坠落应急', '项目安全部', '幕墙项目', 'monitor14', '高处坠落', '加密巡检', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
   (9506, 9402, 3, '监控中心测试-材料转运', '叉车交叉作业', '人车混行', '车辆伤害', '偶尔', '每天', '较重', '150', '较大风险', '划分人车通道', '设置引导员', '车辆伤害应急', '项目安全部', '幕墙项目', 'monitor15', '车辆碰撞', '完善隔离线', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
-  (9507, 9403, 24, '监控中心测试-仓储通道', '物料堆垛', '通道占用', '物体打击', '偶尔', '每天', '一般', '80', '一般风险', '限高堆放', '仓库日清', '现场急救', '仓储部', '资源公司', 'monitor14', '物体打击', '清理占道物料', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
-  (9508, 9404, 28, '监控中心测试-试验电源', '临时用电', '临电不规范', '触电', '偶尔', '每周', '一般', '60', '低风险', '漏电保护', '持证接电', '触电急救', '设备部', '广晟新材', 'monitor15', '人员触电', '关闭箱门并挂牌', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+  (9507, 9403, 24, '监控中心测试-仓储通道', '物料堆垛', '通道占用', '物体打击', '偶尔', '每天', '一般', '80', '一般风险', '限高堆放', '仓库日清', '现场急救', '仓储部', 'Demo Company', 'monitor14', '物体打击', '清理占道物料', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
+  (9508, 9404, 28, '监控中心测试-试验电源', '临时用电', '临电不规范', '触电', '偶尔', '每周', '一般', '60', '低风险', '漏电保护', '持证接电', '触电急救', '设备部', 'Demo Materials', 'monitor15', '人员触电', '关闭箱门并挂牌', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
 INSERT INTO training_safety_learning_content (
   company_id, category, title, content, learning_date, duration_text,
@@ -207,5 +207,7 @@ INSERT INTO special_work_record (
   (4, 'MCTEST-SW-YC-002', '高处作业', TIMESTAMP '2026-06-01 09:00:00', '高处幕墙龙骨校正', '幕墙组装二区', '已识别高处坠落风险', TIMESTAMP '2026-06-01 09:30:00', TIMESTAMP '2026-06-01 17:30:00', 'monitor15', 'monitor14', 'member70', NULL, NULL, 'APPROVED', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
   (4, 'MCTEST-SW-YC-003', '吊装作业', TIMESTAMP '2026-06-01 10:00:00', '单元板吊装转运', '幕墙组装吊装区', '已识别吊物摆动和警戒不足风险', TIMESTAMP '2026-06-01 10:30:00', TIMESTAMP '2026-06-01 15:30:00', 'monitor14', 'monitor15', 'member53', NULL, NULL, 'PENDING', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
   (3, 'MCTEST-SW-MQ-001', '临时用电', TIMESTAMP '2026-06-01 08:40:00', '项目临时配电接入', '项目加工区', '已识别触电风险', TIMESTAMP '2026-06-01 09:10:00', TIMESTAMP '2026-06-01 12:00:00', 'monitor14', 'monitor15', 'member54', NULL, NULL, 'APPROVED', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
-  (24, 'MCTEST-SW-ZY-001', '受限空间作业', TIMESTAMP '2026-06-01 09:20:00', '仓储罐体检查', '资源公司仓储区', '已识别通风不足风险', TIMESTAMP '2026-06-01 10:00:00', TIMESTAMP '2026-06-01 14:00:00', 'monitor14', 'monitor15', 'member55', NULL, NULL, 'APPROVED', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
-  (28, 'MCTEST-SW-XC-001', '设备检修作业', TIMESTAMP '2026-06-01 10:30:00', '试验设备检修', '广晟新材试验区', '已识别机械伤害风险', TIMESTAMP '2026-06-01 11:00:00', TIMESTAMP '2026-06-01 16:00:00', 'monitor14', 'monitor15', 'member57', NULL, NULL, 'PENDING', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+  (24, 'MCTEST-SW-ZY-001', '受限空间作业', TIMESTAMP '2026-06-01 09:20:00', '仓储罐体检查', 'Demo Company仓储区', '已识别通风不足风险', TIMESTAMP '2026-06-01 10:00:00', TIMESTAMP '2026-06-01 14:00:00', 'monitor14', 'monitor15', 'member55', NULL, NULL, 'APPROVED', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
+  (28, 'MCTEST-SW-XC-001', '设备检修作业', TIMESTAMP '2026-06-01 10:30:00', '试验设备检修', 'Demo Materials试验区', '已识别机械伤害风险', TIMESTAMP '2026-06-01 11:00:00', TIMESTAMP '2026-06-01 16:00:00', 'monitor14', 'monitor15', 'member57', NULL, NULL, 'PENDING', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+
+

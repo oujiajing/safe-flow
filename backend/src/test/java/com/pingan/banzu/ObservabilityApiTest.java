@@ -102,7 +102,7 @@ class ObservabilityApiTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
                             objectMapper.writeValueAsBytes(
-                                Map.of("username", "admin", "password", "123456"))))
+                                Map.of("username", "admin", "password", "SAFE_TEST_PASSWORD"))))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -110,3 +110,4 @@ class ObservabilityApiTest {
     return response.path("data").path("accessToken").asText();
   }
 }
+

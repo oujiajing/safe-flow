@@ -93,7 +93,7 @@ public class SystemPersonnelService {
         isBlank(request.username())
             ? request.employeeCode()
             : request.username();
-    user.passwordHash = "{noop}123456";
+    user.passwordHash = "{noop}SAFE_TEST_PASSWORD";
     user.realName = request.name();
     user.mobile = request.mobile();
     user.orgId = orgId;
@@ -264,3 +264,4 @@ public class SystemPersonnelService {
                 || support.belongsToOrganization(profile.teamOrgId, organizationId)));
   }
 }
+

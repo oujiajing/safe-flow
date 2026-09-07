@@ -911,7 +911,7 @@ describe('pre-shift-meeting page', () => {
       now: new Date('2026-05-14T08:30:00+08:00'),
       routeName: runtime.routeName,
       values: {
-        company: '广晟源成',
+        company: 'Demo Works Company',
         department: '选矿车间',
         dispatchDate: '2026-05-14',
         dispatchStatus: '生效',
@@ -927,7 +927,7 @@ describe('pre-shift-meeting page', () => {
       canRemind: false,
       canSubmit: true,
       canWithdraw: false,
-      company: '广晟源成',
+      company: 'Demo Works Company',
       date: '2026-05-14',
       department: '选矿车间',
       dispatchDate: '2026-05-14',
@@ -954,7 +954,7 @@ describe('pre-shift-meeting page', () => {
       now: new Date('2026-05-14T08:30:00+08:00'),
       routeName: runtime.routeName,
       values: {
-        company: '广晟源成',
+        company: 'Demo Works Company',
         date: '2026-05-14',
         department: '幕墙组装',
         imageCheck: '未上传',
@@ -1008,7 +1008,7 @@ describe('pre-shift-meeting page', () => {
       now: new Date('2026-05-14T08:30:00+08:00'),
       routeName: runtime.routeName,
       values: {
-        company: '广晟源成',
+        company: 'Demo Works Company',
         department: '幕墙组装',
         dispatchDate: '2026-05-14',
         dispatchStatus: '未生效',
@@ -1042,7 +1042,7 @@ describe('pre-shift-meeting page', () => {
     const detail = {
       businessDate: '2026-05-18',
       canSubmit: true,
-      company: '广晟源成',
+      company: 'Demo Works Company',
       companyId: 4,
       date: '2026-05-18',
       department: '幕墙组装',
@@ -1934,10 +1934,10 @@ describe('pre-shift-meeting page', () => {
     );
 
     expect(getThreeCheckFixedCompanyName('PinganCurtainWallPenalty')).toBe(
-      '广晟幕墙',
+      'Demo Works Company',
     );
     expect(getThreeCheckFixedCompanyName('PinganCurtainWallRoutineCheck')).toBe(
-      '广晟幕墙',
+      'Demo Works Company',
     );
     expect(getThreeCheckFixedCompanyName('PinganSafetyCheck')).toBeUndefined();
   });
@@ -2398,3 +2398,4 @@ describe('pre-shift-meeting page', () => {
     expect(formatThreeCheckPayloadDisplayValue(undefined)).toBe('');
   });
 });
+

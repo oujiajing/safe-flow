@@ -90,10 +90,10 @@ test("loginAndBootstrap stores token, permission codes, current user, and update
   const auth = require("../utils/auth")
   const authFlow = require("../utils/auth-flow")
 
-  const result = await authFlow.loginAndBootstrap({ username: "admin", password: "123456" })
+  const result = await authFlow.loginAndBootstrap({ username: "admin", password: "SAFE_TEST_PASSWORD" })
 
   assert.deepEqual(calls, [
-    { fn: "login", payload: { username: "admin", password: "123456" } },
+    { fn: "login", payload: { username: "admin", password: "SAFE_TEST_PASSWORD" } },
     { fn: "getPermissionCodes" },
     { fn: "getCurrentUser" }
   ])
@@ -180,3 +180,4 @@ test("logout clears auth and redirects to login", () => {
   assert.equal(auth.getCurrentUser(), null)
   assert.deepEqual(global.wx.calls.reLaunch, [{ url: "/pages/login/index" }])
 })
+

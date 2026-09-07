@@ -38,7 +38,7 @@ class SystemTeamCheckTemplateApiTest {
 
   @Test
   void supportsKeySitesTemplateStage() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode libraryItem =
         postJson(
@@ -61,7 +61,7 @@ class SystemTeamCheckTemplateApiTest {
 
   @Test
   void managesLibraryItemsAndResolvesMostSpecificTemplate() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode libraryItem =
         postJson(
@@ -224,7 +224,7 @@ class SystemTeamCheckTemplateApiTest {
 
   @Test
   void allowsPostShiftTemplatesWithoutRiskType() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     Map<String, Object> libraryPayload = new LinkedHashMap<>();
     libraryPayload.put("checkItem", "检查工具材料是否归位");
@@ -263,7 +263,7 @@ class SystemTeamCheckTemplateApiTest {
 
   @Test
   void managesPreShiftMeetingConfirmationTemplates() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode libraryItem =
         postJson(
@@ -332,7 +332,7 @@ class SystemTeamCheckTemplateApiTest {
 
   @Test
   void deletesTemplatesSoftlyAndBlocksNonAdminUsers() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode template =
         postJson(
                 "/api/system/team-check-item-templates/templates",
@@ -367,7 +367,7 @@ class SystemTeamCheckTemplateApiTest {
                 templateId))
         .isEqualTo(1);
 
-    String memberToken = login("team_member", "123456");
+    String memberToken = login("team_member", "SAFE_TEST_PASSWORD");
     mockMvc
         .perform(
             get("/api/system/team-check-item-templates/templates")
@@ -377,7 +377,7 @@ class SystemTeamCheckTemplateApiTest {
 
   @Test
   void updatesLibraryItemsAndCopiesTemplates() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode libraryItem =
         postJson(
@@ -553,3 +553,4 @@ class SystemTeamCheckTemplateApiTest {
             .getContentAsString(StandardCharsets.UTF_8));
   }
 }
+

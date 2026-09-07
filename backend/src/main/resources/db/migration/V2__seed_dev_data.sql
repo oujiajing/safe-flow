@@ -1,12 +1,12 @@
 INSERT INTO sys_org (id, parent_id, org_type, org_code, org_name, org_path, sort_order, status) VALUES
-  (1, NULL, 'GROUP', 'GSKG', '广晟控股集团', '/1/', 1, 'ACTIVE'),
-  (2, 1, 'GROUP', 'GSKY', '广晟矿业集团', '/1/2/', 1, 'ACTIVE'),
-  (3, 2, 'COMPANY', 'GSMQ', '广晟幕墙', '/1/2/3/', 1, 'ACTIVE'),
-  (4, 3, 'COMPANY', 'YCGS', '源成公司', '/1/2/3/4/', 1, 'ACTIVE'),
-  (5, 4, 'COMPANY', 'SZGSMQ', '深圳广晟幕墙科技有限公司', '/1/2/3/4/5/', 1, 'ACTIVE'),
+  (1, NULL, 'GROUP', 'GSKG', 'Demo控股集团', '/1/', 1, 'ACTIVE'),
+  (2, 1, 'GROUP', 'GSKY', 'Demo Safety Holdings', '/1/2/', 1, 'ACTIVE'),
+  (3, 2, 'COMPANY', 'GSMQ', 'Demo Works Company', '/1/2/3/', 1, 'ACTIVE'),
+  (4, 3, 'COMPANY', 'YCGS', 'Demo Works Company', '/1/2/3/4/', 1, 'ACTIVE'),
+  (5, 4, 'COMPANY', 'SZGSMQ', 'Demo Works Company', '/1/2/3/4/5/', 1, 'ACTIVE'),
   (6, 5, 'DEPARTMENT', 'HBA6', '湖贝A6', '/1/2/3/4/5/6/', 1, 'ACTIVE'),
   (7, 6, 'TEAM', '4000-MQXM001-001', '4000-MQXM001-001', '/1/2/3/4/5/6/7/', 1, 'ACTIVE'),
-  (8, 2, 'COMPANY', 'MZJS', '梅州嘉晟', '/1/2/8/', 2, 'ACTIVE'),
+  (8, 2, 'COMPANY', 'MZJS', 'Demo East Site', '/1/2/8/', 2, 'ACTIVE'),
   (9, 8, 'DEPARTMENT', 'ZYCJ', '制氧车间', '/1/2/8/9/', 1, 'ACTIVE'),
   (10, 9, 'TEAM', 'MZJS-EARLY', '早班', '/1/2/8/9/10/', 1, 'ACTIVE');
 
@@ -16,10 +16,10 @@ INSERT INTO sys_role (id, role_code, role_name, data_scope) VALUES
   (3, 'TEAM_LEADER', '班长', 'ORG_AND_CHILDREN');
 
 INSERT INTO sys_user (id, username, password_hash, real_name, mobile, org_id, status) VALUES
-  (1, 'admin', '{noop}123456', '系统管理员', '13800000000', 1, 'ACTIVE'),
-  (2, 'HB_MONITOR', '{noop}123456', '湖贝班长', '13800000001', 7, 'ACTIVE'),
-  (3, 'MQ_SAFE', '{noop}123456', '幕墙安全员', '13800000002', 5, 'ACTIVE'),
-  (4, 'ZY_SUPERVISOR', '{noop}123456', '制氧主管', '13800000003', 10, 'ACTIVE');
+  (1, 'admin', '{noop}DISABLED_UNTIL_LOCAL_INIT', '系统管理员', NULL, 1, 'ACTIVE'),
+  (2, 'HB_MONITOR', '{noop}DISABLED_UNTIL_LOCAL_INIT', '湖贝班长', NULL, 7, 'ACTIVE'),
+  (3, 'MQ_SAFE', '{noop}DISABLED_UNTIL_LOCAL_INIT', '幕墙安全员', NULL, 5, 'ACTIVE'),
+  (4, 'ZY_SUPERVISOR', '{noop}DISABLED_UNTIL_LOCAL_INIT', '制氧主管', NULL, 10, 'ACTIVE');
 
 INSERT INTO sys_user_role (user_id, role_id) VALUES
   (1, 1),
@@ -52,3 +52,5 @@ INSERT INTO biz_status_log (biz_type, biz_id, from_status, to_status, action, op
   ('PRE_SHIFT_MEETING', 2001, NULL, 'OPENED', 'SUBMIT', 2, '种子数据提交'),
   ('PRE_SHIFT_MEETING', 2002, NULL, 'ARCHIVED', 'ARCHIVE', 2, '种子数据归档'),
   ('PRE_SHIFT_MEETING', 2003, NULL, 'DRAFT', 'CREATE', 4, '种子数据创建');
+
+

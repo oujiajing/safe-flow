@@ -408,7 +408,7 @@ test("learning detail renders PC uploaded safety learning video", async () => {
       getLearningContent(id) {
         return Promise.resolve({
           id,
-          title: "广晟源成安全学习视频",
+          title: "Demo Works Company安全学习视频",
           category: "班组安全学习",
           learningDate: "2026-06-01",
           durationMinutes: 6,
@@ -417,7 +417,7 @@ test("learning detail renders PC uploaded safety learning video", async () => {
             url: "https://pc.example.test/training/cover.png"
           },
           videoAttachment: {
-            url: "http://10.43.122.12:9000/pingan-banzu/training/video.mp4?X-Amz-Signature=test"
+            url: "http://localhost:9000/safeteam-portfolio/training/video.mp4?X-Amz-Signature=test"
           }
         })
       },
@@ -460,7 +460,7 @@ test("learning detail renders PC uploaded safety learning video", async () => {
 
   assert.equal(
     pageConfig.data.content.videoUrl,
-    "http://10.43.122.12:9000/pingan-banzu/training/video.mp4?X-Amz-Signature=test"
+    "http://localhost:9000/safeteam-portfolio/training/video.mp4?X-Amz-Signature=test"
   )
   assert.equal(pageConfig.data.content.coverImageUrl, "")
   assert.equal(pageConfig.data.videoExpanded, undefined)
@@ -489,3 +489,6 @@ test("learning detail renders PC uploaded safety learning video", async () => {
   assert.equal(checkInCalls.length, 1)
   assert.equal(pageConfig.data.checkIn.pointsAwarded, 1)
 })
+
+
+

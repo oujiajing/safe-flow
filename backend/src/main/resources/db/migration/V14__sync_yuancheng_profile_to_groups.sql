@@ -1,13 +1,13 @@
 INSERT INTO sys_company_profile
   (org_id, short_name, description, company_type, level1_name, level2_name, level3_name, level4_name, deleted)
-SELECT 1, '广晟控股集团', '广晟控股集团', '集团', '广晟控股集团', NULL, NULL, NULL, 0
+SELECT 1, 'Demo控股集团', 'Demo控股集团', '集团', 'Demo控股集团', NULL, NULL, NULL, 0
 WHERE NOT EXISTS (
   SELECT 1
   FROM sys_company_profile
   WHERE org_id = 1
 )
 UNION ALL
-SELECT 2, '广晟矿业集团', '广晟矿业集团', '集团', '广晟控股集团', '广晟矿业集团', NULL, NULL, 0
+SELECT 2, 'Demo Safety Holdings', 'Demo Safety Holdings', '集团', 'Demo控股集团', 'Demo Safety Holdings', NULL, NULL, 0
 WHERE NOT EXISTS (
   SELECT 1
   FROM sys_company_profile
@@ -39,3 +39,4 @@ WHERE org_id IN (1, 2)
     WHERE source.org_id = 4
       AND source.deleted = 0
   );
+

@@ -135,7 +135,7 @@ describe('system management shared view state', () => {
     expect(state.canUseSingleRowAction.value).toBe(false);
     expect(state.selectedCount.value).toBe(0);
 
-    state.selectRow({ id: '4', name: '源成公司' });
+    state.selectRow({ id: '4', name: 'Demo Works Company' });
     expect(state.canUseRowActions.value).toBe(true);
     expect(state.canUseSingleRowAction.value).toBe(true);
     expect(state.selectedCount.value).toBe(1);
@@ -152,8 +152,8 @@ describe('system management shared view state', () => {
     });
 
     state.selectRows([
-      { id: '4', name: '源成公司' },
-      { id: '8', name: '梅州嘉晟' },
+      { id: '4', name: 'Demo Works Company' },
+      { id: '8', name: 'Demo East Site' },
     ]);
 
     expect(state.selectedIds.value).toEqual(['4', '8']);
@@ -168,8 +168,8 @@ describe('system management shared view state', () => {
     expect(fetchList).toHaveBeenCalledTimes(1);
 
     state.selectRows([
-      { id: '4', name: '源成公司' },
-      { id: '8', name: '梅州嘉晟' },
+      { id: '4', name: 'Demo Works Company' },
+      { id: '8', name: 'Demo East Site' },
     ]);
     await state.handleStatus('INACTIVE');
     expect(updateStatus).toHaveBeenCalledWith('4', 'INACTIVE');
@@ -215,9 +215,9 @@ describe('system management shared view state', () => {
   });
 
   it('preserves row key value type for controlled table selection', () => {
-    expect(getSystemRowKey({ id: 4, name: '源成公司' }, 'id')).toBe(4);
-    expect(getSystemRowKey({ id: '4', name: '源成公司' }, 'id')).toBe('4');
-    expect(getSystemRowKey({ name: '源成公司' }, 'id')).toBeUndefined();
+    expect(getSystemRowKey({ id: 4, name: 'Demo Works Company' }, 'id')).toBe(4);
+    expect(getSystemRowKey({ id: '4', name: 'Demo Works Company' }, 'id')).toBe('4');
+    expect(getSystemRowKey({ name: 'Demo Works Company' }, 'id')).toBeUndefined();
   });
 
   it('loads data with configured filter aliases', async () => {
@@ -386,7 +386,7 @@ describe('system management shared view state', () => {
           id: 8,
           key: '8',
           orgType: 'COMPANY',
-          title: '梅州嘉晟',
+          title: 'Demo East Site',
         },
       ]),
     ).toEqual([
@@ -395,7 +395,7 @@ describe('system management shared view state', () => {
         id: 8,
         key: '8',
         orgType: 'COMPANY',
-        title: '梅州嘉晟',
+        title: 'Demo East Site',
       },
     ]);
   });
@@ -441,21 +441,21 @@ describe('system management shared view state', () => {
             id: '1',
             key: '1',
             orgType: 'GROUP',
-            title: '广晟控股集团',
+            title: 'Demo控股集团',
           },
           {
             companyType: '集团',
             id: '2',
             key: '2',
             orgType: 'GROUP',
-            title: '广晟矿业集团',
+            title: 'Demo Safety Holdings',
           },
           {
             companyType: '分公司',
             id: '3',
             key: '3',
             orgType: 'COMPANY',
-            title: '广晟幕墙',
+            title: 'Demo Works Company',
           },
         ],
       },
@@ -465,9 +465,9 @@ describe('system management shared view state', () => {
       data: {
         code: 'AUTO-SUB',
         companyType: '子公司',
-        level1Name: '广晟控股集团',
-        level2Name: '广晟矿业集团',
-        level3Name: '广晟幕墙',
+        level1Name: 'Demo控股集团',
+        level2Name: 'Demo Safety Holdings',
+        level3Name: 'Demo Works Company',
         level4Name: '自动新增子公司',
         name: '自动新增子公司',
         status: 'ACTIVE',
@@ -520,28 +520,28 @@ describe('system management shared view state', () => {
         id: '1',
         key: '1',
         orgType: 'GROUP',
-        title: '广晟控股集团',
+        title: 'Demo控股集团',
       },
       {
         companyType: '集团',
         id: '2',
         key: '2',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
       },
       {
         companyType: '分公司',
         id: '3',
         key: '3',
         orgType: 'COMPANY',
-        title: '广晟幕墙',
+        title: 'Demo Works Company',
       },
       {
         companyType: '子公司',
         id: '4',
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
       },
     ];
 
@@ -563,21 +563,21 @@ describe('system management shared view state', () => {
         id: '1',
         key: '1',
         orgType: 'GROUP',
-        title: '广晟控股集团',
+        title: 'Demo控股集团',
       },
       {
         companyType: '集团',
         id: '2',
         key: '2',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
       },
       {
         companyType: '分公司',
         id: '3',
         key: '3',
         orgType: 'COMPANY',
-        title: '广晟幕墙',
+        title: 'Demo Works Company',
       },
     ];
 
@@ -596,11 +596,11 @@ describe('system management shared view state', () => {
         code: 'DEPT-AUTO',
         companyOrgId: '3',
         departmentType: '车间',
-        groupName: '广晟矿业集团',
-        level1Unit: '广晟幕墙',
+        groupName: 'Demo Safety Holdings',
+        level1Unit: 'Demo Works Company',
         name: '自动部门',
         status: 'ACTIVE',
-        topLevelName: '广晟控股集团',
+        topLevelName: 'Demo控股集团',
       },
     });
   });
@@ -612,28 +612,28 @@ describe('system management shared view state', () => {
         id: '1',
         key: '1',
         orgType: 'GROUP',
-        title: '广晟控股集团',
+        title: 'Demo控股集团',
       },
       {
         companyType: '集团',
         id: '2',
         key: '2',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
       },
       {
         companyType: '分公司',
         id: '3',
         key: '3',
         orgType: 'COMPANY',
-        title: '广晟幕墙',
+        title: 'Demo Works Company',
       },
       {
         companyType: '子公司',
         id: '4',
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
       },
     ];
 
@@ -646,12 +646,12 @@ describe('system management shared view state', () => {
       data: {
         code: 'DEPT-SUB',
         companyOrgId: '4',
-        groupName: '广晟矿业集团',
-        level1Unit: '广晟幕墙',
-        level2Unit: '广晟源成',
+        groupName: 'Demo Safety Holdings',
+        level1Unit: 'Demo Works Company',
+        level2Unit: 'Demo Works Company',
         name: '子公司部门',
         status: 'ACTIVE',
-        topLevelName: '广晟控股集团',
+        topLevelName: 'Demo控股集团',
       },
     });
   });
@@ -670,28 +670,28 @@ describe('system management shared view state', () => {
                     id: '4',
                     key: '4',
                     orgType: 'COMPANY',
-                    title: '广晟源成',
+                    title: 'Demo Works Company',
                   },
                 ],
                 companyType: '分公司',
                 id: '3',
                 key: '3',
                 orgType: 'COMPANY',
-                title: '广晟幕墙',
+                title: 'Demo Works Company',
               },
             ],
             companyType: '集团',
             id: '2',
             key: '2',
             orgType: 'GROUP',
-            title: '广晟矿业集团',
+            title: 'Demo Safety Holdings',
           },
         ],
         companyType: '集团',
         id: '1',
         key: '1',
         orgType: 'GROUP',
-        title: '广晟控股集团',
+        title: 'Demo控股集团',
       },
     ]);
 
@@ -738,28 +738,28 @@ describe('system management shared view state', () => {
         id: '1',
         key: '1',
         orgType: 'GROUP',
-        title: '广晟控股集团',
+        title: 'Demo控股集团',
       },
       {
         companyType: '集团',
         id: '2',
         key: '2',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
       },
       {
         companyType: '分公司',
         id: '3',
         key: '3',
         orgType: 'COMPANY',
-        title: '广晟幕墙',
+        title: 'Demo Works Company',
       },
       {
         companyType: '子公司',
         id: '4',
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
       },
     ];
 
@@ -782,10 +782,10 @@ describe('system management shared view state', () => {
         applicantName: '管理员',
         code: 'TEAM-AUTO',
         companyOrgId: '4',
-        companyName: '广晟源成',
-        groupName: '广晟矿业集团',
-        level1Unit: '广晟幕墙',
-        level2Unit: '广晟源成',
+        companyName: 'Demo Works Company',
+        groupName: 'Demo Safety Holdings',
+        level1Unit: 'Demo Works Company',
+        level2Unit: 'Demo Works Company',
         name: '自动班组',
         status: 'ACTIVE',
         submitDate: '2026-05-17',
@@ -815,28 +815,28 @@ describe('system management shared view state', () => {
         id: '1',
         key: '1',
         orgType: 'GROUP',
-        title: '广晟控股集团',
+        title: 'Demo控股集团',
       },
       {
         companyType: '集团',
         id: '2',
         key: '2',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
       },
       {
         companyType: '分公司',
         id: '3',
         key: '3',
         orgType: 'COMPANY',
-        title: '广晟幕墙',
+        title: 'Demo Works Company',
       },
       {
         companyType: '子公司',
         id: '4',
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
       },
     ];
 
@@ -859,7 +859,7 @@ describe('system management shared view state', () => {
     ).toEqual({
       data: {
         applicantName: '管理员',
-        companyName: '广晟源成',
+        companyName: 'Demo Works Company',
         companyOrgId: '4',
         departmentOrgId: '101109',
         joinDate: '2026-05-18',
@@ -994,7 +994,7 @@ describe('system management shared view state', () => {
           id: 1,
           key: '1',
           orgType: 'GROUP',
-          title: '广晟控股集团',
+          title: 'Demo控股集团',
         },
       ]),
     ).toEqual([
@@ -1019,7 +1019,7 @@ describe('system management shared view state', () => {
         id: 1,
         key: '1',
         orgType: 'GROUP',
-        title: '广晟控股集团',
+        title: 'Demo控股集团',
       },
     ]);
   });
@@ -1047,13 +1047,13 @@ describe('system management shared view state', () => {
               id: 4,
               key: '4',
               orgType: 'COMPANY',
-              title: '广晟源成',
+              title: 'Demo Works Company',
             },
           ],
           id: 3,
           key: '3',
           orgType: 'COMPANY',
-          title: '广晟幕墙',
+          title: 'Demo Works Company',
         },
       ]),
     ).toEqual([
@@ -1072,13 +1072,13 @@ describe('system management shared view state', () => {
             id: 4,
             key: '4',
             orgType: 'COMPANY',
-            title: '广晟源成',
+            title: 'Demo Works Company',
           },
         ],
         id: 3,
         key: '3',
         orgType: 'COMPANY',
-        title: '广晟幕墙',
+        title: 'Demo Works Company',
       },
     ]);
   });
@@ -1093,7 +1093,7 @@ describe('system management shared view state', () => {
               id: 3,
               key: '3',
               orgType: 'COMPANY',
-              title: '广晟幕墙',
+              title: 'Demo Works Company',
             },
             {
               children: [
@@ -1107,13 +1107,13 @@ describe('system management shared view state', () => {
               id: 4,
               key: '4',
               orgType: 'COMPANY',
-              title: '广晟源成',
+              title: 'Demo Works Company',
             },
           ],
           id: 2,
           key: '2',
           orgType: 'GROUP',
-          title: '广晟矿业集团',
+          title: 'Demo Safety Holdings',
         },
       ]),
     ).toEqual([
@@ -1124,20 +1124,20 @@ describe('system management shared view state', () => {
             id: 3,
             key: '3',
             orgType: 'COMPANY',
-            title: '广晟幕墙',
+            title: 'Demo Works Company',
           },
           {
             children: [],
             id: 4,
             key: '4',
             orgType: 'COMPANY',
-            title: '广晟源成',
+            title: 'Demo Works Company',
           },
         ],
         id: 2,
         key: '2',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
       },
     ]);
   });
@@ -1152,13 +1152,13 @@ describe('system management shared view state', () => {
               id: 3,
               key: '3',
               orgType: 'COMPANY',
-              title: '广晟幕墙',
+              title: 'Demo Works Company',
             },
           ],
           id: 2,
           key: '2',
           orgType: 'GROUP',
-          title: '广晟矿业集团',
+          title: 'Demo Safety Holdings',
         },
       ]),
     ).toEqual([
@@ -1169,13 +1169,13 @@ describe('system management shared view state', () => {
             id: 3,
             key: '3',
             orgType: 'COMPANY',
-            title: '广晟幕墙',
+            title: 'Demo Works Company',
           },
         ],
         id: 2,
         key: '2',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
       },
     ]);
   });
@@ -1244,3 +1244,4 @@ describe('system management shared view state', () => {
     });
   });
 });
+

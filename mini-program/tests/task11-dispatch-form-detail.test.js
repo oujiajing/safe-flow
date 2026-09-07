@@ -10,12 +10,12 @@ const organizationServicePath = require.resolve("../services/organization")
 const orgTree = [
   {
     id: 1,
-    title: "广晟控股集团",
+    title: "Demo控股集团",
     orgType: "GROUP",
     children: [
       {
         id: 4,
-        title: "广晟源成",
+        title: "Demo Works Company",
         orgType: "COMPANY",
         children: [
           {
@@ -163,7 +163,7 @@ test("dispatch form creates and submits simplified team dispatch payload", async
   assert.equal(serviceCalls[0].payload.departmentId, 101109)
   assert.equal(serviceCalls[0].payload.teamId, 1011002)
   assert.equal(serviceCalls[0].payload.content, "班组派班")
-  assert.equal(serviceCalls[0].payload.payload.companyName, "广晟源成")
+  assert.equal(serviceCalls[0].payload.payload.companyName, "Demo Works Company")
   assert.equal(serviceCalls[0].payload.payload.departmentName, "幕墙组装")
   assert.equal(serviceCalls[0].payload.payload.teamName, "幕墙组装2班")
   assert.equal(serviceCalls[0].payload.payload.task, "班组派班")
@@ -361,11 +361,11 @@ test("dispatch form loads PC organization tree and cascades company department t
   await global.__dispatchFormPage.onLoad({ companyKey: "gs" })
 
   assert.equal(global.__dispatchFormPage.data.dispatchDate, todayString())
-  assert.equal(global.__dispatchFormPage.data.currentCompany.company, "广晟源成")
+  assert.equal(global.__dispatchFormPage.data.currentCompany.company, "Demo Works Company")
   assert.equal(global.__dispatchFormPage.data.currentCompany.workshop, "幕墙组装")
   assert.equal(global.__dispatchFormPage.data.currentTeam, "")
   assert.equal(global.__dispatchFormPage.data.selectedTeamId, "")
-  assert.deepEqual(global.__dispatchFormPage.data.companyOptions.map(item => item.label), ["广晟源成"])
+  assert.deepEqual(global.__dispatchFormPage.data.companyOptions.map(item => item.label), ["Demo Works Company"])
   assert.deepEqual(global.__dispatchFormPage.data.departmentOptions.map(item => item.label), ["幕墙组装"])
   assert.deepEqual(global.__dispatchFormPage.data.teamOptions.map(item => item.label), ["幕墙组装1班", "幕墙组装2班"])
 
@@ -379,12 +379,12 @@ test("dispatch form cascades backend organization nodes with orgName type and no
   stubOrganizationTree([
     {
       id: 1,
-      orgName: "广晟控股集团",
+      orgName: "Demo控股集团",
       type: "GROUP",
       nodes: [
         {
           id: 4,
-          orgName: "广晟源成",
+          orgName: "Demo Works Company",
           type: "COMPANY",
           nodes: [
             {
@@ -444,7 +444,7 @@ test("dispatch form cascades backend organization nodes with orgName type and no
   require("../pages/dispatch/form/index")
 
   await global.__dispatchFormPage.onLoad({ companyKey: "gs" })
-  assert.deepEqual(global.__dispatchFormPage.data.companyOptions.map(item => item.label), ["广晟源成", "海安加工厂"])
+  assert.deepEqual(global.__dispatchFormPage.data.companyOptions.map(item => item.label), ["Demo Works Company", "海安加工厂"])
 
   global.__dispatchFormPage.changeDispatchCompany({ detail: { value: "1" } })
   assert.equal(global.__dispatchFormPage.data.selectedCompanyId, 5)
@@ -588,7 +588,7 @@ test("dispatch detail page loads one team-dispatch record", async () => {
           id,
           businessDate: "2026-06-16",
           team: "幕墙组装2班",
-          owner: "蔡燕艳",
+          owner: "Demo Admin",
           payload: { workType: "安全员", task: "安全交底与现场巡查" }
         })
       }
@@ -617,7 +617,7 @@ test("dispatch detail page loads one team-dispatch record", async () => {
     date: "2026-06-16",
     department: "-",
     team: "幕墙组装2班",
-    name: "蔡燕艳",
+    name: "Demo Admin",
     work: "安全员",
     task: "安全交底与现场巡查",
     status: "-",
@@ -639,3 +639,4 @@ test("dispatch detail uses screenshot-style full page layout", () => {
   assert.match(wxss, /\.dispatch-field\s*\{[^}]*min-height:\s*64rpx/s)
   assert.doesNotMatch(wxml, /<input class="dispatch-value/)
 })
+

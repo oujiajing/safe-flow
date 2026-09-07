@@ -67,7 +67,7 @@ class SystemImportExportApiTest {
 
   @Test
   void downloadsTemplatesForAllExcelModulesWithStableFilenames() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     for (String module : List.of("company", "department", "team", "personnel")) {
       var result =
@@ -84,7 +84,7 @@ class SystemImportExportApiTest {
 
   @Test
   void exportsCurrentDataWithTemplateHeaders() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     for (String module : List.of("company", "department", "team", "personnel")) {
       byte[] content =
@@ -100,7 +100,7 @@ class SystemImportExportApiTest {
 
   @Test
   void rejectsInvalidImportBatchWithRowLevelErrorsAndJobRecord() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     byte[] file =
         workbook(
             HEADERS.get("company"),
@@ -131,7 +131,7 @@ class SystemImportExportApiTest {
 
   @Test
   void importsValidCompanyBatchAndRecordsAudit() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     byte[] file =
         workbook(
             HEADERS.get("company"),
@@ -224,3 +224,4 @@ class SystemImportExportApiTest {
     }
   }
 }
+

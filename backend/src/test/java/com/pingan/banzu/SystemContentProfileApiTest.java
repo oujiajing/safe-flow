@@ -42,19 +42,19 @@ class SystemContentProfileApiTest {
 
   @Test
   void managesContentProfilesAndRejectsDuplicateOrganizations() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
                 "/api/system/content-profiles",
                 token,
-                payload(3L, "广晟幕墙简介", "幕墙安全生产样板", "幕墙公司图文介绍", "幕墙宣传片", 20, "ACTIVE"))
+                payload(3L, "Demo Works Company简介", "幕墙安全生产样板", "幕墙公司图文介绍", "幕墙宣传片", 20, "ACTIVE"))
             .path("data");
 
     long id = created.path("id").asLong();
     assertThat(created.path("orgId").asLong()).isEqualTo(3L);
-    assertThat(created.path("orgName").asText()).isEqualTo("广晟幕墙");
-    assertThat(created.path("title").asText()).isEqualTo("广晟幕墙简介");
+    assertThat(created.path("orgName").asText()).isEqualTo("Demo Works Company");
+    assertThat(created.path("title").asText()).isEqualTo("Demo Works Company简介");
     assertThat(created.path("status").asText()).isEqualTo("ACTIVE");
 
     mockMvc
@@ -69,9 +69,9 @@ class SystemContentProfileApiTest {
         putJson(
                 "/api/system/content-profiles/" + id,
                 token,
-                payload(3L, "广晟幕墙更新", "更新副标题", "更新后的简介正文", "更新宣传片", 5, "DRAFT"))
+                payload(3L, "Demo Works Company更新", "更新副标题", "更新后的简介正文", "更新宣传片", 5, "DRAFT"))
             .path("data");
-    assertThat(updated.path("title").asText()).isEqualTo("广晟幕墙更新");
+    assertThat(updated.path("title").asText()).isEqualTo("Demo Works Company更新");
     assertThat(updated.path("videoSortOrder").asInt()).isEqualTo(5);
     assertThat(updated.path("status").asText()).isEqualTo("DRAFT");
 
@@ -95,19 +95,19 @@ class SystemContentProfileApiTest {
         postJson(
                 "/api/system/content-profiles",
                 token,
-                payload(3L, "广晟幕墙重新配置", "", "删除后重新创建", "", 30, "DRAFT"))
+                payload(3L, "Demo Works Company重新配置", "", "删除后重新创建", "", 30, "DRAFT"))
             .path("data");
     assertThat(recreated.path("orgId").asLong()).isEqualTo(3L);
   }
 
   @Test
   void uploadsImagesAndVideosAndReadApisReturnOnlyActiveContent() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long inactiveId =
         postJson(
                 "/api/system/content-profiles",
                 token,
-                payload(24L, "资源公司简介", "", "未启用内容", "资源宣传片", 1, "DRAFT"))
+                payload(24L, "Demo Company简介", "", "未启用内容", "资源宣传片", 1, "DRAFT"))
             .path("data")
             .path("id")
             .asLong();
@@ -115,7 +115,7 @@ class SystemContentProfileApiTest {
         postJson(
                 "/api/system/content-profiles",
                 token,
-                payload(4L, "广晟源成简介", "矿业班组", "源成图文介绍", "源成宣传片", 7, "ACTIVE"))
+                payload(4L, "Demo Works Company简介", "Safety Operations Team", "Demo Works图文介绍", "Demo Works宣传片", 7, "ACTIVE"))
             .path("data")
             .path("id")
             .asLong();
@@ -169,7 +169,7 @@ class SystemContentProfileApiTest {
         .andExpect(status().isBadRequest());
 
     JsonNode orgProfile = getJson("/api/pingan/content-profiles/by-org/4", token).path("data");
-    assertThat(orgProfile.path("title").asText()).isEqualTo("广晟源成简介");
+    assertThat(orgProfile.path("title").asText()).isEqualTo("Demo Works Company简介");
     assertThat(orgProfile.path("imageAttachment").path("fileKind").asText()).isEqualTo("IMAGE");
 
     JsonNode inactiveProfile = getJson("/api/pingan/content-profiles/by-org/24", token).path("data");
@@ -268,3 +268,6 @@ class SystemContentProfileApiTest {
             .getContentAsString(StandardCharsets.UTF_8));
   }
 }
+
+
+

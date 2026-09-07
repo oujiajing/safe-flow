@@ -30,9 +30,9 @@ class MinioObjectProxyControllerTest {
             "./uploads-local",
             "http://localhost:9000",
             "",
-            "pingan-banzu",
-            "minioadmin",
-            "minioadmin",
+            "safeteam-portfolio",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
             "us-east-1",
             15);
     MinioObjectProxyController controller =
@@ -59,9 +59,9 @@ class MinioObjectProxyControllerTest {
             "./uploads-local",
             "http://localhost:9000",
             "",
-            "pingan-banzu",
-            "minioadmin",
-            "minioadmin",
+            "safeteam-portfolio",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
             "us-east-1",
             15);
     MinioObjectProxyController controller =
@@ -77,3 +77,5 @@ class MinioObjectProxyControllerTest {
     assertThat(outputStream.size()).isGreaterThan(50_000);
   }
 }
+
+

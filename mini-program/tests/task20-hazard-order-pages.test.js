@@ -69,7 +69,7 @@ function mockOrganizationService() {
         return Promise.resolve([
           {
             id: 4,
-            title: "广东广晟稀有金属光电新材料有限公司",
+            title: "Demo Materials Company",
             orgType: "COMPANY",
             children: [
               {
@@ -509,3 +509,4 @@ test("rectification detail validates required issue and after-photo fields", asy
     { title: "请选择整改后照片", icon: "none" }
   ])
 })
+

@@ -34,7 +34,7 @@ This is the latest version, 5.0, and it is not compatible with previous versions
 
 - [Vben Admin](https://vben.pro/) - Full version Chinese site
 
-Test Account: vben/123456
+Test Account: vben/SAFE_TEST_PASSWORD
 
 <div align="center">
   <img alt="VbenAdmin Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview1.png">
@@ -155,3 +155,4 @@ If you think this project is helpful to you, you can help the author buy a cup o
 ## License
 
 [MIT © Vben-2020](./LICENSE)
+

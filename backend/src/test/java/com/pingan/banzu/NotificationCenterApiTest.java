@@ -77,7 +77,7 @@ class NotificationCenterApiTest {
         notificationId);
 
     JsonNode message =
-        getJson("/api/mini/notifications/" + notificationId, login("admin", "123456")).path("data");
+        getJson("/api/mini/notifications/" + notificationId, login("admin", "SAFE_TEST_PASSWORD")).path("data");
     assertThat(message.path("teamName").asText())
         .isEqualTo(jdbcTemplate.queryForObject("select org_name from sys_org where id = 7", String.class));
     assertThat(message.path("responsibleName").asText()).isEqualTo("系统管理员");
@@ -94,7 +94,7 @@ class NotificationCenterApiTest {
             + " '{\"meetingContent\":\"消息测试\"}', '现场照片', '未上传', 'OPENED', 0, 0, 1, 1,"
             + " 'PC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)",
         REMINDER_MEETING_ID);
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
 
     postEmpty(
         "/api/pingan/three-checks/pre-shift-meeting/records/"
@@ -102,7 +102,7 @@ class NotificationCenterApiTest {
             + "/remind",
         adminToken);
 
-    String ownerToken = login("HB_MONITOR", "123456");
+    String ownerToken = login("HB_MONITOR", "SAFE_TEST_PASSWORD");
     JsonNode data =
         getJson(
                 "/api/mini/notifications?groupType=ACTION&moduleKey=pre-shift-meeting&unread=true",
@@ -135,7 +135,7 @@ class NotificationCenterApiTest {
         "ACTION", "pre-shift-inspection", "班前检查待执行", "OPEN_INSPECTION",
         "IMPORTANT", LocalDateTime.now().plusHours(2), "other-user", 2L, null, "PENDING");
 
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode list =
         getJson("/api/mini/notifications?groupType=ACTION&unread=true&page=1&pageSize=20", token)
             .path("data");
@@ -173,7 +173,7 @@ class NotificationCenterApiTest {
     JsonNode data =
         getJson(
                 "/api/mini/notifications?groupType=BUSINESS&dateStart=" + date + "&dateEnd=" + date,
-                login("admin", "123456"))
+                login("admin", "SAFE_TEST_PASSWORD"))
             .path("data");
 
     assertThat(data.path("total").asInt()).isEqualTo(1);
@@ -194,7 +194,7 @@ class NotificationCenterApiTest {
         insertNotification(
             "ACTION", "pre-shift-inspection", "其他用户待办", "OPEN_INSPECTION",
             "IMPORTANT", null, "read-state-other", 2L, null, "PENDING");
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     postEmpty("/api/mini/notifications/" + first + "/read", token);
     assertThat(getJson("/api/mini/notifications/" + first, token).path("data").path("read").asBoolean())
@@ -301,3 +301,4 @@ class NotificationCenterApiTest {
             .getContentAsString(StandardCharsets.UTF_8));
   }
 }
+

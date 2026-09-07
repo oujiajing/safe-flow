@@ -352,7 +352,7 @@ const oneShiftRouteNameByModuleKey: Record<string, string> = {
 };
 
 const GUANGSHENG_CURTAIN_WALL_COMPANY_ID = 3;
-const GUANGSHENG_CURTAIN_WALL_COMPANY_NAME = '广晟幕墙';
+const GUANGSHENG_CURTAIN_WALL_COMPANY_NAME = 'Demo Works Company';
 const {
   changeHistoryFilter,
   changeHistoryFilterOptions,
@@ -1044,7 +1044,7 @@ const documentFlowSidebarSubtitle = computed(() =>
   isKeySiteDocumentFlow.value
     ? '重点场所 / 检查记录 / 整改验收'
     : isPreShiftSafetyActivityDocumentFlow.value
-      ? '广晟幕墙 / 班前安全活动'
+      ? 'Demo Works Company / 班前安全活动'
       : isStageSpecificDocumentFlow.value
         ? '班组派班 / 班前会 / 三查记录'
         : '作业排程 / 班组派班',
@@ -8620,3 +8620,4 @@ watch(
   }
 }
 </style>
+

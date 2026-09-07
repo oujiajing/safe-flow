@@ -32,10 +32,6 @@ lerna-debug.log*
 .env.*
 !.env.example
 !.env.*.example
-!vben/**/.env
-!vben/**/.env.development
-!vben/**/.env.production
-!vben/**/.env.analyze
 
 # Local tool state
 .codex-run/
@@ -98,3 +94,9 @@ backend/uploads-local/
 
 # WeChat Mini Program local developer settings
 **/project.private.config.json
+
+# Portfolio-local generated configuration and demo data
+portfolio.local.yml
+demo-data/generated/
+backend/uploads-local/
+mini-program/project.private.config.json

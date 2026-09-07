@@ -41,32 +41,32 @@ class AttachmentUrlResolverTest {
     MinioClient storageClient = org.mockito.Mockito.mock(MinioClient.class);
     MinioClient presignClient = org.mockito.Mockito.mock(MinioClient.class);
     when(presignClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
-        .thenReturn("http://10.43.122.12:9000/pingan-banzu/object?X-Amz-Signature=test");
+        .thenReturn("http://localhost:9000/safeteam-portfolio/object?X-Amz-Signature=test");
     StorageProperties properties =
         new StorageProperties(
             "minio",
             "./uploads-local",
             "http://minio:9000",
             "http://127.0.0.1:9000",
-            "pingan-banzu",
-            "minioadmin",
-            "minioadmin",
+            "safeteam-portfolio",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
             "us-east-1",
             20);
     MinioAttachmentUrlResolver resolver =
         new MinioAttachmentUrlResolver(storageClient, presignClient, properties);
     BizAttachment attachment = new BizAttachment();
     attachment.id = 9L;
-    attachment.bucketName = "pingan-banzu";
+    attachment.bucketName = "safeteam-portfolio";
     attachment.objectKey = "pre-shift-meeting/42/image/a.jpg";
 
     assertThat(resolver.url(attachment))
-        .isEqualTo("http://10.43.122.12:9000/pingan-banzu/object?X-Amz-Signature=test");
+        .isEqualTo("http://localhost:9000/safeteam-portfolio/object?X-Amz-Signature=test");
     ArgumentCaptor<GetPresignedObjectUrlArgs> argsCaptor =
         ArgumentCaptor.forClass(GetPresignedObjectUrlArgs.class);
     verify(presignClient).getPresignedObjectUrl(argsCaptor.capture());
     verify(storageClient, never()).getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class));
-    assertThat(argsCaptor.getValue().bucket()).isEqualTo("pingan-banzu");
+    assertThat(argsCaptor.getValue().bucket()).isEqualTo("safeteam-portfolio");
     assertThat(argsCaptor.getValue().object()).isEqualTo("pre-shift-meeting/42/image/a.jpg");
   }
 
@@ -75,30 +75,32 @@ class AttachmentUrlResolverTest {
     MinioClient storageClient = org.mockito.Mockito.mock(MinioClient.class);
     MinioClient presignClient = org.mockito.Mockito.mock(MinioClient.class);
     when(presignClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
-        .thenReturn("http://10.43.122.12:9000/pingan-banzu-verify/object?X-Amz-Signature=test");
+        .thenReturn("http://localhost:9000/safeteam-portfolio-verify/object?X-Amz-Signature=test");
     StorageProperties properties =
         new StorageProperties(
             "minio",
             "./uploads-local",
             "http://minio:9000",
-            "http://10.43.122.12:9000",
-            "pingan-banzu",
-            "minioadmin",
-            "minioadmin",
+            "http://localhost:9000",
+            "safeteam-portfolio",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
             "us-east-1",
             20);
     MinioAttachmentUrlResolver resolver =
         new MinioAttachmentUrlResolver(storageClient, presignClient, properties);
     BizAttachment attachment = new BizAttachment();
     attachment.id = 10L;
-    attachment.bucketName = "pingan-banzu-verify";
+    attachment.bucketName = "safeteam-portfolio-verify";
     attachment.storagePath = "training/old/image.jpg";
 
     assertThat(resolver.url(attachment)).contains("X-Amz-Signature=test");
     ArgumentCaptor<GetPresignedObjectUrlArgs> argsCaptor =
         ArgumentCaptor.forClass(GetPresignedObjectUrlArgs.class);
     verify(presignClient).getPresignedObjectUrl(argsCaptor.capture());
-    assertThat(argsCaptor.getValue().bucket()).isEqualTo("pingan-banzu-verify");
+    assertThat(argsCaptor.getValue().bucket()).isEqualTo("safeteam-portfolio-verify");
     assertThat(argsCaptor.getValue().object()).isEqualTo("training/old/image.jpg");
   }
 }
+
+

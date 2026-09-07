@@ -65,7 +65,7 @@ const visibleDetailColumns = ref<Record<DetailColumnKey, boolean>>({
   workshop: true,
 });
 
-const groupOptions = [{ label: '广晟矿业集团', value: 'guangsheng' }];
+const groupOptions = [{ label: 'Demo Safety Holdings', value: 'guangsheng' }];
 const pageSizeOptions = [
   { label: '10条/页', value: 10 },
   { label: '20条/页', value: 20 },
@@ -1514,3 +1514,4 @@ function downloadCurrentTeamTable() {
   box-shadow: 0 0 0 2px rgb(35 139 255 / 12%);
 }
 </style>
+

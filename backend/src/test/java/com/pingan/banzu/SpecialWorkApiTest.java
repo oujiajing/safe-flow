@@ -38,7 +38,7 @@ class SpecialWorkApiTest {
 
   @Test
   void servesOnlyCanonicalStatusesOnTheSharedPcMiniList() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     assertThat(
             jdbcTemplate.queryForObject(
@@ -63,7 +63,7 @@ class SpecialWorkApiTest {
 
   @Test
   void managesSpecialWorkRecordsWithFiltersAndSoftDelete() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -74,7 +74,7 @@ class SpecialWorkApiTest {
 
     long recordId = created.path("id").asLong();
     assertThat(recordId).isPositive();
-    assertThat(created.path("company").asText()).isEqualTo("广晟源成");
+    assertThat(created.path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(created.path("project").asText()).isEqualTo("动火审批-单测");
     assertThat(created.path("statusLabel").asText()).isEqualTo("待审批");
 
@@ -134,7 +134,7 @@ class SpecialWorkApiTest {
 
   @Test
   void uploadsSpecialWorkImageAndExportsTemplateHeaders() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long recordId =
         postJson(
                 "/api/pingan/special-work/records",
@@ -185,7 +185,7 @@ class SpecialWorkApiTest {
 
   @Test
   void deletesSingleSpecialWorkRecord() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long recordId =
         postJson(
                 "/api/pingan/special-work/records",
@@ -272,7 +272,7 @@ class SpecialWorkApiTest {
 
   @Test
   void rejectsSpecialWorkMaintenanceWhenReviewPermissionMissing() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     long recordId =
         postJson(
                 "/api/pingan/special-work/records",
@@ -330,7 +330,7 @@ class SpecialWorkApiTest {
 
   @Test
   void enforcesServerDrivenSpecialWorkTransitionsAndEvidence() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode rejectedCreate =
         postJsonBadRequest(
@@ -519,7 +519,7 @@ class SpecialWorkApiTest {
         Map.entry("workType", "动火作业"),
         Map.entry("applicationTime", applicationTime),
         Map.entry("workContent", "焊接作业"),
-        Map.entry("workLocation", "源成车间一层"),
+        Map.entry("workLocation", "Demo Works车间一层"),
         Map.entry("riskIdentificationResult", "已辨识并落实隔离措施"),
         Map.entry("implementationStartTime", "2026-05-22 13:00:00"),
         Map.entry("implementationEndTime", "2026-05-22 18:00:00"),
@@ -567,12 +567,12 @@ class SpecialWorkApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, 4, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, 4, 'ACTIVE', 0)",
         id,
         username,
         username);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", id, id);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private JsonNode getJson(String path, String token) throws Exception {
@@ -647,3 +647,5 @@ class SpecialWorkApiTest {
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=");
   }
 }
+
+

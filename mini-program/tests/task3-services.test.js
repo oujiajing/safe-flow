@@ -70,11 +70,11 @@ test("auth service calls login and permission endpoints", async () => {
   withUploadStub()
   const { auth } = loadServices()
 
-  await auth.login({ username: "admin", password: "123456" })
+  await auth.login({ username: "admin", password: "SAFE_TEST_PASSWORD" })
   await auth.getPermissionCodes()
 
   assert.deepEqual(calls, [
-    { url: "/api/auth/login", method: "POST", data: { username: "admin", password: "123456" } },
+    { url: "/api/auth/login", method: "POST", data: { username: "admin", password: "SAFE_TEST_PASSWORD" } },
     { url: "/api/auth/codes", method: "GET" }
   ])
 })
@@ -161,3 +161,4 @@ test("flow service calls dispatch flow endpoint", async () => {
     { url: "/api/pingan/three-checks/flows/33", method: "GET" }
   ])
 })
+

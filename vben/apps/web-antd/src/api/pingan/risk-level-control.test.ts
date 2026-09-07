@@ -36,7 +36,7 @@ describe('risk-level-control api', () => {
     };
 
     await getRiskControlLibrariesApi({ keyword: '事故隐患', page: 1, pageSize: 20 });
-    await createRiskControlLibraryApi({ hazard, name: '源成风险库' });
+    await createRiskControlLibraryApi({ hazard, name: 'Demo Works风险库' });
     await getRiskControlHazardsApi(12, { page: 2, pageSize: 50 });
     await createRiskControlHazardApi(12, hazard);
     await updateRiskControlHazardApi(12, 99, { ...hazard, riskLevel: '重大风险' });
@@ -49,7 +49,7 @@ describe('risk-level-control api', () => {
     expect(requestClient.post).toHaveBeenNthCalledWith(
       1,
       '/pingan/risk-level-control/libraries',
-      { hazard, name: '源成风险库' },
+      { hazard, name: 'Demo Works风险库' },
     );
     expect(requestClient.get).toHaveBeenNthCalledWith(
       2,
@@ -94,3 +94,4 @@ describe('risk-level-control api', () => {
     );
   });
 });
+

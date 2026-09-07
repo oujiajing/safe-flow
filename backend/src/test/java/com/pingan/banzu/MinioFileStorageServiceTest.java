@@ -49,9 +49,9 @@ class MinioFileStorageServiceTest {
             "./uploads",
             "http://localhost:9000",
             "http://localhost:9000",
-            "pingan-banzu",
-            "minioadmin",
-            "minioadmin",
+            "safeteam-portfolio",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
             "us-east-1",
             15);
 
@@ -88,7 +88,7 @@ class MinioFileStorageServiceTest {
 
     BizAttachment attachment = inserted.get();
     assertThat(attachment.storageProvider).isEqualTo("MINIO");
-    assertThat(attachment.bucketName).isEqualTo("pingan-banzu");
+    assertThat(attachment.bucketName).isEqualTo("safeteam-portfolio");
     assertThat(attachment.objectKey)
         .startsWith("pre-shift-meeting/12/image/")
         .endsWith("-现场照片.png");
@@ -111,9 +111,9 @@ class MinioFileStorageServiceTest {
             "./uploads",
             "http://localhost:9000",
             "http://localhost:9000",
-            "pingan-banzu",
-            "minioadmin",
-            "minioadmin",
+            "safeteam-portfolio",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
             "us-east-1",
             15);
 
@@ -189,3 +189,5 @@ class MinioFileStorageServiceTest {
     verify(lifecycle).deleteNow(org.mockito.ArgumentMatchers.eq("MINIO"), org.mockito.ArgumentMatchers.eq("bucket"), any());
   }
 }
+
+

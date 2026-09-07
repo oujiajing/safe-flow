@@ -187,7 +187,7 @@
         <view class="quick-shot-info-card">
           <view class="quick-shot-section-title"><text></text>详细信息</view>
           <info-row label="编号" value="{{record.recordNo || record.sourceRecordId || record.id || '-'}}" />
-          <info-row label="公司" value="{{record.companyName || record.company || '广东广晟稀有金属光电新材料有限公司'}}" />
+          <info-row label="公司" value="{{record.companyName || record.company || 'Demo Materials Company'}}" />
           <info-row label="部门" value="{{record.departmentName || record.payload.departmentName || '-'}}" />
           <info-row label="班组" value="{{record.team || record.teamName || '-'}}" />
           <info-row label="上报人" value="{{record.ownerUserName || record.payload.reporterName || '-'}}" />
@@ -240,3 +240,4 @@
     </view>
   </view>
 </view>
+

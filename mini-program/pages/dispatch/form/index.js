@@ -17,7 +17,7 @@ function todayString() {
 Page({
   data: {
     companyKey: "gs",
-    currentCompany: { company: "广晟", workshop: "幕墙车间" },
+    currentCompany: { company: "Demo", workshop: "幕墙车间" },
     currentTeam: "幕墙组装2班",
     organizationNodes: [],
     companyOptions: [],
@@ -246,3 +246,4 @@ Page({
     }
   }
 })
+

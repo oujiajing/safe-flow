@@ -38,8 +38,8 @@ describe('monitor-center api', () => {
 
   it('normalizes partial aggregate responses for monitor pages', () => {
     const overview = normalizeMonitorCenterOverview({
-      companies: [{ id: 3, name: '广晟幕墙' }],
-      learningBars: [{ name: '广晟幕墙', value: '2' }],
+      companies: [{ id: 3, name: 'Demo Works Company' }],
+      learningBars: [{ name: 'Demo Works Company', value: '2' }],
       learningTrend: [{ name: '2026-05-30', value: '2' }],
       riskAccidentTypeBars: [{ name: '机械伤害', value: '2' }],
       riskCauseBars: [{ name: '设备缺陷', value: '2' }],
@@ -49,7 +49,7 @@ describe('monitor-center api', () => {
           {
             abnormalItems: 4,
             captain: '余银',
-            company: '广晟源成',
+            company: 'Demo Works Company',
             companyLearningCount: 1,
             dispatchCompletionRate: '0.00%',
             hazardTotal: 1,
@@ -83,7 +83,7 @@ describe('monitor-center api', () => {
       },
       hazardRecordRows: [
         {
-          company: '广晟幕墙',
+          company: 'Demo Works Company',
           date: '2026-05-30',
           detail: '临边防护缺失',
           sourceModule: '隐患整改',
@@ -102,12 +102,12 @@ describe('monitor-center api', () => {
       },
     } as any);
 
-    expect(overview.companies).toEqual([{ id: 3, name: '广晟幕墙' }]);
+    expect(overview.companies).toEqual([{ id: 3, name: 'Demo Works Company' }]);
     expect(overview.dispatchBars).toEqual([]);
     expect(overview.dispatchTrend).toEqual([]);
     expect(overview.hazardStatusBars).toEqual([]);
     expect(overview.learningCategoryBars).toEqual([]);
-    expect(overview.learningBars).toEqual([{ name: '广晟幕墙', value: '2' }]);
+    expect(overview.learningBars).toEqual([{ name: 'Demo Works Company', value: '2' }]);
     expect(overview.learningTrend).toEqual([
       { name: '2026-05-30', value: '2' },
     ]);
@@ -184,12 +184,13 @@ describe('monitor-center api', () => {
             { children: [], id: 101, name: '幕墙组装', orgType: 'DEPARTMENT' },
           ],
           id: 3,
-          name: '广晟幕墙',
+          name: 'Demo Works Company',
           orgType: 'COMPANY',
         },
       ]).map((item) => `${item.depth}:${item.name}`),
-    ).toEqual(['0:广晟幕墙', '1:幕墙组装']);
+    ).toEqual(['0:Demo Works Company', '1:幕墙组装']);
     expect(toMonitorCenterNumber('12')).toBe(12);
     expect(toMonitorCenterNumber('bad')).toBe(0);
   });
 });
+

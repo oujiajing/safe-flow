@@ -14,13 +14,13 @@ const orgTree: DataMapNode[] = [
     id: 1,
     key: 'group',
     orgType: 'GROUP',
-    title: '广晟控股集团',
+    title: 'Demo控股集团',
     children: [
       {
         id: 4,
         key: 'company-yuancheng',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
         children: [
           {
             id: 101_109,
@@ -109,3 +109,4 @@ describe('pingan organization filter permission', () => {
     });
   });
 });
+

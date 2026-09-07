@@ -42,7 +42,7 @@ class TrainingSafetyLearningApiTest {
 
   @Test
   void createsUpdatesFiltersAndDeletesSafetyLearningContent() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -51,7 +51,7 @@ class TrainingSafetyLearningApiTest {
                 token)
             .path("data");
     long id = created.path("id").asLong();
-    assertThat(created.path("company").asText()).isEqualTo("广晟源成");
+    assertThat(created.path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(created.path("code").asText()).startsWith("LEARN-202605-");
     assertThat(created.path("statusLabel").asText()).isEqualTo("激活");
 
@@ -86,7 +86,7 @@ class TrainingSafetyLearningApiTest {
 
   @Test
   void uploadsPdfAttachmentAndRejectsNonPdf() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long id =
         postJson(
                 "/api/pingan/training/safety-learning/contents",
@@ -146,7 +146,7 @@ class TrainingSafetyLearningApiTest {
 
   @Test
   void uploadsAndRemovesCoverImageAndVideo() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long id =
         postJson(
                 "/api/pingan/training/safety-learning/contents",
@@ -244,7 +244,7 @@ class TrainingSafetyLearningApiTest {
 
   @Test
   void downloadsTemplateImportsWorkbookAndExportsFilteredRows() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     var templateResponse =
         mockMvc
@@ -313,7 +313,7 @@ class TrainingSafetyLearningApiTest {
 
   @Test
   void batchDeletesSafetyLearningContent() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long first =
         postJson(
                 "/api/pingan/training/safety-learning/contents",
@@ -376,7 +376,7 @@ class TrainingSafetyLearningApiTest {
                 .header("Authorization", "Bearer " + viewOnlyToken))
         .andExpect(status().isOk());
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     long contentId =
         postJson(
                 "/api/pingan/training/safety-learning/contents",
@@ -487,7 +487,7 @@ class TrainingSafetyLearningApiTest {
 
   @Test
   void miniSafetyLearningListRequiresTrainingViewPermission() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     long contentId =
         postJson(
                 "/api/pingan/training/safety-learning/contents",
@@ -529,7 +529,7 @@ class TrainingSafetyLearningApiTest {
 
   @Test
   void miniSafetyLearningCheckInCreatesPointsFlowVisibleOnPc() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     long contentId =
         postJson(
                 "/api/pingan/training/safety-learning/contents",
@@ -594,7 +594,7 @@ class TrainingSafetyLearningApiTest {
 
   @Test
   void selfScopedMemberCanViewSafetyLearningForOwnCompanyFilter() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     postJson(
         "/api/pingan/training/safety-learning/contents",
         payload("成员学习", "成员安全学习查看测试", "2026-06-01", "ACTIVE", "MEMBER-LEARN-VIEW"),
@@ -647,7 +647,7 @@ class TrainingSafetyLearningApiTest {
       Row row = sheet.createRow(1);
       List<String> values =
           List.of(
-              "广晟源成",
+              "Demo Works Company",
               category,
               title,
               "导入正文",
@@ -711,13 +711,13 @@ class TrainingSafetyLearningApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         userId,
         username,
         username,
         SOURCE_COMPANY_ID);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", userId, roleId);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private String selfScopedPermissionToken(
@@ -747,13 +747,13 @@ class TrainingSafetyLearningApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         userId,
         username,
         username,
         orgId);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", userId, roleId);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private JsonNode getJson(String path, String token) throws Exception {
@@ -794,3 +794,5 @@ class TrainingSafetyLearningApiTest {
             .getContentAsString(StandardCharsets.UTF_8));
   }
 }
+
+

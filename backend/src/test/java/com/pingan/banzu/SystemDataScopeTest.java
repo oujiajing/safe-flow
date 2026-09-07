@@ -55,7 +55,7 @@ class SystemDataScopeTest {
     jdbcTemplate.update(
         "insert into sys_role (id, role_code, role_name, data_scope) values (9001, 'SELF_ONLY_TEST', '仅本人测试', 'SELF')");
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (9001, 'self_scope_user', '{noop}123456', '仅本人用户', 4, 'ACTIVE', 0)");
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (9001, 'self_scope_user', '{noop}SAFE_TEST_PASSWORD', '仅本人用户', 4, 'ACTIVE', 0)");
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (9001, 9001)");
 
     CurrentUserContext.set(
@@ -454,3 +454,4 @@ class SystemDataScopeTest {
             roleCode));
   }
 }
+

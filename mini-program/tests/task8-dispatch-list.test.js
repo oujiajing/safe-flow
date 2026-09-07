@@ -18,21 +18,21 @@ test("dispatch mapper converts team-dispatch records to prototype table rows", (
       id: "1",
       businessDate: "2026-05-15",
       team: "幕墙组装2班",
-      owner: "蔡燕艳",
+      owner: "Demo Admin",
       payload: { workType: "安全员", task: "安全交底与现场巡查" }
     },
     {
       id: "2",
       date: "2026-05-16",
       team: "幕墙机加班组",
-      owner: "沈光明",
+      owner: "Demo Leader",
       payload: { jobType: "班长", content: "一班三查任务联动" }
     }
   ])
 
   assert.deepEqual(rows, [
-    { id: "1", date: "2026-05-15", team: "幕墙组装2班", name: "蔡燕艳", work: "安全员", task: "安全交底与现场巡查", status: "-", statusLabel: "-", department: "-" },
-    { id: "2", date: "2026-05-16", team: "幕墙机加班组", name: "沈光明", work: "班长", task: "一班三查任务联动", status: "-", statusLabel: "-", department: "-" }
+    { id: "1", date: "2026-05-15", team: "幕墙组装2班", name: "Demo Admin", work: "安全员", task: "安全交底与现场巡查", status: "-", statusLabel: "-", department: "-" },
+    { id: "2", date: "2026-05-16", team: "幕墙机加班组", name: "Demo Leader", work: "班长", task: "一班三查任务联动", status: "-", statusLabel: "-", department: "-" }
   ])
 })
 
@@ -206,7 +206,7 @@ test("dispatch record detail loads dispatch record and flow stages", async () =>
       id: "d900",
       recordNo: "TCR-TD-20260703-48EF8F64",
       businessDate: "2026-07-03",
-      company: "广晟幕墙",
+      company: "Demo Works Company",
       department: "门窗机加",
       team: "门窗加工2班",
       owner: "系统管理员",
@@ -227,7 +227,7 @@ test("dispatch record detail loads dispatch record and flow stages", async () =>
       moduleKey: "pre-shift-meeting",
       recordNo: "TCR-PSM-20260703-001",
       businessDate: "2026-07-03",
-      company: "广晟幕墙",
+      company: "Demo Works Company",
       department: "门窗机加",
       team: "门窗加工2班",
       owner: "班组长",
@@ -246,7 +246,7 @@ test("dispatch record detail loads dispatch record and flow stages", async () =>
       moduleKey: "mid-shift-inspection",
       recordNo: "TCR-MSI-20260703-001",
       businessDate: "2026-07-03",
-      company: "广晟幕墙",
+      company: "Demo Works Company",
       department: "门窗机加",
       team: "门窗加工2班",
       owner: "安全员",
@@ -262,7 +262,7 @@ test("dispatch record detail loads dispatch record and flow stages", async () =>
       moduleKey: "post-shift-inspection",
       recordNo: "TCR-POSTSI-20260703-001",
       businessDate: "2026-07-03",
-      company: "广晟幕墙",
+      company: "Demo Works Company",
       department: "门窗机加",
       team: "门窗加工2班",
       owner: "安全员",
@@ -303,10 +303,10 @@ test("dispatch record detail loads dispatch record and flow stages", async () =>
         return Promise.resolve({
           stages: [
             { stageKey: "teamDispatch", record: { id, recordNo: "TCR-TD-20260703-48EF8F64", status: "OPENED" } },
-            { stageKey: "preShiftMeeting", record: { id: "m1", moduleKey: "pre-shift-meeting", recordNo: "TCR-PSM-20260703-001", status: "OPENED", statusLabel: "已开会议", businessDate: "2026-07-03", company: "广晟幕墙", department: "门窗机加", team: "门窗加工2班", owner: "班组长", imageCheck: "图片已传", videoCheck: "视频已传", payload: { attendees: "张三、李四" } } },
+            { stageKey: "preShiftMeeting", record: { id: "m1", moduleKey: "pre-shift-meeting", recordNo: "TCR-PSM-20260703-001", status: "OPENED", statusLabel: "已开会议", businessDate: "2026-07-03", company: "Demo Works Company", department: "门窗机加", team: "门窗加工2班", owner: "班组长", imageCheck: "图片已传", videoCheck: "视频已传", payload: { attendees: "张三、李四" } } },
             { stageKey: "preShiftInspection", moduleKey: "pre-shift-inspection", record: null },
-            { stageKey: "midShiftInspection", record: { id: "mid1", moduleKey: "mid-shift-inspection", recordNo: "TCR-MSI-20260703-001", status: "OPENED", statusLabel: "已检查", businessDate: "2026-07-03", company: "广晟幕墙", department: "门窗机加", team: "门窗加工2班", owner: "安全员", imageCheck: "图片已传", videoCheck: "视频已传" } },
-            { stageKey: "postShiftInspection", record: { id: "post1", moduleKey: "post-shift-inspection", recordNo: "TCR-POSTSI-20260703-001", status: "DRAFT", statusLabel: "待检查", businessDate: "2026-07-03", company: "广晟幕墙", department: "门窗机加", team: "门窗加工2班", owner: "安全员", imageCheck: "未上传", payload: { handoverStatus: "未交班" } } }
+            { stageKey: "midShiftInspection", record: { id: "mid1", moduleKey: "mid-shift-inspection", recordNo: "TCR-MSI-20260703-001", status: "OPENED", statusLabel: "已检查", businessDate: "2026-07-03", company: "Demo Works Company", department: "门窗机加", team: "门窗加工2班", owner: "安全员", imageCheck: "图片已传", videoCheck: "视频已传" } },
+            { stageKey: "postShiftInspection", record: { id: "post1", moduleKey: "post-shift-inspection", recordNo: "TCR-POSTSI-20260703-001", status: "DRAFT", statusLabel: "待检查", businessDate: "2026-07-03", company: "Demo Works Company", department: "门窗机加", team: "门窗加工2班", owner: "安全员", imageCheck: "未上传", payload: { handoverStatus: "未交班" } } }
           ]
         })
       }
@@ -394,3 +394,4 @@ test("dispatch record detail renders flow insight sections and components", () =
   assert.doesNotMatch(wxml, /scroll-x="true"[\s\S]*dispatch-step-card/)
   assert.match(wxss, /\.dispatch-step-track\s*\{[\s\S]*?grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/)
 })
+

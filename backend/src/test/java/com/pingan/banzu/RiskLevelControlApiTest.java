@@ -62,14 +62,14 @@ class RiskLevelControlApiTest {
 
   @Test
   void createsRiskLibraryWithFirstHazardAndMaintainsHazardDetails() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
                 "/api/pingan/risk-level-control/libraries",
                 Map.of(
                     "name",
-                    "源成风险库-单测",
+                    "Demo Works风险库-单测",
                     "hazard",
                     hazard("吊篮作业", "高处坠落", "高处坠落", "一般风险")),
                 token)
@@ -77,8 +77,8 @@ class RiskLevelControlApiTest {
 
     long libraryId = created.path("id").asLong();
     assertThat(libraryId).isPositive();
-    assertThat(created.path("name").asText()).isEqualTo("源成风险库-单测");
-    assertThat(created.path("company").asText()).isEqualTo("广晟源成");
+    assertThat(created.path("name").asText()).isEqualTo("Demo Works风险库-单测");
+    assertThat(created.path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(created.path("hazardCount").asInt()).isEqualTo(1);
 
     JsonNode appended =
@@ -110,7 +110,7 @@ class RiskLevelControlApiTest {
 
   @Test
   void downloadsTemplateAndExportsLibraryWithConfiguredHeaders() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     byte[] template =
         mockMvc
@@ -145,12 +145,12 @@ class RiskLevelControlApiTest {
 
   @Test
   void importsWorkbookAsOneLibraryWithOneHazardPerDataRowAndCompanyDictionarySheet() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     byte[] file =
         workbook(
             List.of(
-                List.of("广晟源成", "有限空间", "缺氧", "通风不足", "中毒窒息", "3", "6", "7", "126", "较大风险"),
-                List.of("广晟源成", "吊装作业", "物体打击", "吊点失效", "物体打击", "1", "6", "15", "90", "一般风险")));
+                List.of("Demo Works Company", "有限空间", "缺氧", "通风不足", "中毒窒息", "3", "6", "7", "126", "较大风险"),
+                List.of("Demo Works Company", "吊装作业", "物体打击", "吊点失效", "物体打击", "1", "6", "15", "90", "一般风险")));
 
     JsonNode imported =
         objectMapper
@@ -181,8 +181,8 @@ class RiskLevelControlApiTest {
 
   @Test
   void hidesLibrariesOutsideCurrentUsersOrganizationScope() throws Exception {
-    String adminToken = login("admin", "123456");
-    String memberToken = login("team_member", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
+    String memberToken = login("team_member", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -300,7 +300,7 @@ class RiskLevelControlApiTest {
       String riskPoint, String dangerSource, String accidentType, String riskLevel) {
     return Map.ofEntries(
         Map.entry("companyId", String.valueOf(SOURCE_COMPANY_ID)),
-        Map.entry("company", "广晟源成"),
+        Map.entry("company", "Demo Works Company"),
         Map.entry("riskPoint", riskPoint),
         Map.entry("dangerSource", dangerSource),
         Map.entry("riskInfluenceFactors", "现场环境变化"),
@@ -356,12 +356,12 @@ class RiskLevelControlApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, 4, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, 4, 'ACTIVE', 0)",
         id,
         username,
         username);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", id, id);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private JsonNode getJson(String path, String token) throws Exception {
@@ -446,9 +446,11 @@ class RiskLevelControlApiTest {
       companies.createRow(0).createCell(0).setCellValue("编码");
       companies.getRow(0).createCell(1).setCellValue("名称");
       companies.createRow(1).createCell(0).setCellValue("1011");
-      companies.getRow(1).createCell(1).setCellValue("广晟源成");
+      companies.getRow(1).createCell(1).setCellValue("Demo Works Company");
       workbook.write(output);
       return output.toByteArray();
     }
   }
 }
+
+

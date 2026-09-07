@@ -173,7 +173,7 @@ test("safety exam list matches the reference toolbar, status tabs, and card fiel
   assert.match(wxml, /exam-card-company/)
   assert.match(wxml, /exam-card-meta/)
   assert.match(wxml, /exam-person-pill/)
-  assert.equal(record.company, "广东广晟有色金属光电新材料有限公司")
+  assert.equal(record.company, "Demo Materials Company")
   assert.equal(record.exam, "2026年防灾减灾知识考试")
   assert.match(wxml, /明细/)
   assert.match(wxml, /<view wx:for="\{\{records\}\}" wx:key="id" class="exam-card" data-id="\{\{item\.id\}\}" bindtap="openBasic">/)
@@ -274,7 +274,7 @@ test("safety exam basic page matches the reference main-info fields", () => {
   assert.doesNotMatch(wxml, /主单信息/)
   assert.deepEqual(rows.map(item => item.label), ["编码", "公司", "部门", "考试人员", "考试", "考试日期", "状态", "创建时间", "备注"])
   assert.equal(record.code, "KSPC00000072-190")
-  assert.equal(record.company, "广东广晟有色金属光电新材料有限公司")
+  assert.equal(record.company, "Demo Materials Company")
   assert.equal(record.department, "火法厂")
   assert.equal(record.person, "霍永清")
   assert.equal(record.status, "待考试")
@@ -517,7 +517,7 @@ test("safety exam create flow saves basic draft and posts PC exam task payload",
   installOrganizationServiceStub([
     {
       id: 4,
-      title: "广东广晟有色金属光电新材料有限公司",
+      title: "Demo Materials Company",
       orgType: "COMPANY",
       children: [
         {
@@ -576,7 +576,7 @@ test("safety exam create flow saves basic draft and posts PC exam task payload",
   delete require.cache[pagePath]
   require("../pages/training/exam-create-basic/index")
   await pageConfig.onLoad()
-  assert.equal(pageConfig.data.companyName, "广东广晟有色金属光电新材料有限公司")
+  assert.equal(pageConfig.data.companyName, "Demo Materials Company")
   assert.equal(pageConfig.data.departmentName, "全部部门（公司范围）")
   pageConfig.changeDepartment({ detail: { value: "1" } })
   pageConfig.changeTeam({ detail: { value: "1" } })
@@ -642,12 +642,12 @@ test("safety exam create basic cascades backend organization nodes with orgName 
   installOrganizationServiceStub([
     {
       id: 1,
-      orgName: "广晟控股集团",
+      orgName: "Demo控股集团",
       type: "GROUP",
       nodes: [
         {
           id: 4,
-          orgName: "广晟源成",
+          orgName: "Demo Works Company",
           type: "COMPANY",
           nodes: [
             {
@@ -715,7 +715,7 @@ test("safety exam create basic cascades backend organization nodes with orgName 
   require("../pages/training/exam-create-basic/index")
   await pageConfig.onLoad()
 
-  assert.deepEqual(pageConfig.data.companyOptions.map(item => item.label), ["广晟源成", "海安加工厂"])
+  assert.deepEqual(pageConfig.data.companyOptions.map(item => item.label), ["Demo Works Company", "海安加工厂"])
   assert.deepEqual(pageConfig.data.departmentOptions.map(item => item.label), ["全部部门（公司范围）", "火法厂", "湿法厂"])
   assert.equal(pageConfig.data.departmentId, "")
   assert.equal(pageConfig.data.teamId, "")
@@ -753,7 +753,7 @@ test("safety exam list loads PC-backed exam task cards and counts both statuses"
               taskId: 901,
               resultId: 1901,
               code: "EXAM-USER-PC-1901",
-              company: "广晟源成公司",
+              company: "Demo Works Company公司",
               department: "安全环保部",
               exam: "PC端设置的安全考试任务",
               examDate: "2026-07-06",
@@ -772,7 +772,7 @@ test("safety exam list loads PC-backed exam task cards and counts both statuses"
           taskId: 901,
           resultId: 1901,
           code: "EXAM-USER-PC-1901",
-          company: "广晟源成公司",
+          company: "Demo Works Company公司",
           exam: "PC端设置的安全考试任务",
           examDate: "2026-07-06",
           status: "EXAMED",
@@ -827,7 +827,7 @@ test("safety exam list loads PC-backed exam task cards and counts both statuses"
   assert.equal(pageConfig.data.statusCounts.pending, 1)
   assert.equal(pageConfig.data.statusCounts.done, 3)
   assert.deepEqual(detailCalls, [])
-  assert.equal(pageConfig.data.records[0].company, "广晟源成公司")
+  assert.equal(pageConfig.data.records[0].company, "Demo Works Company公司")
   assert.equal(pageConfig.data.records[0].person, "霍永清")
   assert.equal(pageConfig.data.records[0].exam, "PC端设置的安全考试任务")
   assert.equal(pageConfig.data.records[0].statusKey, "pending")
@@ -864,7 +864,7 @@ test("safety exam filter applies date department and team to exam task query", a
   installOrganizationServiceStub([
     {
       id: 1,
-      title: "广晟源成公司",
+      title: "Demo Works Company公司",
       orgType: "COMPANY",
       children: [
         {
@@ -949,7 +949,7 @@ test("safety exam basic and detail pages load PC-backed task detail and question
       return Promise.resolve({
         id,
         code: "EXAM-TASK-PC-902",
-        company: "广晟源成公司",
+        company: "Demo Works Company公司",
         department: "火法厂",
         exam: "PC端防灾减灾考试",
         examDate: "2026-07-06",
@@ -1000,7 +1000,7 @@ test("safety exam basic and detail pages load PC-backed task detail and question
   await pageConfig.onLoad({ id: "902" })
 
   assert.equal(pageConfig.data.record.code, "EXAM-TASK-PC-902")
-  assert.equal(pageConfig.data.infoRows.find(item => item.label === "公司").value, "广晟源成公司")
+  assert.equal(pageConfig.data.infoRows.find(item => item.label === "公司").value, "Demo Works Company公司")
   assert.equal(pageConfig.data.infoRows.find(item => item.label === "考试人员").value, "真实考试人员、第二考试人员")
   assert.equal(pageConfig.data.infoRows.find(item => item.label === "状态").value, "已生效")
   assert.equal(pageConfig.data.activeDetailTab, "basic")
@@ -1107,7 +1107,7 @@ test("safety exam taking page aligns with reference layout and loads PC-backed q
       return Promise.resolve({
         id,
         code: "EXAM-TASK-PC-902",
-        company: "广晟源成公司",
+        company: "Demo Works Company公司",
         department: "火法厂",
         exam: "PC端防灾减灾考试",
         examDate: "2026-07-06",
@@ -1520,7 +1520,7 @@ test("safety exam page scripts navigate list, basic, and detail views", async ()
       return Promise.resolve({
         id,
         code: id,
-        company: "广东广晟有色金属光电新材料有限公司",
+        company: "Demo Materials Company",
         department: "火法厂",
         exam: "2026年防灾减灾知识考试",
         examDate: "2026-05-14",
@@ -1589,3 +1589,4 @@ test("safety exam page scripts navigate list, basic, and detail views", async ()
   pageConfig.openBasic()
   assert.equal(pageConfig.data.activeDetailTab, "basic")
 })
+

@@ -536,7 +536,7 @@ describe('one-shift-three-checks workbench module config', () => {
     expect(workbenchSource).toContain('会议状态');
     expect(workbenchSource).toContain('检查状态');
     expect(workbenchSource).toContain('活动状态');
-    expect(workbenchSource).toContain('广晟幕墙 / 班前安全活动');
+    expect(workbenchSource).toContain('Demo Works Company / 班前安全活动');
     expect(workbenchSource).toContain('GUANGSHENG_CURTAIN_WALL_COMPANY_ID');
     expect(workbenchSource).toContain('shouldShowDataMap');
     expect(workbenchSource).toContain('pingan-shell--no-data-map');
@@ -925,3 +925,4 @@ describe('one-shift-three-checks workbench module config', () => {
     ).toEqual({ message: '', valid: true });
   });
 });
+

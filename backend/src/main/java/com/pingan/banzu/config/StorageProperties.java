@@ -20,9 +20,9 @@ public record StorageProperties(
     rootDir = blankToDefault(rootDir, "./uploads");
     endpoint = normalizeLocalhostEndpoint(blankToDefault(endpoint, "http://127.0.0.1:9000"));
     publicEndpoint = normalizeLocalhostEndpoint(blankToDefault(publicEndpoint, ""));
-    bucket = blankToDefault(bucket, "pingan-banzu");
-    accessKey = blankToDefault(accessKey, "minioadmin");
-    secretKey = blankToDefault(secretKey, "minioadmin");
+    bucket = blankToDefault(bucket, "safeteam-portfolio");
+    accessKey = blankToDefault(accessKey, "YOUR_MINIO_ACCESS_KEY_HERE");
+    secretKey = blankToDefault(secretKey, "YOUR_MINIO_ACCESS_KEY_HERE");
     region = blankToDefault(region, "us-east-1");
     presignedUrlMinutes = presignedUrlMinutes == null || presignedUrlMinutes <= 0 ? 15 : presignedUrlMinutes;
   }
@@ -59,3 +59,5 @@ public record StorageProperties(
     return value.replace("://localhost:", "://127.0.0.1:");
   }
 }
+
+

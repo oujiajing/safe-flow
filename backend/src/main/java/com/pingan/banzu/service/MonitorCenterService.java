@@ -49,10 +49,10 @@ public class MonitorCenterService {
       "PINGAN_MONITOR_CENTER_GLOBAL_VIEW";
   private static final List<CompanyOption> APPROVED_COMPANIES =
       List.of(
-          new CompanyOption(3L, "广晟幕墙"),
-          new CompanyOption(4L, "广晟源成"),
-          new CompanyOption(24L, "资源公司"),
-          new CompanyOption(28L, "广晟新材"));
+          new CompanyOption(3L, "Demo Works Company"),
+          new CompanyOption(4L, "Demo Works Company"),
+          new CompanyOption(24L, "Demo Company"),
+          new CompanyOption(28L, "Demo Materials"));
   private static final Map<Long, String> APPROVED_COMPANY_NAMES =
       APPROVED_COMPANIES.stream().collect(Collectors.toMap(CompanyOption::id, CompanyOption::name));
 
@@ -1639,3 +1639,4 @@ public class MonitorCenterService {
     }
   }
 }
+

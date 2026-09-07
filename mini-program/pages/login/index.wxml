@@ -12,9 +12,9 @@
         src="../../assets/brand/guangsheng-mining-login-transparent.webp"
         mode="widthFix"
         show-menu-by-longpress="false"
-        aria-label="广晟矿业，广晟控股旗下"
+        aria-label="Demo Safety Operations"
       />
-      <view class="brand-welcome">欢迎登录广晟矿业</view>
+      <view class="brand-welcome">欢迎登录Demo Safety Operations</view>
       <view class="brand-tagline">
         <text>安全生产</text>
         <text class="brand-tagline__dot">·</text>
@@ -93,3 +93,4 @@
     </view>
   </view>
 </view>
+

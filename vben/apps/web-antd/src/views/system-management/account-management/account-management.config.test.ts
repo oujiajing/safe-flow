@@ -97,20 +97,20 @@ describe('account management view config', () => {
             id: 4,
             key: '4',
             orgType: 'COMPANY',
-            title: '广晟源成',
+            title: 'Demo Works Company',
           },
           {
-            children: [{ id: 8, key: '8', orgType: 'COMPANY', title: '梅州嘉晟' }],
+            children: [{ id: 8, key: '8', orgType: 'COMPANY', title: 'Demo East Site' }],
             id: 11,
             key: '11',
             orgType: 'COMPANY',
-            title: '广晟矿投',
+            title: 'Demo矿投',
           },
         ],
         id: 2,
         key: '2',
         orgType: 'GROUP',
-        title: '广晟矿业集团',
+        title: 'Demo Safety Holdings',
       },
     ];
 
@@ -135,7 +135,7 @@ describe('account management view config', () => {
         id: 4,
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
       },
     ]);
   });
@@ -199,3 +199,4 @@ describe('account management view config', () => {
       });
   });
 });
+

@@ -38,7 +38,7 @@ test("inspection mapper converts three-check records to prototype check rows", (
       businessDate: "2026-06-16",
       departmentName: "幕墙车间",
       teamName: "幕墙组装2班",
-      ownerName: "沈光明",
+      ownerName: "Demo Leader",
       content: "高处作业安全检查",
       status: "DRAFT"
     },
@@ -60,7 +60,7 @@ test("inspection mapper converts three-check records to prototype check rows", (
       id: "c1",
       dept: "幕墙车间",
       team: "幕墙组装2班",
-      owner: "沈光明",
+      owner: "Demo Leader",
       task: "高处作业安全检查",
       date: "2026-06-16",
       status: "待提交",
@@ -105,7 +105,7 @@ test("inspection list page loads selected module records into prototype rows", a
               businessDate: "2026-06-16",
               departmentName: "幕墙车间",
               teamName: "幕墙组装2班",
-              ownerName: "沈光明",
+              ownerName: "Demo Leader",
               content: "高处作业安全检查",
               status: "DRAFT"
             }
@@ -161,7 +161,7 @@ test("inspection list page loads selected module records into prototype rows", a
       id: "c100",
       dept: "幕墙车间",
       team: "幕墙组装2班",
-      owner: "沈光明",
+      owner: "Demo Leader",
       task: "高处作业安全检查",
       date: "2026-06-16",
       status: "待提交",
@@ -628,3 +628,4 @@ test("inspection list uses meeting-like card layout with TDesign icons", () => {
   assert.doesNotMatch(listWxml, /filter-simple-top|filter-simple-stem|before-check-icon/)
   assert.doesNotMatch(listWxml, /three-check-statusbar|inspection-native-bar/)
 })
+

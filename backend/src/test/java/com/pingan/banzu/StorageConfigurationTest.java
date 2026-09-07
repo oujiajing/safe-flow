@@ -26,9 +26,9 @@ class StorageConfigurationTest {
             "./uploads-local",
             "http://localhost:9000",
             "http://127.0.0.1:9000",
-            "pingan-banzu",
-            "minioadmin",
-            "minioadmin",
+            "safeteam-portfolio",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
             "us-east-1",
             20);
 
@@ -46,9 +46,9 @@ class StorageConfigurationTest {
             "./uploads-local",
             "http://localhost:9000",
             "",
-            "pingan-banzu",
-            "minioadmin",
-            "minioadmin",
+            "safeteam-portfolio",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
+            "YOUR_MINIO_ACCESS_KEY_HERE",
             "us-east-1",
             15);
 
@@ -56,3 +56,5 @@ class StorageConfigurationTest {
     assertThat(properties.effectivePublicEndpoint()).isEqualTo("http://127.0.0.1:9000");
   }
 }
+
+

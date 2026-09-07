@@ -28,12 +28,12 @@ management:
 
 spring:
   application:
-    name: pingan-banzu-backend
+    name: safeteam-portfolio-backend
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${PINGAN_DB_URL:jdbc:postgresql://localhost:5432/pingan_banzu_verify}
-    username: ${PINGAN_DB_USERNAME:pingan}
-    password: ${PINGAN_DB_PASSWORD:pingan}
+    url: ${PINGAN_DB_URL:jdbc:postgresql://localhost:5432/demo_safeteam}
+    username: ${PINGAN_DB_USERNAME:YOUR_DB_USERNAME_HERE}
+    password: ${PINGAN_DB_PASSWORD:YOUR_DB_PASSWORD_HERE}
   flyway:
     enabled: true
     locations: classpath:db/migration,classpath:db/vendor/{vendor}
@@ -54,17 +54,17 @@ mybatis-plus:
 
 pingan:
   jwt:
-    issuer: pingan-banzu
-    secret: ${PINGAN_JWT_SECRET:pingan-banzu-local-dev-secret-at-least-32-bytes}
+    issuer: safeteam-portfolio
+    secret: ${PINGAN_JWT_SECRET:YOUR_JWT_SECRET_HERE}
     ttl-minutes: 720
   storage:
     provider: ${PINGAN_STORAGE_PROVIDER:minio}
     root-dir: ${PINGAN_STORAGE_ROOT:./uploads}
     endpoint: ${PINGAN_MINIO_ENDPOINT:http://localhost:9000}
     public-endpoint: ${PINGAN_MINIO_PUBLIC_ENDPOINT:}
-    bucket: ${PINGAN_MINIO_BUCKET:pingan-banzu}
-    access-key: ${PINGAN_MINIO_ACCESS_KEY:minioadmin}
-    secret-key: ${PINGAN_MINIO_SECRET_KEY:minioadmin}
+    bucket: ${PINGAN_MINIO_BUCKET:demo-safeteam}
+    access-key: ${PINGAN_MINIO_ACCESS_KEY:YOUR_MINIO_ACCESS_KEY_HERE}
+    secret-key: ${PINGAN_MINIO_SECRET_KEY:YOUR_MINIO_SECRET_KEY_HERE}
     region: ${PINGAN_MINIO_REGION:us-east-1}
     presigned-url-minutes: ${PINGAN_MINIO_PRESIGNED_URL_MINUTES:15}
   security:
@@ -72,3 +72,5 @@ pingan:
     lock-minutes: 30
     two-factor-enabled: false
     test-verification-code: ${PINGAN_TEST_VERIFICATION_CODE:}
+
+

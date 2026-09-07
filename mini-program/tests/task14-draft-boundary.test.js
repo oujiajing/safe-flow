@@ -50,7 +50,7 @@ test("dispatch form saves draft locally and removes it after successful submit",
         return Promise.resolve([
           {
             id: 4,
-            title: "广晟源成",
+            title: "Demo Works Company",
             orgType: "COMPANY",
             children: [
               {
@@ -185,3 +185,4 @@ test("removed prototype shells are absent from routes and source files", () => {
   assert.equal(fs.existsSync(path.join(__dirname, "../pages/todo")), false)
   assert.equal(fs.existsSync(path.join(__dirname, "../utils/modules.js")), false)
 })
+

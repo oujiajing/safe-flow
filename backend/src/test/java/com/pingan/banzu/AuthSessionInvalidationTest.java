@@ -35,7 +35,7 @@ class AuthSessionInvalidationTest {
     clean();
     jdbcTemplate.update(
         "insert into sys_user (id, username, password_hash, real_name, org_id, status, auth_version, deleted)"
-            + " values (?, 'session_fixture', '{noop}123456', '会话测试用户', 8, 'ACTIVE', 0, 0)",
+            + " values (?, 'session_fixture', '{noop}SAFE_TEST_PASSWORD', '会话测试用户', 8, 'ACTIVE', 0, 0)",
         USER_ID);
     jdbcTemplate.update(
         "insert into sys_role (id, role_code, role_name, data_scope, deleted)"
@@ -89,7 +89,7 @@ class AuthSessionInvalidationTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         objectMapper.writeValueAsString(
-                            Map.of("username", "session_fixture", "password", "123456"))))
+                            Map.of("username", "session_fixture", "password", "SAFE_TEST_PASSWORD"))))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -109,3 +109,4 @@ class AuthSessionInvalidationTest {
         .andExpect(status().isUnauthorized());
   }
 }
+

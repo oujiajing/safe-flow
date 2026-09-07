@@ -76,10 +76,10 @@ class SystemSecurityApiTest {
             "workshop_director",
             "team_leader",
             "team_member")) {
-      assertThat(login(username, "123456")).isNotBlank();
+      assertThat(login(username, "SAFE_TEST_PASSWORD")).isNotBlank();
     }
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode teamMember =
         getJson("/api/system/accounts?keyword=team_member", adminToken).path("data").path("items").get(0);
     assertThat(ids(teamMember.path("roleIds")))
@@ -135,15 +135,15 @@ class SystemSecurityApiTest {
                     "PINGAN_TRAINING_STUDY_EXAM"));
 
     for (Map.Entry<String, List<String>> entry : expectedCodes.entrySet()) {
-      JsonNode codes = getJson("/api/auth/codes", login(entry.getKey(), "123456")).path("data");
+      JsonNode codes = getJson("/api/auth/codes", login(entry.getKey(), "SAFE_TEST_PASSWORD")).path("data");
       assertThat(texts(codes)).containsAll(entry.getValue());
     }
 
-    JsonNode companyLeaderCodes = getJson("/api/auth/codes", login("company_leader", "123456")).path("data");
+    JsonNode companyLeaderCodes = getJson("/api/auth/codes", login("company_leader", "SAFE_TEST_PASSWORD")).path("data");
     assertThat(texts(companyLeaderCodes))
         .doesNotContain("PINGAN_ONE_SHIFT_THREE_CHECKS_SUBMIT", "PINGAN_TEAM_DISPATCH_CREATE");
 
-    JsonNode teamMemberCodes = getJson("/api/auth/codes", login("team_member", "123456")).path("data");
+    JsonNode teamMemberCodes = getJson("/api/auth/codes", login("team_member", "SAFE_TEST_PASSWORD")).path("data");
     assertThat(texts(teamMemberCodes))
         .doesNotContain(
             "PINGAN_ONE_SHIFT_THREE_CHECKS_SUBMIT",
@@ -159,14 +159,14 @@ class SystemSecurityApiTest {
 
   @Test
   void nonAdminUsersCannotSeeOrOpenSystemManagement() throws Exception {
-    String companyToken = login("company_leader", "123456");
+    String companyToken = login("company_leader", "SAFE_TEST_PASSWORD");
     JsonNode companyLeaderCodes = getJson("/api/auth/codes", companyToken).path("data");
     assertThat(texts(companyLeaderCodes)).noneMatch(code -> code.startsWith("SYSTEM_"));
 
     JsonNode companyLeaderRoutes = getJson("/api/menu/all", companyToken).path("data");
     assertThat(findRoute(companyLeaderRoutes, "SystemManagement").isMissingNode()).isTrue();
 
-    String memberToken = login("team_member", "123456");
+    String memberToken = login("team_member", "SAFE_TEST_PASSWORD");
     JsonNode memberCodes = getJson("/api/auth/codes", memberToken).path("data");
     assertThat(texts(memberCodes)).noneMatch(code -> code.startsWith("SYSTEM_"));
 
@@ -181,7 +181,7 @@ class SystemSecurityApiTest {
 
   @Test
   void organizationViewersCanReadOrganizationStructureSystemEndpointsOnly() throws Exception {
-    String departmentManagerToken = login("department_manager", "123456");
+    String departmentManagerToken = login("department_manager", "SAFE_TEST_PASSWORD");
     JsonNode codes = getJson("/api/auth/codes", departmentManagerToken).path("data");
     assertThat(texts(codes)).contains("PINGAN_ORGANIZATION_VIEW");
 
@@ -200,7 +200,7 @@ class SystemSecurityApiTest {
 
   @Test
   void enterpriseLeaderCanLoadOrganizationArchitecturePageData() throws Exception {
-    String enterpriseLeaderToken = login("enterprise_leader", "123456");
+    String enterpriseLeaderToken = login("enterprise_leader", "SAFE_TEST_PASSWORD");
     JsonNode codes = getJson("/api/auth/codes", enterpriseLeaderToken).path("data");
     assertThat(texts(codes)).contains("PINGAN_ORGANIZATION_VIEW");
 
@@ -236,7 +236,7 @@ class SystemSecurityApiTest {
 
   @Test
   void accountLifecycleSupportsFreezeLoginBlockUnfreezeResetPasswordAndRoles() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -246,7 +246,7 @@ class SystemSecurityApiTest {
                     "username",
                     "security_api_user",
                     "password",
-                    "Init123456",
+                    "InitSAFE_TEST_PASSWORD",
                     "realName",
                     "权限测试用户",
                     "mobile",
@@ -278,21 +278,21 @@ class SystemSecurityApiTest {
         .perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("username", "security_api_user", "password", "Init123456"))))
+                .content(objectMapper.writeValueAsString(Map.of("username", "security_api_user", "password", "InitSAFE_TEST_PASSWORD"))))
         .andExpect(status().isBadRequest());
 
     postJson("/api/system/accounts/" + accountId + "/unfreeze", adminToken, Map.of());
-    String userToken = login("security_api_user", "Init123456");
+    String userToken = login("security_api_user", "InitSAFE_TEST_PASSWORD");
     assertThat(userToken).isNotBlank();
 
     JsonNode reset =
         postJson(
                 "/api/system/accounts/" + accountId + "/reset-password",
                 adminToken,
-                Map.of("password", "Changed123456"))
+                Map.of("password", "ChangedSAFE_TEST_PASSWORD"))
             .path("data");
     assertThat(reset.path("id").asLong()).isEqualTo(accountId);
-    assertThat(login("security_api_user", "Changed123456")).isNotBlank();
+    assertThat(login("security_api_user", "ChangedSAFE_TEST_PASSWORD")).isNotBlank();
 
     putJson("/api/system/accounts/" + accountId + "/roles", adminToken, Map.of("roleIds", List.of(2)));
     Integer roleCount =
@@ -308,7 +308,7 @@ class SystemSecurityApiTest {
 
   @Test
   void roleMenuGrantChangesAuthCodesAndMenuTreeComesFromDatabase() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     String roleCode = "SECURITY_API_ROLE_" + System.nanoTime();
     JsonNode role =
         postJson(
@@ -358,7 +358,7 @@ class SystemSecurityApiTest {
                     "username",
                     "security_codes_user",
                     "password",
-                    "Init123456",
+                    "InitSAFE_TEST_PASSWORD",
                     "realName",
                     "权限码用户",
                     "orgId",
@@ -367,7 +367,7 @@ class SystemSecurityApiTest {
                     List.of(roleId)))
             .path("data");
 
-    String userToken = login("security_codes_user", "Init123456");
+    String userToken = login("security_codes_user", "InitSAFE_TEST_PASSWORD");
     JsonNode codes = getJson("/api/auth/codes", userToken).path("data");
     assertThat(texts(codes)).contains("SECURITY_API_TEST_CODE");
 
@@ -381,7 +381,7 @@ class SystemSecurityApiTest {
 
   @Test
   void authCodesIncludeAncestorModuleEntriesForGrantedChildPermissions() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     String roleCode = "SECURITY_CHILD_ONLY_ROLE_" + System.nanoTime();
     JsonNode role =
         postJson(
@@ -405,7 +405,7 @@ class SystemSecurityApiTest {
                     "username",
                     "security_child_only_user",
                     "password",
-                    "Init123456",
+                    "InitSAFE_TEST_PASSWORD",
                     "realName",
                     "子权限入口推导用户",
                     "orgId",
@@ -414,7 +414,7 @@ class SystemSecurityApiTest {
                     List.of(roleId)))
             .path("data");
 
-    JsonNode codes = getJson("/api/auth/codes", login("security_child_only_user", "Init123456")).path("data");
+    JsonNode codes = getJson("/api/auth/codes", login("security_child_only_user", "InitSAFE_TEST_PASSWORD")).path("data");
     assertThat(texts(codes))
         .contains(
             "PINGAN_ONE_SHIFT_THREE_CHECKS_VIEW",
@@ -428,7 +428,7 @@ class SystemSecurityApiTest {
 
   @Test
   void roleMenuParentGrantExpandsToExecutableChildPermissions() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     String suffix = String.valueOf(System.nanoTime());
     JsonNode role =
         postJson(
@@ -461,7 +461,7 @@ class SystemSecurityApiTest {
                     "username",
                     "security_parent_grant_user_" + suffix,
                     "password",
-                    "Init123456",
+                    "InitSAFE_TEST_PASSWORD",
                     "realName",
                     "父级授权执行用户",
                     "orgId",
@@ -470,7 +470,7 @@ class SystemSecurityApiTest {
                     List.of(roleId)))
             .path("data");
 
-    String token = login("security_parent_grant_user_" + suffix, "Init123456");
+    String token = login("security_parent_grant_user_" + suffix, "InitSAFE_TEST_PASSWORD");
     JsonNode codes = getJson("/api/auth/codes", token).path("data");
     assertThat(texts(codes))
         .contains(
@@ -502,7 +502,7 @@ class SystemSecurityApiTest {
 
   @Test
   void pinganBusinessPermissionTreeGroupsModuleEntryViewAndActionCodes() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode tree = getJson("/api/system/menus/tree", adminToken).path("data");
     JsonNode pinganPermissionRoot = findNodeByTitle(tree, "平安班组业务权限");
@@ -721,7 +721,7 @@ class SystemSecurityApiTest {
 
   @Test
   void menuAllReturnsSystemManagementRoutesForVbenBackendAccessMode() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode routes = getJson("/api/menu/all", adminToken).path("data");
     JsonNode systemRoute =
@@ -752,7 +752,7 @@ class SystemSecurityApiTest {
 
   @Test
   void menuAllExcludesHiddenPermissionNodes() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode routes = getJson("/api/menu/all", adminToken).path("data");
 
@@ -763,7 +763,7 @@ class SystemSecurityApiTest {
 
   @Test
   void roleMenuGrantRejectsInvalidMenuIdsBeforeReplacingExistingGrants() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     String suffix = String.valueOf(System.nanoTime());
     String roleCode = "INVALID_MENU_GRANT_ROLE_" + suffix;
     JsonNode role =
@@ -804,7 +804,7 @@ class SystemSecurityApiTest {
 
   @Test
   void roleAndMenuListsSupportKeywordAndStatusFilters() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     String suffix = String.valueOf(System.nanoTime());
     JsonNode role =
         postJson(
@@ -856,7 +856,7 @@ class SystemSecurityApiTest {
 
   @Test
   void failedLoginLockTwoFactorAndLoginAuditAreEnforced() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     String username = "security_lock_user_" + System.nanoTime();
     postJson(
         "/api/system/accounts",
@@ -865,7 +865,7 @@ class SystemSecurityApiTest {
             "username",
             username,
             "password",
-            "Init123456",
+            "InitSAFE_TEST_PASSWORD",
             "realName",
             "登录锁定用户",
             "orgId",
@@ -879,17 +879,17 @@ class SystemSecurityApiTest {
                 .perform(
                     post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("username", "admin", "password", "123456"))))
+                        .content(objectMapper.writeValueAsString(Map.of("username", "admin", "password", "SAFE_TEST_PASSWORD"))))
                 .andExpect(status().isBadRequest())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8));
     assertThat(missingCode.path("message").asText()).contains("验证码");
 
-    failedLogin(username, "Wrong123456").andExpect(status().isBadRequest());
+    failedLogin(username, "WrongSAFE_TEST_PASSWORD").andExpect(status().isBadRequest());
     JsonNode locked =
         objectMapper.readTree(
-            failedLogin(username, "Wrong123456")
+            failedLogin(username, "WrongSAFE_TEST_PASSWORD")
                 .andExpect(status().isBadRequest())
                 .andReturn()
                 .getResponse()
@@ -908,7 +908,7 @@ class SystemSecurityApiTest {
                                     "username",
                                     username,
                                     "password",
-                                    "Init123456",
+                                    "InitSAFE_TEST_PASSWORD",
                                     "verificationCode",
                                     "246810"))))
                 .andExpect(status().isBadRequest())
@@ -923,7 +923,7 @@ class SystemSecurityApiTest {
                 Integer.class,
                 username))
         .isGreaterThanOrEqualTo(1);
-    assertThat(login("admin", "123456")).isNotBlank();
+    assertThat(login("admin", "SAFE_TEST_PASSWORD")).isNotBlank();
     assertThat(
             jdbcTemplate.queryForObject(
                 "select count(*) from sys_access_log where module = 'SECURITY' and action = 'LOGIN' and username = 'admin'",
@@ -1141,3 +1141,4 @@ class SystemSecurityApiTest {
     return values;
   }
 }
+

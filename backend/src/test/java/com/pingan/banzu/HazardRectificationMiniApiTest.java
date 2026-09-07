@@ -52,7 +52,7 @@ class HazardRectificationMiniApiTest {
   @Test
   void miniQuickShotApprovalCreatesUnifiedRectificationOrderVisibleToPcEndpoint()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/mini/pingan/three-checks/quick-shot/records",
@@ -104,7 +104,7 @@ class HazardRectificationMiniApiTest {
   @Test
   void miniSafetyCheckSubmitCreatesUnifiedRectificationOrderVisibleToPcEndpoint()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/mini/pingan/three-checks/safety-check/records",
@@ -165,7 +165,7 @@ class HazardRectificationMiniApiTest {
   @Test
   void miniCanHandleRectificationOrderActionCycleAndUploadAfterPhoto()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/hazard-rectification/orders",
@@ -315,7 +315,7 @@ class HazardRectificationMiniApiTest {
   @Test
   void miniHazardActionsRespectPermissionAndDataScope()
       throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     JsonNode created =
         postJson(
                 "/api/pingan/hazard-rectification/orders",
@@ -343,7 +343,7 @@ class HazardRectificationMiniApiTest {
         VIEW_ONLY_ROLE_CODE,
         "PINGAN_HAZARD_RECTIFICATION_VIEW");
 
-    String viewOnlyToken = login(VIEW_ONLY_USERNAME, "123456");
+    String viewOnlyToken = login(VIEW_ONLY_USERNAME, "SAFE_TEST_PASSWORD");
     JsonNode detail =
         getJson("/api/pingan/hazard-rectification/orders/" + orderId, viewOnlyToken).path("data");
     assertThat(detail.path("id").asText()).isEqualTo(orderId);
@@ -538,7 +538,7 @@ class HazardRectificationMiniApiTest {
         roleCode,
         realName + "角色");
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         userId,
         username,
         realName,
@@ -583,3 +583,4 @@ class HazardRectificationMiniApiTest {
         Long.parseLong(orderId));
   }
 }
+

@@ -57,7 +57,7 @@ function defaultDateRange() {
 }
 
 const INITIAL_DATE_RANGE = defaultDateRange()
-const DEFAULT_COMPANY_NAME = "广东广晟稀有金属光电新材料有限公司"
+const DEFAULT_COMPANY_NAME = "Demo Materials Company"
 const DEFAULT_DEPARTMENT_NAME = "安全环保部"
 const DEFAULT_REPORTER_NAME = "李燕发"
 const ALL_DEPARTMENT_OPTION = { label: "全部部门", value: "" }
@@ -405,3 +405,4 @@ Page({
     }
   }
 })
+

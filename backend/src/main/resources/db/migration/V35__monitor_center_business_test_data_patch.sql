@@ -91,7 +91,7 @@ FROM (
 WHERE NOT EXISTS (SELECT 1 FROM three_check_record r WHERE r.record_no = seed.record_no);
 
 INSERT INTO risk_control_library (id, name, company_id, created_by, updated_by, created_at, updated_at, deleted)
-SELECT 9401, '监控中心测试-源成幕墙风险库', 4, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
+SELECT 9401, '监控中心测试-Demo Works幕墙风险库', 4, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
 WHERE NOT EXISTS (SELECT 1 FROM risk_control_library WHERE id = 9401);
 
 INSERT INTO risk_control_hazard (
@@ -138,3 +138,4 @@ FROM (
     '高处幕墙龙骨校正', '幕墙组装二区', '已识别高处坠落风险', 'APPROVED'
 ) seed
 WHERE NOT EXISTS (SELECT 1 FROM special_work_record r WHERE r.project = seed.project AND r.deleted = 0);
+

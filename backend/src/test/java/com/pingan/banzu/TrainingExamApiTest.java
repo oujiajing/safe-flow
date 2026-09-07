@@ -47,7 +47,7 @@ class TrainingExamApiTest {
   @Test
   void expandsExamOrganizationScopeAndRestrictsApplicableQuestionBankItems()
       throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long teamId =
         jdbcTemplate.queryForObject(
             """
@@ -163,7 +163,7 @@ class TrainingExamApiTest {
             .path("data");
     assertThat(teamApplicable.path("total").asInt()).isEqualTo(3);
 
-    String memberToken = login("HB_MONITOR", "123456");
+    String memberToken = login("HB_MONITOR", "SAFE_TEST_PASSWORD");
     JsonNode memberExams =
         getJson("/api/mini/pingan/training/exams?status=PENDING_EXAM", memberToken)
             .path("data");
@@ -172,7 +172,7 @@ class TrainingExamApiTest {
 
   @Test
   void createsExamTaskWithQuestionsAndGeneratedPersonDetails() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode task =
         postJson(
@@ -186,7 +186,7 @@ class TrainingExamApiTest {
                 token)
             .path("data");
     long taskId = task.path("id").asLong();
-    assertThat(task.path("company").asText()).isEqualTo("广晟源成");
+    assertThat(task.path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(task.path("department").asText()).isEqualTo("安全质量职卫部");
     assertThat(task.path("code").asText()).startsWith("EXAM-TASK-202605-");
     assertThat(task.path("remark").asText()).isEqualTo("安全管理部上半年安全知识考试");
@@ -247,7 +247,7 @@ class TrainingExamApiTest {
 
   @Test
   void managesExamResultsWithFiltersAndBatchDelete() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long firstTaskId =
         postJson(
                 "/api/pingan/training/exam-tasks",
@@ -313,7 +313,7 @@ class TrainingExamApiTest {
 
   @Test
   void derivesExamResultStatusFromScore() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long taskId =
         postJson(
                 "/api/pingan/training/exam-tasks",
@@ -349,9 +349,9 @@ class TrainingExamApiTest {
 
   @Test
   void miniProgramSubmitsAssignedExamWithServerGradingAndIdempotency() throws Exception {
-    String adminToken = login("admin", "123456");
-    String memberToken = login("team_member", "123456");
-    String otherToken = login("team_leader", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
+    String memberToken = login("team_member", "SAFE_TEST_PASSWORD");
+    String otherToken = login("team_leader", "SAFE_TEST_PASSWORD");
     long taskId =
         postJson(
                 "/api/pingan/training/exam-tasks",
@@ -474,7 +474,7 @@ class TrainingExamApiTest {
 
   @Test
   void trainingUserOptionsRespectCurrentUserDataScope() throws Exception {
-    String token = login("company_leader", "123456");
+    String token = login("company_leader", "SAFE_TEST_PASSWORD");
 
     JsonNode users = getJson("/api/pingan/users", token).path("data");
 
@@ -484,7 +484,7 @@ class TrainingExamApiTest {
 
   @Test
   void downloadsAndParsesQuestionWorkbook() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     var templateResponse =
         mockMvc
@@ -522,7 +522,7 @@ class TrainingExamApiTest {
 
   @Test
   void managesQuestionBankAndExportsWorkbooks() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
@@ -531,7 +531,7 @@ class TrainingExamApiTest {
                 token)
             .path("data");
     long questionId = created.path("id").asLong();
-    assertThat(created.path("company").asText()).isEqualTo("广晟源成");
+    assertThat(created.path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(created.path("department").asText()).isEqualTo("安全质量职卫部");
     assertThat(created.path("questionText").asText()).isEqualTo("题库消防知识题");
 
@@ -601,7 +601,7 @@ class TrainingExamApiTest {
 
   @Test
   void managesReusableExamPapersAndBatchDeletesQuestionBankItems() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Long paperTeamId =
         jdbcTemplate.queryForObject(
             """
@@ -784,7 +784,7 @@ class TrainingExamApiTest {
 
   @Test
   void createsStructuredMultipleChoiceAndCaseAnalysisQuestionBankItems() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> multiple =
         questionBankPayload(
             "MULTIPLE_CHOICE",
@@ -908,7 +908,7 @@ class TrainingExamApiTest {
             .path("data")
             .path("id")
             .asLong();
-    String memberToken = login("team_member", "123456");
+    String memberToken = login("team_member", "SAFE_TEST_PASSWORD");
     JsonNode miniDetail =
         getJson("/api/mini/pingan/training/exams/" + activeTaskId, memberToken).path("data");
     assertThat(miniDetail.path("questions")).hasSize(3);
@@ -999,7 +999,7 @@ class TrainingExamApiTest {
 
   @Test
   void confirmsValidatedPdfDraftsAndRejectsFakePdfFiles() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> first =
         pdfDraft(
             questionBankPayload(
@@ -1131,7 +1131,7 @@ class TrainingExamApiTest {
 
   @Test
   void acceptsFourOptionMultipleChoiceTasksAndRequiresTwoAnswers() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> fourOptionMultiple =
         questionBankPayload(
             "MULTIPLE_CHOICE",
@@ -1182,7 +1182,7 @@ class TrainingExamApiTest {
 
   @Test
   void rejectsInvalidStructuredQuestionBankAnswers() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> invalid =
         questionBankPayload(
             "SINGLE_CHOICE",
@@ -1205,7 +1205,7 @@ class TrainingExamApiTest {
 
   @Test
   void importsQuestionBankWorkbookAndExportsTaskQuestionSnapshot() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     MockMultipartFile file =
         new MockMultipartFile(
@@ -1228,7 +1228,7 @@ class TrainingExamApiTest {
                     .getContentAsString(StandardCharsets.UTF_8))
             .path("data");
     assertThat(importResult.path("successRows").asInt()).isEqualTo(2);
-    assertThat(importResult.path("questions").get(0).path("company").asText()).isEqualTo("广晟源成");
+    assertThat(importResult.path("questions").get(0).path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(importResult.path("questions").get(1).path("actualScore").asDouble()).isEqualTo(8.0);
 
     JsonNode bankList =
@@ -1302,7 +1302,7 @@ class TrainingExamApiTest {
         .perform(get("/api/pingan/training/exam-tasks").header("Authorization", "Bearer " + resultViewToken))
         .andExpect(status().isForbidden());
 
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     long taskId =
         postJson(
                 "/api/pingan/training/exam-tasks",
@@ -1347,7 +1347,7 @@ class TrainingExamApiTest {
 
   @Test
   void selfScopedMemberCanViewExamResultsForOwnCompanyFilter() throws Exception {
-    String adminToken = login("admin", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
     Map<String, Object> ownDepartmentTask =
         new HashMap<>(
             taskPayload(
@@ -1576,13 +1576,13 @@ class TrainingExamApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         userId,
         username,
         username,
         SOURCE_COMPANY_ID);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", userId, roleId);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private String selfScopedPermissionToken(
@@ -1612,13 +1612,13 @@ class TrainingExamApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, ?, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, ?, 'ACTIVE', 0)",
         userId,
         username,
         username,
         orgId);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", userId, roleId);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private JsonNode getJson(String path, String token) throws Exception {
@@ -1665,3 +1665,5 @@ class TrainingExamApiTest {
     return ids;
   }
 }
+
+

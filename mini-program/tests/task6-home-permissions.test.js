@@ -307,12 +307,12 @@ test("home page counts teams from the current user's department", async () => {
         return Promise.resolve([
           {
             id: 1,
-            title: "广晟集团",
+            title: "Demo集团",
             orgType: "GROUP",
             children: [
               {
                 id: 4,
-                title: "广晟幕墙",
+                title: "Demo Works Company",
                 orgType: "COMPANY",
                 children: [
                   {
@@ -382,11 +382,11 @@ test("home profile shows real organization path by account level and hides it fo
 
   const tree = [{
     id: 1,
-    title: "广晟集团",
+    title: "Demo集团",
     orgType: "GROUP",
     children: [{
       id: 4,
-      title: "广晟幕墙",
+      title: "Demo Works Company",
       orgType: "COMPANY",
       children: [{
         id: 20,
@@ -397,9 +397,10 @@ test("home profile shows real organization path by account level and hides it fo
     }]
   }]
 
-  assert.deepEqual(resolveHomeOrganizationNames(tree, { orgId: 1, roles: ["GROUP_MANAGER"] }), ["广晟集团"])
-  assert.deepEqual(resolveHomeOrganizationNames(tree, { orgId: 4, roles: ["COMPANY_MANAGER"] }), ["广晟幕墙"])
+  assert.deepEqual(resolveHomeOrganizationNames(tree, { orgId: 1, roles: ["GROUP_MANAGER"] }), ["Demo集团"])
+  assert.deepEqual(resolveHomeOrganizationNames(tree, { orgId: 4, roles: ["COMPANY_MANAGER"] }), ["Demo Works Company"])
   assert.deepEqual(resolveHomeOrganizationNames(tree, { orgId: 20, roles: ["DEPARTMENT_MANAGER"] }), ["生产部"])
   assert.deepEqual(resolveHomeOrganizationNames(tree, { orgId: 30, roles: ["TEAM_LEADER"] }), ["生产部", "生产一班"])
   assert.deepEqual(resolveHomeOrganizationNames(tree, { orgId: 1, roles: ["ADMIN"] }), [])
 })
+

@@ -35,29 +35,29 @@ class RiskFourColorMapApiTest {
 
   @Test
   void maintainsFourColorMapsWithSoftDeleteAndCompanyScope() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
 
     JsonNode created =
         postJson(
                 "/api/pingan/risk-four-color-maps",
-                Map.of("name", "源成厂区四色图", "companyId", SOURCE_COMPANY_ID, "remark", "厂区总图"),
+                Map.of("name", "Demo Works厂区四色图", "companyId", SOURCE_COMPANY_ID, "remark", "厂区总图"),
                 token)
             .path("data");
 
     long mapId = created.path("id").asLong();
     assertThat(mapId).isPositive();
-    assertThat(created.path("company").asText()).isEqualTo("广晟源成");
+    assertThat(created.path("company").asText()).isEqualTo("Demo Works Company");
     assertThat(created.path("remark").asText()).isEqualTo("厂区总图");
 
     JsonNode updated =
         putJson(
                 "/api/pingan/risk-four-color-maps/" + mapId,
-                Map.of("name", "源成车间四色图", "companyId", SOURCE_COMPANY_ID, "remark", "车间底图"),
+                Map.of("name", "Demo Works车间四色图", "companyId", SOURCE_COMPANY_ID, "remark", "车间底图"),
                 token)
             .path("data");
-    assertThat(updated.path("name").asText()).isEqualTo("源成车间四色图");
+    assertThat(updated.path("name").asText()).isEqualTo("Demo Works车间四色图");
 
-    JsonNode list = getJson("/api/pingan/risk-four-color-maps?keyword=源成车间", token).path("data");
+    JsonNode list = getJson("/api/pingan/risk-four-color-maps?keyword=Demo Works车间", token).path("data");
     assertThat(list.path("total").asInt()).isEqualTo(1);
     assertThat(list.path("items").get(0).path("id").asLong()).isEqualTo(mapId);
 
@@ -69,13 +69,13 @@ class RiskFourColorMapApiTest {
             "select deleted from risk_four_color_map where id = ?", Integer.class, mapId);
     assertThat(deleted).isEqualTo(1);
 
-    JsonNode afterDelete = getJson("/api/pingan/risk-four-color-maps?keyword=源成车间", token).path("data");
+    JsonNode afterDelete = getJson("/api/pingan/risk-four-color-maps?keyword=Demo Works车间", token).path("data");
     assertThat(afterDelete.path("total").asInt()).isZero();
   }
 
   @Test
   void uploadsImageBackgroundAndRejectsNonImageFiles() throws Exception {
-    String token = login("admin", "123456");
+    String token = login("admin", "SAFE_TEST_PASSWORD");
     long mapId =
         postJson(
                 "/api/pingan/risk-four-color-maps",
@@ -112,8 +112,8 @@ class RiskFourColorMapApiTest {
 
   @Test
   void hidesFourColorMapsOutsideCurrentUsersOrganizationScope() throws Exception {
-    String adminToken = login("admin", "123456");
-    String memberToken = login("team_member", "123456");
+    String adminToken = login("admin", "SAFE_TEST_PASSWORD");
+    String memberToken = login("team_member", "SAFE_TEST_PASSWORD");
 
     postJson(
             "/api/pingan/risk-four-color-maps",
@@ -200,12 +200,12 @@ class RiskFourColorMapApiTest {
           permissionCode);
     }
     jdbcTemplate.update(
-        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}123456', ?, 4, 'ACTIVE', 0)",
+        "insert into sys_user (id, username, password_hash, real_name, org_id, status, deleted) values (?, ?, '{noop}SAFE_TEST_PASSWORD', ?, 4, 'ACTIVE', 0)",
         id,
         username,
         username);
     jdbcTemplate.update("insert into sys_user_role (user_id, role_id) values (?, ?)", id, id);
-    return login(username, "123456");
+    return login(username, "SAFE_TEST_PASSWORD");
   }
 
   private JsonNode getJson(String path, String token) throws Exception {
@@ -252,3 +252,5 @@ class RiskFourColorMapApiTest {
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=");
   }
 }
+
+

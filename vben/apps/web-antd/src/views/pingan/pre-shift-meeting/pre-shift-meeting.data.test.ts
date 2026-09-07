@@ -38,8 +38,8 @@ function flattenTreeTitles(nodes: OrganizationNode[]): string[] {
 
 describe('pre-shift-meeting data', () => {
   it('exposes the Guangsheng organization tree used by the data map', () => {
-    expect(organizationTree[0]?.title).toBe('广晟控股集团');
-    expect(organizationTree[0]?.children?.[0]?.title).toBe('广晟矿业集团');
+    expect(organizationTree[0]?.title).toBe('Demo控股集团');
+    expect(organizationTree[0]?.children?.[0]?.title).toBe('Demo Safety Holdings');
   });
 
   it('contains the data-map organizations shown in the first prototype page', () => {
@@ -47,38 +47,38 @@ describe('pre-shift-meeting data', () => {
 
     expect(titles).toEqual(
       expect.arrayContaining([
-        '广晟控股集团',
-        '广晟矿业集团',
-        '广晟幕墙',
-        '广晟源成',
-        '广晟矿投',
-        '梅州嘉晟',
+        'Demo控股集团',
+        'Demo Safety Holdings',
+        'Demo Works Company',
+        'Demo Works Company',
+        'Demo矿投',
+        'Demo East Site',
         '河源古云',
         '博泰实业',
         '潮安立源',
         '广东省冶金工业总公司',
-        '广晟禾尚田',
+        'Demo禾尚田',
         '南储仓储',
         '南储运输',
         '佛山南储',
         '常州南储',
-        '广晟冶金',
+        'Demo冶金',
         '经发公司',
-        '瑶岭矿业',
-        '资源公司',
+        'Demo Site',
+        'Demo Company',
         '阳春金同',
         '黄金集团',
         '冶金技校',
-        '广晟新材',
+        'Demo Materials',
         '高力公司',
-        '广晟仓储',
+        'Demo仓储',
         '金粤幕墙',
         '泛澳公司',
       ]),
     );
     expect(titles).not.toEqual(
       expect.arrayContaining([
-        '深圳广晟幕墙科技有限公司',
+        'Demo Works Company',
         '湖贝A6 / 4000-MQXM001-001',
         '制氧车间',
         '早班',
@@ -112,7 +112,7 @@ describe('pre-shift-meeting data', () => {
     expect(yuancheng).toMatchObject({
       id: 4,
       key: 'company-yuancheng',
-      title: '广晟源成',
+      title: 'Demo Works Company',
     });
     expect(yuancheng?.children ?? []).toEqual([]);
     expect(getOrganizationIdByKey(organizationTree, 'company-yuancheng')).toBe(4);
@@ -120,15 +120,15 @@ describe('pre-shift-meeting data', () => {
 
   it('filters rows by company keyword, status, and meeting date range', () => {
     const rows = filterMeetingRows(meetingRows, {
-      company: '广晟源成',
+      company: 'Demo Works Company',
       dateRange: ['2025-04-01', '2025-04-30'],
       status: 'OPENED',
     });
 
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
-      department: '广晟源成',
-      team: '广晟源成',
+      department: 'Demo Works Company',
+      team: 'Demo Works Company',
     });
   });
 
@@ -145,8 +145,8 @@ describe('pre-shift-meeting data', () => {
 
     expect(options).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: '广晟源成', value: 4 }),
-        expect.objectContaining({ label: '梅州嘉晟', value: 8 }),
+        expect.objectContaining({ label: 'Demo Works Company', value: 4 }),
+        expect.objectContaining({ label: 'Demo East Site', value: 8 }),
       ]),
     );
   });
@@ -206,7 +206,7 @@ describe('pre-shift-meeting data', () => {
         id: 4,
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
         children: [
           {
             id: 101_109,
@@ -229,7 +229,7 @@ describe('pre-shift-meeting data', () => {
 
     applyOrganizationFilterCompany(state, nodes, 4);
     expect(state).toMatchObject({
-      company: '广晟源成',
+      company: 'Demo Works Company',
       companyId: 4,
     });
     expect(state.department).toBe('');
@@ -239,7 +239,7 @@ describe('pre-shift-meeting data', () => {
     applyOrganizationFilterTeam(state, nodes, 1_011_001);
 
     expect(createOrganizationFilterParams(state)).toEqual({
-      company: '广晟源成',
+      company: 'Demo Works Company',
       companyId: 4,
       department: '幕墙组装',
       departmentId: 101_109,
@@ -264,7 +264,7 @@ describe('pre-shift-meeting data', () => {
         id: 4,
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
         children: [
           {
             id: 101_109,
@@ -288,7 +288,7 @@ describe('pre-shift-meeting data', () => {
 
     expect(yuancheng).toMatchObject({
       key: 'company-yuancheng',
-      title: '广晟源成',
+      title: 'Demo Works Company',
     });
     expect(yuancheng?.children ?? []).toEqual([]);
 
@@ -300,7 +300,7 @@ describe('pre-shift-meeting data', () => {
     );
 
     expect(createOrganizationFilterParams(state)).toEqual({
-      company: '广晟源成',
+      company: 'Demo Works Company',
       companyId: 4,
     });
   });
@@ -312,7 +312,7 @@ describe('pre-shift-meeting data', () => {
         id: 4,
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
         children: [
           {
             id: 101_109,
@@ -340,7 +340,7 @@ describe('pre-shift-meeting data', () => {
     );
 
     expect(createOrganizationFilterParams(state)).toEqual({
-      company: '广晟源成',
+      company: 'Demo Works Company',
       companyId: 4,
       department: '幕墙组装',
       departmentId: 101_109,
@@ -354,7 +354,7 @@ describe('pre-shift-meeting data', () => {
     );
 
     expect(createOrganizationFilterParams(state)).toEqual({
-      company: '广晟源成',
+      company: 'Demo Works Company',
       companyId: 4,
       department: '幕墙组装',
       departmentId: 101_109,
@@ -369,7 +369,7 @@ describe('pre-shift-meeting data', () => {
         id: 4,
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
         children: [
           {
             id: 101_109,
@@ -406,7 +406,7 @@ describe('pre-shift-meeting data', () => {
         id: 4,
         key: '4',
         orgType: 'COMPANY',
-        title: '广晟源成',
+        title: 'Demo Works Company',
         children: [
           {
             id: 101_109,
@@ -420,7 +420,7 @@ describe('pre-shift-meeting data', () => {
         id: 8,
         key: '8',
         orgType: 'COMPANY',
-        title: '梅州嘉晟',
+        title: 'Demo East Site',
         children: [
           {
             id: 9,
@@ -479,14 +479,14 @@ describe('pre-shift-meeting data', () => {
     );
     expect(
       resolveAttachmentPreviewUrl(
-        'http://10.43.122.12:9000/pingan-banzu/pre-shift-meeting/1/image/a.jpg?X-Amz-Signature=test',
+        'http://localhost:9000/safeteam-portfolio/pre-shift-meeting/1/image/a.jpg?X-Amz-Signature=test',
       ),
     ).toBe(
-      'http://10.43.122.12:9000/pingan-banzu/pre-shift-meeting/1/image/a.jpg?X-Amz-Signature=test',
+      'http://localhost:9000/safeteam-portfolio/pre-shift-meeting/1/image/a.jpg?X-Amz-Signature=test',
     );
     expect(
       resolveAttachmentPreviewUrl(
-        'MINIO|pingan-banzu|pre-shift-meeting/1/image/a.jpg|etag-001',
+        'MINIO|safeteam-portfolio|pre-shift-meeting/1/image/a.jpg|etag-001',
       ),
     ).toBe('/uploads/pre-shift-meeting/1/image/a.jpg');
     expect(resolveAttachmentPreviewUrl()).toBe('');
@@ -505,7 +505,7 @@ describe('pre-shift-meeting data', () => {
       fileSize: 128,
       id: 'att-1',
       originalName: '现场.jpg',
-      storagePath: 'MINIO|pingan-banzu|pre-shift-meeting/1/image/a.jpg|etag',
+      storagePath: 'MINIO|safeteam-portfolio|pre-shift-meeting/1/image/a.jpg|etag',
       url: '',
     });
     const withVideo = upsertAttachmentPreview(withImage, {
@@ -539,7 +539,7 @@ describe('pre-shift-meeting data', () => {
       const runtime = resolvePreShiftMeetingRuntime(routeName, routeName);
       const rows = getThreeCheckTemplateRows(routeName);
       const visibleRows = filterMeetingRows(rows, {
-        company: '广晟源成',
+        company: 'Demo Works Company',
         status: 'all',
       });
       const fieldNames = runtime.columns.map((column) => column.dataIndex);
@@ -602,6 +602,9 @@ describe('pre-shift-meeting data', () => {
       organizationKey: 'company-yuancheng',
     });
 
-    expect(rows.map((item) => item.company)).toContain('广晟源成');
+    expect(rows.map((item) => item.company)).toContain('Demo Works Company');
   });
 });
+
+
+

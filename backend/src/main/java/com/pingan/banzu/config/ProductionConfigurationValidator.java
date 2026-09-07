@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Profile("prod")
 public class ProductionConfigurationValidator implements InitializingBean {
 
-  static final String DEFAULT_JWT_SECRET = "pingan-banzu-local-dev-secret-at-least-32-bytes";
+  static final String DEFAULT_JWT_SECRET = "safeteam-portfolio-local-dev-secret-at-least-32-bytes";
 
   private final DataSourceProperties dataSource;
   private final JwtProperties jwt;
@@ -35,8 +35,8 @@ public class ProductionConfigurationValidator implements InitializingBean {
     if (storage.isMinio()) {
       requireText("PINGAN_MINIO_ENDPOINT", storage.endpoint(), invalid);
       requireText("PINGAN_MINIO_BUCKET", storage.bucket(), invalid);
-      requireSecret("PINGAN_MINIO_ACCESS_KEY", storage.accessKey(), "minioadmin", invalid);
-      requireSecret("PINGAN_MINIO_SECRET_KEY", storage.secretKey(), "minioadmin", invalid);
+      requireSecret("PINGAN_MINIO_ACCESS_KEY", storage.accessKey(), "YOUR_MINIO_ACCESS_KEY_HERE", invalid);
+      requireSecret("PINGAN_MINIO_SECRET_KEY", storage.secretKey(), "YOUR_MINIO_ACCESS_KEY_HERE", invalid);
     }
     if (!storage.isLocal() && !storage.isMinio()) {
       invalid.add("PINGAN_STORAGE_PROVIDER");
@@ -60,3 +60,5 @@ public class ProductionConfigurationValidator implements InitializingBean {
     }
   }
 }
+
+
