@@ -70,15 +70,14 @@ test("mini-program debug package keeps local UI assets while ignoring developmen
   assert.ok(rootIgnored.includes("tests"))
 })
 
-test("home page local static icons are packaged instead of ignored remote assets", () => {
+test("portfolio candidate excludes internal static home assets", () => {
   const rootConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "../../project.config.json"), "utf8"))
   const rootIgnored = rootConfig.packOptions.ignore.map(item => item.value)
   const staticHomeDir = path.join(__dirname, "../static/home")
 
   assert.equal(rootIgnored.includes("mini-program/static"), false)
   assert.equal(rootIgnored.includes("mini-program/static/home"), false)
-  assert.equal(fs.existsSync(path.join(staticHomeDir, "message.png")), true)
-  assert.equal(fs.existsSync(path.join(staticHomeDir, "pabzlogo.webp")), true)
+  assert.equal(fs.existsSync(staticHomeDir), false)
 })
 
 test("auth stores token, permission codes, user info, and clears auth state", () => {

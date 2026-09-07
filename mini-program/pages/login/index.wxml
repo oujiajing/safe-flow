@@ -1,20 +1,8 @@
 <view class="login-page">
-  <image
-    class="login-background-image"
-    src="../../assets/brand/login-background.webp"
-    mode="aspectFill"
-    aria-hidden="true"
-  />
   <view class="login-content">
     <view class="brand-section">
-      <image
-        class="brand-logo"
-        src="../../assets/brand/guangsheng-mining-login-transparent.webp"
-        mode="widthFix"
-        show-menu-by-longpress="false"
-        aria-label="Demo Safety Operations"
-      />
-      <view class="brand-welcome">欢迎登录Demo Safety Operations</view>
+      <view class="brand-logo brand-logo--text" aria-label="SafeTeam Demo">SafeTeam</view>
+      <view class="brand-welcome">欢迎登录 SafeTeam Demo</view>
       <view class="brand-tagline">
         <text>安全生产</text>
         <text class="brand-tagline__dot">·</text>
