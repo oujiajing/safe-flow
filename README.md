@@ -26,7 +26,7 @@ This repository is an independent portfolio candidate derived from the audited `
 
 ## Quick start status
 
-The portfolio candidate is currently `PARTIAL`, not READY. Dependencies, database setup, credential initialization, builds, screenshots and the two end-to-end workflows still require clean-environment verification.
+The portfolio candidate is currently `PARTIAL`, not READY. Backend compile/tests, Demo account lifecycle, isolated PostgreSQL startup and API-level workflow evidence are complete. PC dependency installation/build, page-level E2E and real screenshots remain outstanding.
 
 Do not connect this candidate to any production or enterprise service. Use only a new local Demo database and local attachment storage. See [docs/PORTFOLIO_AUDIT.md](docs/PORTFOLIO_AUDIT.md) and [PORTFOLIO_READINESS.md](PORTFOLIO_READINESS.md).
 
@@ -45,6 +45,19 @@ The command creates `portfolio-admin` only in a localhost `demo_safeteam` databa
 ```
 
 Generated passwords are not written to Git, README files or logs. The scripts refuse non-local or non-Demo database URLs.
+
+## Feature Evidence
+
+| Capability | Implementation | Backend/API verification | Page-level E2E | Overall |
+| --- | --- | --- | --- | --- |
+| One-shift three-checks | Implemented | PASS: five backend flow stages read successfully | NOT_RUN | PARTIAL |
+| Hazard rectification | Implemented | PASS: real database order reached `CLOSED` through all states | NOT_RUN | PARTIAL |
+| Authentication and invalid transitions | Implemented | PASS for tested login, 401 unauthenticated access and 400 closed-order action | NOT_RUN for full role/page matrix | PARTIAL |
+| Mini-program client | Implemented | PASS: 241/241 tests and API contracts | NOT_RUN in real WeChat runtime | PARTIAL |
+
+The evidence above deliberately separates implementation from verification. It does not claim production deployment, customer adoption or complete page-level E2E.
+
+For the Phase A2 evidence reconciliation, see [docs/EVIDENCE_RECONCILIATION.md](docs/EVIDENCE_RECONCILIATION.md).
 
 ## Third-party attribution
 
