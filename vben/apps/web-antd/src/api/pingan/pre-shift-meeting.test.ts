@@ -75,7 +75,7 @@ describe('pre-shift-meeting api', () => {
 
   it('maps create and workflow action endpoints', async () => {
     const payload = {
-      attendees: ['湖贝班长'],
+      attendees: ['Demo Harbor班长'],
       companyId: 4,
       departmentId: 4,
       meetingDate: '2025-05-13',
@@ -150,4 +150,3 @@ describe('pre-shift-meeting api', () => {
     );
   });
 });
-

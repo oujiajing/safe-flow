@@ -66,7 +66,7 @@ class SystemRealSourceDataSeedTest {
     assertCompanyHierarchy(4L, "子公司", "Demo控股集团", "Demo Safety Holdings", "Demo Works Company", "Demo Works Company");
     assertCompanyHierarchy(11L, "分公司", "Demo控股集团", "Demo Safety Holdings", "Demo矿投", null);
     assertCompanyHierarchy(8L, "子公司", "Demo控股集团", "Demo Safety Holdings", "Demo矿投", "Demo East Site");
-    assertCompanyHierarchy(27L, "分公司", "Demo控股集团", "Demo Safety Holdings", "冶金技校", null);
+    assertCompanyHierarchy(27L, "分公司", "Demo控股集团", "Demo Safety Holdings", "Demo Training School", null);
     assertCompanyTypeCount("分公司", 12);
     assertCompanyTypeCount("子公司", 13);
     assertYuanchengOperatingProfileSyncedToGroup(1L);
@@ -159,9 +159,9 @@ class SystemRealSourceDataSeedTest {
                         "meetingContent",
                         "使用Demo Works真实组织数据创建班前会。",
                         "attendees",
-                        List.of("湖贝班长"),
+                        List.of("Demo Harbor班长"),
                         "attendeesText",
-                        "湖贝班长")))
+                        "Demo Harbor班长")))
             .path("data");
 
     assertThat(created.path("company").asText()).isEqualTo(SOURCE_COMPANY_NAME);
@@ -415,5 +415,3 @@ class SystemRealSourceDataSeedTest {
     return titles;
   }
 }
-
-

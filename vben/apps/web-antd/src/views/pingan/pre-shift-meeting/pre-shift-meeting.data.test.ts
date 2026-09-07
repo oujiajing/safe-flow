@@ -53,33 +53,33 @@ describe('pre-shift-meeting data', () => {
         'Demo Works Company',
         'Demo矿投',
         'Demo East Site',
-        '河源古云',
-        '博泰实业',
-        '潮安立源',
-        '广东省冶金工业总公司',
-        'Demo禾尚田',
-        '南储仓储',
-        '南储运输',
-        '佛山南储',
-        '常州南储',
-        'Demo冶金',
-        '经发公司',
+        'Demo North Site',
+        'Demo Industrial',
+        'Demo Coastal Site',
+        'Demo Metallurgy Company',
+        'Demo Harvest Site',
+        'Demo Storage',
+        'Demo Transport',
+        'Demo South Depot',
+        'Demo East Depot',
+        'Demo Metallurgy',
+        'Demo Development',
         'Demo Site',
         'Demo Company',
-        '阳春金同',
-        '黄金集团',
-        '冶金技校',
+        'Demo Spring Site',
+        'Demo Gold Group',
+        'Demo Training School',
         'Demo Materials',
         '高力公司',
-        'Demo仓储',
-        '金粤幕墙',
-        '泛澳公司',
+        'Demo Warehouse',
+        'Demo Works Subsidiary',
+        'Demo Pacific Company',
       ]),
     );
     expect(titles).not.toEqual(
       expect.arrayContaining([
         'Demo Works Company',
-        '湖贝A6 / 4000-MQXM001-001',
+        'Demo HarborA6 / 4000-MQXM001-001',
         '制氧车间',
         '早班',
       ]),
@@ -605,6 +605,3 @@ describe('pre-shift-meeting data', () => {
     expect(rows.map((item) => item.company)).toContain('Demo Works Company');
   });
 });
-
-
-

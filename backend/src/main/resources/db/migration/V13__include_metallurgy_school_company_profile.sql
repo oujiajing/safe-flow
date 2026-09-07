@@ -7,7 +7,7 @@ WHERE id = 27
 
 INSERT INTO sys_company_profile
   (org_id, short_name, description, company_type, level1_name, level2_name, level3_name, level4_name, deleted)
-SELECT 27, '冶金技校', '冶金技校', '分公司', 'Demo控股集团', 'Demo Safety Holdings', '冶金技校', NULL, 0
+SELECT 27, 'Demo Training School', 'Demo Training School', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Training School', NULL, 0
 WHERE EXISTS (
     SELECT 1
     FROM sys_org
@@ -21,14 +21,13 @@ WHERE EXISTS (
   );
 
 UPDATE sys_company_profile
-SET short_name = '冶金技校',
-    description = '冶金技校',
+SET short_name = 'Demo Training School',
+    description = 'Demo Training School',
     company_type = '分公司',
     level1_name = 'Demo控股集团',
     level2_name = 'Demo Safety Holdings',
-    level3_name = '冶金技校',
+    level3_name = 'Demo Training School',
     level4_name = NULL,
     updated_at = CURRENT_TIMESTAMP,
     deleted = 0
 WHERE org_id = 27;
-

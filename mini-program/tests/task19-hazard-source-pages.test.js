@@ -199,7 +199,7 @@ function mockSafetyCheckOrganizationService() {
         return Promise.resolve([
           {
             id: 1,
-            title: "广东省Demo控股集团有限公司",
+            title: "Demo RegionDemo控股集团有限公司",
             orgType: "GROUP",
             children: [
               {
@@ -991,7 +991,7 @@ test("safety-check create page matches screenshot fields and maps payload", asyn
   assert.equal(page.data.safetyFormTab, "base")
 
   assert.deepEqual(page.data.inspectionUnitOptions.map(item => item.label), [
-    "广东省Demo控股集团有限公司",
+    "Demo RegionDemo控股集团有限公司",
     "Demo Materials Company",
     "Demo Materials Company"
   ])
@@ -1360,7 +1360,7 @@ test("safety-check detail renders inspection fields, selectable units, and hazar
   assert.equal(page.data.title, "安全检查")
   assert.equal(page.data.safetyDetailTab, "basic")
   assert.deepEqual(page.data.inspectionUnitOptions.map(item => item.label), [
-    "广东省Demo控股集团有限公司",
+    "Demo RegionDemo控股集团有限公司",
     "Demo Materials Company",
     "Demo Materials Company"
   ])
@@ -1451,4 +1451,3 @@ test("snapshot and safety-check routes point to source list while hazard points 
   assert.equal(routes.getEntryRoute("snapshot", "gs"), "/pages/hazard/source-list/index?moduleKey=quick-shot&title=%E9%9A%8F%E6%89%8B%E6%8B%8D&companyKey=gs")
   assert.equal(routes.getEntryRoute("safety-check", "gs"), "/pages/hazard/source-list/index?moduleKey=safety-check&title=%E5%AE%89%E5%85%A8%E6%A3%80%E6%9F%A5&companyKey=gs")
 })
-

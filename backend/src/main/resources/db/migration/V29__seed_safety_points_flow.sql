@@ -7,7 +7,7 @@ INSERT INTO three_check_record (
   (
     'points-flow', 'PF-20260522-001', 4, 101109, 1011001, 2,
     '2026-05-22', 'OPENED',
-    '{"createdAt":"2026-05-22 09:20:00","user":"湖贝班长","pointsReason":"安全学习奖励","pointsChange":"加分","pointsQuantity":5,"statusLabel":"加分"}',
+    '{"createdAt":"2026-05-22 09:20:00","user":"Demo Harbor班长","pointsReason":"安全学习奖励","pointsChange":"加分","pointsQuantity":5,"statusLabel":"加分"}',
     '未上传', '未上传', 1, '2026-05-22 09:20:00', 0, 1, 1, 'PC', 'seed-points-flow-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   ),
   (
@@ -19,6 +19,6 @@ INSERT INTO three_check_record (
   (
     'points-flow', 'PF-20260521-003', 4, 101109, 1011001, 2,
     '2026-05-21', 'OPENED',
-    '{"createdAt":"2026-05-21 17:30:00","user":"湖贝班长","pointsReason":"自动售货机兑换","pointsChange":"兑换","pointsQuantity":3,"vendingMachine":"一号机","goods":"矿泉水","statusLabel":"兑换"}',
+    '{"createdAt":"2026-05-21 17:30:00","user":"Demo Harbor班长","pointsReason":"自动售货机兑换","pointsChange":"兑换","pointsQuantity":3,"vendingMachine":"一号机","goods":"矿泉水","statusLabel":"兑换"}',
     '未上传', '未上传', 1, '2026-05-21 17:30:00', 0, 1, 1, 'PC', 'seed-points-flow-003', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   );

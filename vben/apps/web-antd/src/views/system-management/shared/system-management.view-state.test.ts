@@ -43,7 +43,7 @@ describe('system management shared view state', () => {
       serializeSystemFilters({
         companyId: '1',
         departmentId: '2',
-        keyword: '湖贝',
+        keyword: 'Demo Harbor',
         organizationId: 9,
         status: 'ACTIVE',
         teamId: '3',
@@ -51,7 +51,7 @@ describe('system management shared view state', () => {
     ).toEqual({
       companyId: '1',
       departmentId: '2',
-      keyword: '湖贝',
+      keyword: 'Demo Harbor',
       organizationId: 9,
       status: 'ACTIVE',
       teamId: '3',
@@ -1244,4 +1244,3 @@ describe('system management shared view state', () => {
     });
   });
 });
-

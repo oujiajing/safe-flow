@@ -18,26 +18,26 @@ VALUES
   (4, 'Demo Works Company', 'Demo Works Company', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Company', 'Demo Works Company'),
   (8, 'Demo East Site', 'Demo East Site', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', 'Demo East Site'),
   (11, 'Demo矿投', 'Demo矿投', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', NULL),
-  (12, '河源古云', '河源古云', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', '河源古云'),
-  (13, '博泰实业', '博泰实业', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', '博泰实业'),
-  (14, '潮安立源', '潮安立源', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', '潮安立源'),
-  (15, '广东省冶金工业总公司', '广东省冶金工业总公司', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', '广东省冶金工业总公司'),
-  (16, 'Demo禾尚田', 'Demo禾尚田', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', 'Demo禾尚田'),
-  (17, '南储仓储', '南储仓储', '分公司', 'Demo控股集团', 'Demo Safety Holdings', '南储仓储', NULL),
-  (18, '南储运输', '南储运输', '子公司', 'Demo控股集团', 'Demo Safety Holdings', '南储仓储', '南储运输'),
-  (19, '佛山南储', '佛山南储', '子公司', 'Demo控股集团', 'Demo Safety Holdings', '南储仓储', '佛山南储'),
-  (20, '常州南储', '常州南储', '子公司', 'Demo控股集团', 'Demo Safety Holdings', '南储仓储', '常州南储'),
-  (21, 'Demo冶金', 'Demo冶金', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo冶金', NULL),
-  (22, '经发公司', '经发公司', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo冶金', '经发公司'),
+  (12, 'Demo North Site', 'Demo North Site', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', 'Demo North Site'),
+  (13, 'Demo Industrial', 'Demo Industrial', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', 'Demo Industrial'),
+  (14, 'Demo Coastal Site', 'Demo Coastal Site', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', 'Demo Coastal Site'),
+  (15, 'Demo Metallurgy Company', 'Demo Metallurgy Company', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', 'Demo Metallurgy Company'),
+  (16, 'Demo Harvest Site', 'Demo Harvest Site', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo矿投', 'Demo Harvest Site'),
+  (17, 'Demo Storage', 'Demo Storage', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Storage', NULL),
+  (18, 'Demo Transport', 'Demo Transport', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Storage', 'Demo Transport'),
+  (19, 'Demo South Depot', 'Demo South Depot', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Storage', 'Demo South Depot'),
+  (20, 'Demo East Depot', 'Demo East Depot', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Storage', 'Demo East Depot'),
+  (21, 'Demo Metallurgy', 'Demo Metallurgy', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Metallurgy', NULL),
+  (22, 'Demo Development', 'Demo Development', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Metallurgy', 'Demo Development'),
   (23, 'Demo Site', 'Demo Site', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Site', NULL),
   (24, 'Demo Company', 'Demo Company', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Site', 'Demo Company'),
-  (25, '阳春金同', '阳春金同', '分公司', 'Demo控股集团', 'Demo Safety Holdings', '阳春金同', NULL),
-  (26, '黄金集团', '黄金集团', '分公司', 'Demo控股集团', 'Demo Safety Holdings', '黄金集团', NULL),
+  (25, 'Demo Spring Site', 'Demo Spring Site', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Spring Site', NULL),
+  (26, 'Demo Gold Group', 'Demo Gold Group', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Gold Group', NULL),
   (28, 'Demo Materials', 'Demo Materials', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Materials', NULL),
   (29, '高力公司', '高力公司', '子公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Materials', '高力公司'),
-  (30, 'Demo仓储', 'Demo仓储', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo仓储', NULL),
-  (31, '金粤幕墙', '金粤幕墙', '分公司', 'Demo控股集团', 'Demo Safety Holdings', '金粤幕墙', NULL),
-  (32, '泛澳公司', '泛澳公司', '分公司', 'Demo控股集团', 'Demo Safety Holdings', '泛澳公司', NULL);
+  (30, 'Demo Warehouse', 'Demo Warehouse', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Warehouse', NULL),
+  (31, 'Demo Works Subsidiary', 'Demo Works Subsidiary', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Works Subsidiary', NULL),
+  (32, 'Demo Pacific Company', 'Demo Pacific Company', '分公司', 'Demo控股集团', 'Demo Safety Holdings', 'Demo Pacific Company', NULL);
 
 INSERT INTO sys_company_profile (org_id, short_name, description, company_type, level1_name, level2_name, level3_name, level4_name, deleted)
 SELECT h.org_id, h.short_name, h.description, h.company_type, h.level1_name, h.level2_name, h.level3_name, h.level4_name, 0
@@ -61,5 +61,3 @@ SET short_name = (SELECT h.short_name FROM tmp_company_hierarchy_profiles h WHER
 WHERE org_id IN (SELECT org_id FROM tmp_company_hierarchy_profiles);
 
 DROP TABLE tmp_company_hierarchy_profiles;
-
-

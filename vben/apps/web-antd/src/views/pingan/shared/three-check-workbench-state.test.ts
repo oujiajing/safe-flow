@@ -35,7 +35,7 @@ describe('shared three-check workbench state', () => {
       team: '',
     });
     expect(state.createForm).toMatchObject({
-      attendeeNames: ['湖贝班长'],
+      attendeeNames: ['Demo Harbor班长'],
       meetingContent: '',
       ownerUserId: 2,
     });
@@ -59,7 +59,7 @@ describe('shared three-check workbench state', () => {
     first.userOptions.value.pop();
 
     expect(second.rows.value).toEqual([]);
-    expect(second.createForm.attendeeNames).toEqual(['湖贝班长']);
+    expect(second.createForm.attendeeNames).toEqual(['Demo Harbor班长']);
     expect(second.userOptions.value).toHaveLength(4);
   });
 });

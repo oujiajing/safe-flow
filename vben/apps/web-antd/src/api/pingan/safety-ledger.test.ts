@@ -177,7 +177,7 @@ describe('safety-ledger api adapter', () => {
           imagePreviewUrl: '/uploads/pre-shift-meeting/11/image/a.jpg',
           payload: { dispatchStatus: '已生效' },
           rootDispatchRecordId: '88',
-          team: '湖贝班组',
+          team: 'Demo Harbor班组',
           videoCheck: '视频已传',
           videoPreviewUrl: '/uploads/pre-shift-meeting/11/video/a.mp4',
         },
@@ -308,4 +308,3 @@ describe('safety-ledger api adapter', () => {
     });
   });
 });
-

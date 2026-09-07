@@ -127,7 +127,7 @@ describe('system management api clients', () => {
   it('maps master data CRUD calls to /system endpoints', async () => {
     await getCompanyListApi({ keyword: 'Demo Works', page: 1, pageSize: 20 });
     await createCompanyApi({ code: 'YC', name: 'Demo Works Company', status: 'ACTIVE' });
-    await updateTeamApi('7', { name: '湖贝班组', status: 'ACTIVE' });
+    await updateTeamApi('7', { name: 'Demo Harbor班组', status: 'ACTIVE' });
     await deleteDepartmentApi('3');
     await updatePersonnelStatusApi('9', 'INACTIVE');
 
@@ -140,7 +140,7 @@ describe('system management api clients', () => {
       status: 'ACTIVE',
     });
     expect(requestClient.put).toHaveBeenCalledWith('/system/teams/7', {
-      name: '湖贝班组',
+      name: 'Demo Harbor班组',
       status: 'ACTIVE',
     });
     expect(requestClient.delete).toHaveBeenCalledWith('/system/departments/3');
@@ -440,5 +440,3 @@ describe('system management api clients', () => {
     );
   });
 });
-
-

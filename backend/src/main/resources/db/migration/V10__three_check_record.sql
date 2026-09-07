@@ -85,7 +85,7 @@ INSERT INTO three_check_record (
   (
     'pre-shift-inspection', 'TCR-PSI-20260515-001', 4, 101109, 1011001, 2,
     '2026-05-15', 'DRAFT',
-    '{"owner":"湖贝班长","statusLabel":"待检查"}',
+    '{"owner":"Demo Harbor班长","statusLabel":"待检查"}',
     '未上传', '未上传', NULL, NULL, 0, 1, 1, 'PC', 'seed-pre-shift-inspection-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   ),
   (
@@ -97,7 +97,7 @@ INSERT INTO three_check_record (
   (
     'mid-shift-inspection', 'TCR-MSI-20260515-001', 4, 101109, 1011001, 2,
     '2026-05-15', 'DRAFT',
-    '{"owner":"湖贝班长","statusLabel":"待检查"}',
+    '{"owner":"Demo Harbor班长","statusLabel":"待检查"}',
     '现场照片', '视频已传', NULL, NULL, 0, 1, 1, 'PC', 'seed-mid-shift-inspection-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   ),
   (
@@ -109,7 +109,7 @@ INSERT INTO three_check_record (
   (
     'post-shift-inspection', 'TCR-POSTSI-20260515-001', 4, 101109, 1011001, 2,
     '2026-05-15', 'DRAFT',
-    '{"owner":"湖贝班长","handoverStatus":"待交班","statusLabel":"待检查"}',
+    '{"owner":"Demo Harbor班长","handoverStatus":"待交班","statusLabel":"待检查"}',
     '现场照片', '未上传', NULL, NULL, 0, 1, 1, 'PC', 'seed-post-shift-inspection-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   ),
   (
@@ -121,7 +121,7 @@ INSERT INTO three_check_record (
   (
     'key-sites', 'TCR-KS-20260515-001', 4, 101105, 1011001, 2,
     '2026-05-15', 'DRAFT',
-    '{"siteType":"吊装作业区","inspectionDepartment":"安全质量职卫部","responsibleDepartment":"幕墙组装","responsiblePerson":"湖贝班长","acceptancePerson":"幕墙安全员","statusLabel":"待检查"}',
+    '{"siteType":"吊装作业区","inspectionDepartment":"安全质量职卫部","responsibleDepartment":"幕墙组装","responsiblePerson":"Demo Harbor班长","acceptancePerson":"幕墙安全员","statusLabel":"待检查"}',
     '未上传', '未上传', NULL, NULL, 0, 1, 1, 'PC', 'seed-key-sites-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0
   ),
   (

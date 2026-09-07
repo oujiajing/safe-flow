@@ -4,7 +4,7 @@ INSERT INTO sys_org (id, parent_id, org_type, org_code, org_name, org_path, sort
   (3, 2, 'COMPANY', 'GSMQ', 'Demo Works Company', '/1/2/3/', 1, 'ACTIVE'),
   (4, 3, 'COMPANY', 'YCGS', 'Demo Works Company', '/1/2/3/4/', 1, 'ACTIVE'),
   (5, 4, 'COMPANY', 'SZGSMQ', 'Demo Works Company', '/1/2/3/4/5/', 1, 'ACTIVE'),
-  (6, 5, 'DEPARTMENT', 'HBA6', '湖贝A6', '/1/2/3/4/5/6/', 1, 'ACTIVE'),
+  (6, 5, 'DEPARTMENT', 'HBA6', 'Demo HarborA6', '/1/2/3/4/5/6/', 1, 'ACTIVE'),
   (7, 6, 'TEAM', '4000-MQXM001-001', '4000-MQXM001-001', '/1/2/3/4/5/6/7/', 1, 'ACTIVE'),
   (8, 2, 'COMPANY', 'MZJS', 'Demo East Site', '/1/2/8/', 2, 'ACTIVE'),
   (9, 8, 'DEPARTMENT', 'ZYCJ', '制氧车间', '/1/2/8/9/', 1, 'ACTIVE'),
@@ -17,7 +17,7 @@ INSERT INTO sys_role (id, role_code, role_name, data_scope) VALUES
 
 INSERT INTO sys_user (id, username, password_hash, real_name, mobile, org_id, status) VALUES
   (1, 'admin', '{noop}SAFE_TEST_PASSWORD', '系统管理员', NULL, 1, 'ACTIVE'),
-  (2, 'HB_MONITOR', '{noop}SAFE_TEST_PASSWORD', '湖贝班长', NULL, 7, 'ACTIVE'),
+  (2, 'HB_MONITOR', '{noop}SAFE_TEST_PASSWORD', 'Demo Harbor班长', NULL, 7, 'ACTIVE'),
   (3, 'MQ_SAFE', '{noop}SAFE_TEST_PASSWORD', '幕墙安全员', NULL, 5, 'ACTIVE'),
   (4, 'ZY_SUPERVISOR', '{noop}SAFE_TEST_PASSWORD', '制氧主管', NULL, 10, 'ACTIVE');
 
@@ -42,14 +42,13 @@ INSERT INTO pre_shift_meeting (
   (2003, 1003, 'BQM-20250418-001', 8, 9, 10, 4, '2025-04-18', '待补充班前会照片和视频。', 8, '待补传', '未上传', 'DRAFT', NULL, NULL, 0);
 
 INSERT INTO pre_shift_meeting_attendee (meeting_id, user_id, attendee_name, sign_status) VALUES
-  (2001, 2, '湖贝班长', 'SIGNED'),
+  (2001, 2, 'Demo Harbor班长', 'SIGNED'),
   (2001, NULL, '安装工一', 'SIGNED'),
   (2001, NULL, '安装工二', 'SIGNED'),
-  (2002, 2, '湖贝班长', 'SIGNED'),
+  (2002, 2, 'Demo Harbor班长', 'SIGNED'),
   (2003, 4, '制氧主管', 'SIGNED');
 
 INSERT INTO biz_status_log (biz_type, biz_id, from_status, to_status, action, operator_id, remark) VALUES
   ('PRE_SHIFT_MEETING', 2001, NULL, 'OPENED', 'SUBMIT', 2, '种子数据提交'),
   ('PRE_SHIFT_MEETING', 2002, NULL, 'ARCHIVED', 'ARCHIVE', 2, '种子数据归档'),
   ('PRE_SHIFT_MEETING', 2003, NULL, 'DRAFT', 'CREATE', 4, '种子数据创建');
-

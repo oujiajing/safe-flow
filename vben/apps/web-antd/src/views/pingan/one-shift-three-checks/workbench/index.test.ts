@@ -104,10 +104,10 @@ describe('one-shift-three-checks workbench module config', () => {
       departmentId: 101_109,
       id: '3001',
       imageCheck: '未上传',
-      owner: '湖贝班长',
+      owner: 'Demo Harbor班长',
       ownerUserId: 2,
       payload: {
-        owner: '湖贝班长',
+        owner: 'Demo Harbor班长',
         statusLabel: '待检查',
       },
       status: 'DRAFT',
@@ -128,13 +128,13 @@ describe('one-shift-three-checks workbench module config', () => {
     ).toMatchObject({
       date: '2026-05-18',
       imageCheck: '未上传',
-      owner: '湖贝班长',
+      owner: 'Demo Harbor班长',
       status: '待检查',
     });
     expect(
       createOneShiftThreeCheckRecordUpdatePayloadFromDetail(detail, {
         imageCheck: '现场照片',
-        owner: '湖贝班长',
+        owner: 'Demo Harbor班长',
       }),
     ).toEqual({
       businessDate: '2026-05-18',
@@ -143,7 +143,7 @@ describe('one-shift-three-checks workbench module config', () => {
       ownerUserId: 2,
       payload: {
         imageCheck: '现场照片',
-        owner: '湖贝班长',
+        owner: 'Demo Harbor班长',
         statusLabel: '待检查',
       },
       status: '待检查',
@@ -925,4 +925,3 @@ describe('one-shift-three-checks workbench module config', () => {
     ).toEqual({ message: '', valid: true });
   });
 });
-

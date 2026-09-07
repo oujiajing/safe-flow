@@ -179,7 +179,7 @@ describe('system table configuration', () => {
         [
           {
             address:
-              '广东省深圳市福田区深南大道超长详细地址用于验证宽度上限不会撑爆页面',
+              'Demo Region深圳市福田区深南大道超长详细地址用于验证宽度上限不会撑爆页面',
           },
         ],
       ),
@@ -208,7 +208,7 @@ describe('system table configuration', () => {
         [
           {
             address:
-              '广东省深圳市福田区深南大道超长详细地址用于验证固定宽度优先',
+              'Demo Region深圳市福田区深南大道超长详细地址用于验证固定宽度优先',
           },
         ],
       ).find((column) => column.dataIndex === 'address')?.width,

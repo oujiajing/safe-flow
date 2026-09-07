@@ -481,9 +481,9 @@ class SystemMasterDataApiTest {
     assertThat(countByCompanyType(rows, "子公司")).isEqualTo(13);
 
     JsonNode metallurgySchool = findById(rows, 27L);
-    assertThat(metallurgySchool.path("name").asText()).isEqualTo("冶金技校");
+    assertThat(metallurgySchool.path("name").asText()).isEqualTo("Demo Training School");
     assertThat(metallurgySchool.path("companyType").asText()).isEqualTo("分公司");
-    assertThat(metallurgySchool.path("level3Name").asText()).isEqualTo("冶金技校");
+    assertThat(metallurgySchool.path("level3Name").asText()).isEqualTo("Demo Training School");
   }
 
   @Test
@@ -995,6 +995,3 @@ class SystemMasterDataApiTest {
     return count;
   }
 }
-
-
-

@@ -26,7 +26,7 @@ This repository is an independent portfolio candidate derived from the audited `
 
 ## Quick start status
 
-The portfolio candidate is currently `PARTIAL`, not READY. Backend compile/tests, Demo account lifecycle, isolated PostgreSQL startup, PC dependency installation/build/typecheck and PC Demo login are verified. Page-level workflow E2E and real screenshots remain outstanding.
+The portfolio candidate is currently `PARTIAL`, not READY. Backend compile/tests, Demo account lifecycle, isolated PostgreSQL startup, PC dependency installation/build/typecheck, PC Demo login and selected PC page rendering/detail evidence are verified. PC business action E2E and real WeChat runtime E2E remain unverified.
 
 Do not connect this candidate to any production or enterprise service. Use only a new local Demo database and local attachment storage. See [docs/PORTFOLIO_AUDIT.md](docs/PORTFOLIO_AUDIT.md) and [PORTFOLIO_READINESS.md](PORTFOLIO_READINESS.md).
 
@@ -50,12 +50,12 @@ Generated passwords are not written to Git, README files or logs. The scripts re
 
 | Capability | Implementation | Backend/API verification | Page-level E2E | Overall |
 | --- | --- | --- | --- | --- |
-| One-shift three-checks | Implemented | PASS: five backend flow stages read successfully | NOT_RUN | PARTIAL |
-| Hazard rectification | Implemented | PASS: real database order reached `CLOSED` through all states | NOT_RUN | PARTIAL |
-| Authentication and invalid transitions | Implemented | PASS for tested login, 401 unauthenticated access and 400 closed-order action | NOT_RUN for full role/page matrix | PARTIAL |
+| One-shift three-checks | Implemented | PASS: five backend flow stages read successfully; PC workbench/detail rendering inspected | PARTIAL: PC action flow NOT_RUN; mini runtime NOT_RUN | PARTIAL |
+| Hazard rectification | Implemented | PASS: real database order reached `CLOSED` through all states; PC list/detail rendering inspected | PARTIAL: PC action flow NOT_RUN; mini runtime NOT_RUN | PARTIAL |
+| Authentication and invalid transitions | Implemented | PASS for tested login, 401 unauthenticated access and 400 closed-order action | PASS for PC Demo login; full role/page matrix NOT_RUN | PARTIAL |
 | Mini-program client | Implemented | PASS: 241/241 tests and API contracts | NOT_RUN in real WeChat runtime | PARTIAL |
 
-The evidence above deliberately separates implementation from verification. It does not claim production deployment, customer adoption or complete page-level E2E.
+The evidence above deliberately separates implementation from verification. It does not claim production deployment, customer adoption or complete page-level E2E. Four real PC screenshots are retained under `screenshots/`; they are evidence of rendered states, not proof of page action completion.
 
 For the Phase A2 evidence reconciliation, see [docs/EVIDENCE_RECONCILIATION.md](docs/EVIDENCE_RECONCILIATION.md).
 

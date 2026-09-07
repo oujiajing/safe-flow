@@ -177,7 +177,7 @@ describe('three-check-record api', () => {
       businessDate: '2026-05-15',
       companyId: 4,
       departmentId: 101_109,
-      payload: { owner: '湖贝班长', statusLabel: '待检查' },
+      payload: { owner: 'Demo Harbor班长', statusLabel: '待检查' },
       teamId: 1_011_001,
     };
 
@@ -276,4 +276,3 @@ describe('three-check-record api', () => {
     );
   });
 });
-

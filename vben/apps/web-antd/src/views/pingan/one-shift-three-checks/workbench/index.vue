@@ -1826,7 +1826,7 @@ async function loadUsers() {
     if (!userOptions.value.length) {
       userOptions.value = [
         { id: 1, orgId: 1, realName: '系统管理员', username: 'admin' },
-        { id: 2, orgId: 4, realName: '湖贝班长', username: 'HB_MONITOR' },
+        { id: 2, orgId: 4, realName: 'Demo Harbor班长', username: 'HB_MONITOR' },
         { id: 3, orgId: 4, realName: '幕墙安全员', username: 'MQ_SAFE' },
         { id: 4, orgId: 8, realName: '制氧主管', username: 'ZY_SUPERVISOR' },
       ];
@@ -2598,9 +2598,9 @@ function openCreateModal() {
   createForm.ownerUserId =
     resolveCurrentOwnerUserId();
   createForm.attendeeNames = attendeeSelectOptions.value.some(
-    (item) => item.value === '湖贝班长',
+    (item) => item.value === 'Demo Harbor班长',
   )
-    ? ['湖贝班长']
+    ? ['Demo Harbor班长']
     : attendeeSelectOptions.value.slice(0, 1).map((item) => item.value);
   createRootDispatchRecordId.value = undefined;
   resetCreateAttachmentFiles();
@@ -8620,4 +8620,3 @@ watch(
   }
 }
 </style>
-

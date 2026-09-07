@@ -190,7 +190,7 @@ class ThreeCheckRecordApiTest {
                       "status", opened ? "已检查" : "待检查",
                       "payload",
                           Map.of(
-                              "owner", "湖贝班长",
+                              "owner", "Demo Harbor班长",
                               "statusLabel", opened ? "已检查" : "待检查",
                               "batch", "enterprise-query-test")))
               .path("data");
@@ -889,11 +889,11 @@ class ThreeCheckRecordApiTest {
                 .path("data");
 
         assertThat(submitted.path("ownerUserId").asLong()).isEqualTo(2L);
-        assertThat(submitted.path("owner").asText()).isEqualTo("湖贝班长");
-        assertThat(submitted.path("payload").path("owner").asText()).isEqualTo("湖贝班长");
+        assertThat(submitted.path("owner").asText()).isEqualTo("Demo Harbor班长");
+        assertThat(submitted.path("payload").path("owner").asText()).isEqualTo("Demo Harbor班长");
         if (!"pre-shift-meeting".equals(moduleKey)) {
           assertThat(submitted.path("payload").path("responsiblePerson").asText())
-              .isEqualTo("湖贝班长");
+              .isEqualTo("Demo Harbor班长");
         }
 
         JsonNode list =
@@ -901,8 +901,8 @@ class ThreeCheckRecordApiTest {
                 .path("data")
                 .path("items");
         JsonNode row = firstItemById(list, String.valueOf(id));
-        assertThat(row.path("owner").asText()).isEqualTo("湖贝班长");
-        assertThat(row.path("payload").path("owner").asText()).isEqualTo("湖贝班长");
+        assertThat(row.path("owner").asText()).isEqualTo("Demo Harbor班长");
+        assertThat(row.path("payload").path("owner").asText()).isEqualTo("Demo Harbor班长");
       }
     } finally {
       cleanupThreeCheckAccessFixture(memberUserId, memberUsername, "TCR-TL-SUBMIT-OWNER-");
@@ -995,7 +995,7 @@ class ThreeCheckRecordApiTest {
                     "payload",
                         Map.of(
                             "createdAt", "2026-05-22 17:45:21",
-                            "user", "湖贝班长",
+                            "user", "Demo Harbor班长",
                             "pointsReason", "安全学习奖励",
                             "pointsChange", "加分",
                             "pointsQuantity", 5)))
@@ -1023,7 +1023,7 @@ class ThreeCheckRecordApiTest {
                     "payload",
                         Map.of(
                             "createdAt", "2026-05-22 17:45:21",
-                            "user", "湖贝班长",
+                            "user", "Demo Harbor班长",
                             "pointsReason", "自动售货机兑换",
                             "pointsChange", "兑换",
                             "pointsQuantity", 3,
@@ -1926,7 +1926,7 @@ class ThreeCheckRecordApiTest {
                     "payload",
                         Map.of(
                             "meetingContent", "上午派班班前会",
-                            "attendeesText", "湖贝班长",
+                            "attendeesText", "Demo Harbor班长",
                             "statusLabel", "待开会议")))
             .path("data");
     JsonNode secondMeeting =
@@ -1943,7 +1943,7 @@ class ThreeCheckRecordApiTest {
                     "payload",
                         Map.of(
                             "meetingContent", "下午派班班前会",
-                            "attendeesText", "湖贝班长",
+                            "attendeesText", "Demo Harbor班长",
                             "statusLabel", "待开会议")))
             .path("data");
     assertThat(firstMeeting.path("rootDispatchRecordId").asText()).isEqualTo(firstRootId);
@@ -2285,9 +2285,9 @@ class ThreeCheckRecordApiTest {
                             "meetingContent",
                             "班前会打卡校验",
                             "attendees",
-                            List.of("湖贝班长"),
+                            List.of("Demo Harbor班长"),
                             "attendeesText",
-                            "湖贝班长",
+                            "Demo Harbor班长",
                             "statusLabel",
                             "待开会议")))
             .path("data");
@@ -4153,7 +4153,7 @@ class ThreeCheckRecordApiTest {
                                 "payload",
                                 Map.of(
                                     "rectificationResponsiblePerson",
-                                    "湖贝班长",
+                                    "Demo Harbor班长",
                                     "rectificationDeadline",
                                     "2026-05-30"),
                                 "version",
@@ -4627,7 +4627,7 @@ class ThreeCheckRecordApiTest {
                                 "payload",
                                 Map.of(
                                     "rectificationResponsiblePerson",
-                                    "湖贝班长",
+                                    "Demo Harbor班长",
                                     "rectificationDeadline",
                                     "2026-10-08",
                                     "rectificationRequirement",
@@ -5929,7 +5929,7 @@ class ThreeCheckRecordApiTest {
             "siteType", "动火作业区",
             "inspectionDepartment", "安全管理部",
             "responsibleDepartment", "工程管理部",
-            "responsiblePerson", "湖贝班长",
+            "responsiblePerson", "Demo Harbor班长",
             "checkItems",
                 List.of(
                     Map.of(
@@ -6043,7 +6043,7 @@ class ThreeCheckRecordApiTest {
                     "payload",
                         Map.of(
                             "siteType", "吊装作业区",
-                            "responsiblePerson", "湖贝班长",
+                            "responsiblePerson", "Demo Harbor班长",
                             "acceptancePerson", "幕墙安全员",
                             "statusLabel", "待检查"),
                     "sourceChannel", "PC",
@@ -6077,7 +6077,7 @@ class ThreeCheckRecordApiTest {
                     "payload",
                         Map.of(
                             "siteType", "临边防护区",
-                            "responsiblePerson", "湖贝班长",
+                            "responsiblePerson", "Demo Harbor班长",
                             "acceptancePerson", "幕墙安全员",
                             "statusLabel", "待整改"),
                     "sourceRecordId", "wx-key-site-001",
@@ -6160,8 +6160,8 @@ class ThreeCheckRecordApiTest {
                     "payload",
                         Map.of(
                             "meetingContent", "小程序同步班前会内容",
-                            "attendees", List.of("湖贝班长", "幕墙安全员"),
-                            "attendeesText", "湖贝班长、幕墙安全员",
+                            "attendees", List.of("Demo Harbor班长", "幕墙安全员"),
+                            "attendeesText", "Demo Harbor班长、幕墙安全员",
                             "statusLabel", "待开会议"),
                     "sourceChannel", "PC",
                     "sourceRecordId", "wx-pre-shift-meeting-001",
@@ -6182,7 +6182,7 @@ class ThreeCheckRecordApiTest {
             .path("data");
     assertThat(idsIn(pcList.path("items"))).contains(id);
     assertThat(pcList.path("items").get(0).path("payload").path("attendeesText").asText())
-        .isEqualTo("湖贝班长、幕墙安全员");
+        .isEqualTo("Demo Harbor班长、幕墙安全员");
 
     JsonNode upserted =
         postJson(
@@ -6197,8 +6197,8 @@ class ThreeCheckRecordApiTest {
                     "payload",
                         Map.of(
                             "meetingContent", "小程序更新后的班前会内容",
-                            "attendees", List.of("湖贝班长"),
-                            "attendeesText", "湖贝班长",
+                            "attendees", List.of("Demo Harbor班长"),
+                            "attendeesText", "Demo Harbor班长",
                             "statusLabel", "待开会议"),
                     "sourceRecordId", "wx-pre-shift-meeting-001",
                     "clientRequestId", "wx-pre-shift-meeting-req-002",
@@ -6529,7 +6529,7 @@ class ThreeCheckRecordApiTest {
   private Map<String, Object> preShiftInspectionPayload(String imageCheck) {
     return Map.of(
         "owner",
-        "湖贝班长",
+        "Demo Harbor班长",
         "imageCheck",
         imageCheck,
         "statusLabel",
@@ -6552,7 +6552,7 @@ class ThreeCheckRecordApiTest {
           case "ISSUE_RECTIFICATION" ->
               Map.of(
                   "rectificationResponsiblePerson",
-                  "湖贝班长",
+                  "Demo Harbor班长",
                   "rectificationDeadline",
                   "2026-05-30",
                   "rectificationRequirement",
@@ -6837,7 +6837,7 @@ class ThreeCheckRecordApiTest {
     payload.put("statusLabel", "待检查");
     if ("pre-shift-meeting".equals(moduleKey)) {
       payload.put("meetingContent", "班长提交班前会");
-      payload.put("attendeesText", "湖贝班长、提交前组员");
+      payload.put("attendeesText", "Demo Harbor班长、提交前组员");
     } else {
       payload.put(
           "checkItems",
@@ -7182,5 +7182,3 @@ class ThreeCheckRecordApiTest {
         memberName);
   }
 }
-
-

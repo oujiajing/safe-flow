@@ -163,16 +163,16 @@ describe('organization relationship view state', () => {
     expect(relation.graphView?.groups.map((group) => group.parent.node.title)).toEqual([
       'Demo Works Company',
       'Demo矿投',
-      '南储仓储',
-      'Demo冶金',
+      'Demo Storage',
+      'Demo Metallurgy',
       'Demo Site',
-      '阳春金同',
-      '黄金集团',
-      '冶金技校',
+      'Demo Spring Site',
+      'Demo Gold Group',
+      'Demo Training School',
       'Demo Materials',
-      'Demo仓储',
-      '金粤幕墙',
-      '泛澳公司',
+      'Demo Warehouse',
+      'Demo Works Subsidiary',
+      'Demo Pacific Company',
     ]);
     expect(
       relation.graphView?.groups.flatMap((group) => group.children),
@@ -201,11 +201,11 @@ describe('organization relationship view state', () => {
         ?.children.map((item) => item.node.title),
     ).toEqual([
       'Demo East Site',
-      '河源古云',
-      '博泰实业',
-      '潮安立源',
-      '广东省冶金工业总公司',
-      'Demo禾尚田',
+      'Demo North Site',
+      'Demo Industrial',
+      'Demo Coastal Site',
+      'Demo Metallurgy Company',
+      'Demo Harvest Site',
     ]);
     expect(
       relation.graphView?.groups
@@ -232,17 +232,17 @@ describe('organization relationship view state', () => {
         ?.children.map((item) => item.node.title),
     ).toEqual([
       'Demo East Site',
-      '河源古云',
-      '博泰实业',
-      '潮安立源',
-      '广东省冶金工业总公司',
-      'Demo禾尚田',
+      'Demo North Site',
+      'Demo Industrial',
+      'Demo Coastal Site',
+      'Demo Metallurgy Company',
+      'Demo Harvest Site',
     ]);
     expect(
       relation.graphView?.groups
-        .find((group) => group.parent.node.title === '南储仓储')
+        .find((group) => group.parent.node.title === 'Demo Storage')
         ?.children.map((item) => item.node.title),
-    ).toEqual(['南储运输', '佛山南储', '常州南储']);
+    ).toEqual(['Demo Transport', 'Demo South Depot', 'Demo East Depot']);
   });
 
   it('includes direct company children when the selected group has no lower group chain', () => {
@@ -317,6 +317,3 @@ describe('organization relationship view state', () => {
     expect(relation.graphView?.groups).toEqual([]);
   });
 });
-
-
-

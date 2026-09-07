@@ -13,11 +13,11 @@ export interface OrganizationProfile {
 export const organizationProfiles: OrganizationProfile[] = [
   {
     description:
-      '广东省Demo控股集团有限公司（简称“Demo控股集团”）成立于1999年，注册资本金100亿元，是广东省属国有独资重点企业。经过25年的改革发展，Demo控股集团已成长为以矿产资源、电子信息为主业，环保、工程地产、金融协同发展的大型跨国企业集团，入选国务院国资委国企改革“双百企业”名单。截至2024年底，Demo控股集团资产总额1786.9亿元，全年实现营业收入1027.4亿元、利润总额38.3亿元、净利润29.8亿元。现拥有员工5万余人，其中海外员工5000多人，中共党员6000多人；位居2024中国企业500强第203位、中国战略性新兴产业领军企业100强第29位、中国跨国公司100大第88位。',
-    imageAlt: '广东省Demo控股集团形象图',
+      'Demo RegionDemo控股集团有限公司（简称“Demo控股集团”）成立于1999年，注册资本金100亿元，是Demo Region属国有独资重点企业。经过25年的改革发展，Demo控股集团已成长为以矿产资源、电子信息为主业，环保、工程地产、金融协同发展的大型跨国企业集团，入选国务院国资委国企改革“双百企业”名单。截至2024年底，Demo控股集团资产总额1786.9亿元，全年实现营业收入1027.4亿元、利润总额38.3亿元、净利润29.8亿元。现拥有员工5万余人，其中海外员工5000多人，中共党员6000多人；位居2024中国企业500强第203位、中国战略性新兴产业领军企业100强第29位、中国跨国公司100大第88位。',
+    imageAlt: 'Demo RegionDemo控股集团形象图',
     imageUrl: '/images/organization/guangsheng-group.svg',
     subtitle: '省属国有独资重点企业',
-    title: '广东省Demo控股集团有限公司',
+    title: 'Demo RegionDemo控股集团有限公司',
   },
 ];
 
@@ -53,4 +53,3 @@ export function findOrganizationProfile(node?: OrganizationNode) {
     title: `${node.title}简介`,
   };
 }
-

@@ -958,7 +958,7 @@ describe('pre-shift-meeting page', () => {
         date: '2026-05-14',
         department: '幕墙组装',
         imageCheck: '未上传',
-        owner: '湖贝班长',
+        owner: 'Demo Harbor班长',
         status: '待检查',
         team: '幕墙组装1班',
       },
@@ -1050,10 +1050,10 @@ describe('pre-shift-meeting page', () => {
       id: '3001',
       imageCheck: '未上传',
       moduleKey: 'pre-shift-inspection',
-      owner: '湖贝班长',
+      owner: 'Demo Harbor班长',
       ownerUserId: 2,
       payload: {
-        owner: '湖贝班长',
+        owner: 'Demo Harbor班长',
         statusLabel: '待检查',
       },
       status: 'WITHDRAWN',
@@ -1068,13 +1068,13 @@ describe('pre-shift-meeting page', () => {
     expect(createThreeCheckDetailEditForm(detail, runtime.columns)).toMatchObject({
       date: '2026-05-18',
       imageCheck: '未上传',
-      owner: '湖贝班长',
+      owner: 'Demo Harbor班长',
     });
 
     expect(
       createThreeCheckRecordUpdatePayloadFromDetail(detail, {
         imageCheck: '现场照片',
-        owner: '湖贝班长',
+        owner: 'Demo Harbor班长',
       }),
     ).toEqual({
       businessDate: '2026-05-18',
@@ -1083,7 +1083,7 @@ describe('pre-shift-meeting page', () => {
       ownerUserId: 2,
       payload: {
         imageCheck: '现场照片',
-        owner: '湖贝班长',
+        owner: 'Demo Harbor班长',
         statusLabel: '待检查',
       },
       status: '待检查',
@@ -2378,13 +2378,13 @@ describe('pre-shift-meeting page', () => {
   it('maps pre-shift meeting create fields into a generic record payload', () => {
     expect(
       createPreShiftMeetingRecordPayload({
-        attendeeNames: ['湖贝班长', '幕墙安全员'],
+        attendeeNames: ['Demo Harbor班长', '幕墙安全员'],
         meetingContent: '班前风险交底',
         statusLabel: '待开会议',
       }),
     ).toEqual({
-      attendees: ['湖贝班长', '幕墙安全员'],
-      attendeesText: '湖贝班长、幕墙安全员',
+      attendees: ['Demo Harbor班长', '幕墙安全员'],
+      attendeesText: 'Demo Harbor班长、幕墙安全员',
       meetingContent: '班前风险交底',
       statusLabel: '待开会议',
     });
@@ -2392,10 +2392,9 @@ describe('pre-shift-meeting page', () => {
 
   it('formats generic payload array values for table display', () => {
     expect(
-      formatThreeCheckPayloadDisplayValue(['湖贝班长', '幕墙安全员']),
-    ).toBe('湖贝班长、幕墙安全员');
-    expect(formatThreeCheckPayloadDisplayValue('湖贝班长')).toBe('湖贝班长');
+      formatThreeCheckPayloadDisplayValue(['Demo Harbor班长', '幕墙安全员']),
+    ).toBe('Demo Harbor班长、幕墙安全员');
+    expect(formatThreeCheckPayloadDisplayValue('Demo Harbor班长')).toBe('Demo Harbor班长');
     expect(formatThreeCheckPayloadDisplayValue(undefined)).toBe('');
   });
 });
-

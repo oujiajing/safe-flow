@@ -129,7 +129,7 @@ class HazardRectificationMiniApiTest {
                                         "checkResult", "有隐患",
                                         "hazardDescription", "通道堆放材料影响通行",
                                         "rectificationMeasures", "清理通道并设置标识",
-                                        "rectificationResponsiblePerson", "湖贝班长",
+                                        "rectificationResponsiblePerson", "Demo Harbor班长",
                                         "rectificationDeadline", "2026-07-03")))))
             .path("data");
 
@@ -583,4 +583,3 @@ class HazardRectificationMiniApiTest {
         Long.parseLong(orderId));
   }
 }
-

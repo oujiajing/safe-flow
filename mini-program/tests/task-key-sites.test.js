@@ -165,9 +165,9 @@ test("key sites workflow presents the four visual stages without duplicating rec
   const { helpers } = loadPage("../pages/key-sites/workflow/index")
   const steps = helpers.buildFlowSteps({
     status: "OPENED",
-    owner: "湖贝班长",
+    owner: "Demo Harbor班长",
     payload: {
-      responsiblePerson: "湖贝班长",
+      responsiblePerson: "Demo Harbor班长",
       responsibleDepartment: "幕墙组装",
       acceptancePerson: "幕墙安全员",
       checkItems: [{ rectificationStatus: "PENDING_RECTIFY" }]
