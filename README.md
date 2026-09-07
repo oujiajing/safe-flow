@@ -30,6 +30,22 @@ The portfolio candidate is currently `PARTIAL`, not READY. Dependencies, databas
 
 Do not connect this candidate to any production or enterprise service. Use only a new local Demo database and local attachment storage. See [docs/PORTFOLIO_AUDIT.md](docs/PORTFOLIO_AUDIT.md) and [PORTFOLIO_READINESS.md](PORTFOLIO_READINESS.md).
 
+## Demo account flow
+
+After the local Demo PostgreSQL schema is initialized and the backend dependencies have been built, set `PINGAN_DB_URL`, `PINGAN_DB_USERNAME` and `PINGAN_DB_PASSWORD` in the current PowerShell session, then run:
+
+```powershell
+.\scripts\init-demo.ps1 -ConfirmDemo
+```
+
+The command creates `portfolio-admin` only in a localhost `demo_safeteam` database and displays a newly generated password once. Re-running it does not overwrite or display the existing password. To explicitly rotate that local account:
+
+```powershell
+.\scripts\reset-demo.ps1 -ConfirmDemo
+```
+
+Generated passwords are not written to Git, README files or logs. The scripts refuse non-local or non-Demo database URLs.
+
 ## Third-party attribution
 
 The PC application is based on Vue Vben Admin. Its MIT license and upstream attribution must remain with the candidate. Business-specific code, workflow modeling and verification notes are documented separately; framework code is not claimed as original work.

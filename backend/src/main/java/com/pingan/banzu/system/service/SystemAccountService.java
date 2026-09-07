@@ -116,7 +116,10 @@ public class SystemAccountService {
     }
     SysUser user = new SysUser();
     user.username = request.username();
-    user.passwordHash = passwordService.hash(request.password() == null ? "SAFE_TEST_PASSWORD" : request.password());
+    if (request.password() == null || request.password().isBlank()) {
+      throw new BusinessException("密码不能为空");
+    }
+    user.passwordHash = passwordService.hash(request.password());
     user.realName = request.realName();
     user.mobile = request.mobile();
     user.orgId = request.orgId();
