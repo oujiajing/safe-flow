@@ -22,7 +22,7 @@ overrides:
 
 catalog:
   '@ast-grep/napi': ^0.42.1
-  '@changesets/changelog-github': ^0.6.0
+  '@changesets/changelog-github': ^1.0.1
   '@changesets/cli': ^2.30.0
   '@changesets/git': ^3.0.4
   '@clack/prompts': ^1.2.0
