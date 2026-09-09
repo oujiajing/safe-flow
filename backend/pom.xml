@@ -22,7 +22,7 @@
     <jjwt.version>0.12.6</jjwt.version>
     <minio.version>9.0.0</minio.version>
     <mybatis-plus.version>3.5.9</mybatis-plus.version>
-    <testcontainers.version>2.0.2</testcontainers.version>
+    <testcontainers.version>2.0.5</testcontainers.version>
   </properties>
 
   <dependencies>
