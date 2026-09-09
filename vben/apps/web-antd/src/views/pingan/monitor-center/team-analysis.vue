@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 
+import dayjs, { type Dayjs } from 'dayjs';
+
 import { IconifyIcon } from '@vben/icons';
 
 import { Checkbox, DatePicker, Input, Select, Tooltip } from 'ant-design-vue';
@@ -15,10 +17,16 @@ import {
 } from '#/api/pingan/monitor-center';
 
 const searchKeyword = ref('');
-const selectedGroup = ref('guangsheng');
+const selectedGroup = ref('demo-company');
 const selectedCompany = ref<PinganMonitorCenterApi.Id | 'all-company'>('all-company');
 const selectedTeam = ref<PinganMonitorCenterApi.Id | 'all-team'>('all-team');
-const dateRange = ref<[string, string]>(['2026-06-01', '2026-06-01']);
+const teamAnalysisEndDate = new Date();
+const teamAnalysisStartDate = new Date(teamAnalysisEndDate);
+teamAnalysisStartDate.setDate(teamAnalysisStartDate.getDate() - 6);
+const dateRange = ref<[Dayjs, Dayjs]>([
+  dayjs(teamAnalysisStartDate),
+  dayjs(teamAnalysisEndDate),
+]);
 const overview = ref<PinganMonitorCenterApi.Overview>(
   createEmptyMonitorCenterOverview(),
 );
@@ -65,7 +73,7 @@ const visibleDetailColumns = ref<Record<DetailColumnKey, boolean>>({
   workshop: true,
 });
 
-const groupOptions = [{ label: 'Demo Safety Holdings', value: 'guangsheng' }];
+const groupOptions = [{ label: '演示公司', value: 'demo-company' }];
 const pageSizeOptions = [
   { label: '10条/页', value: 10 },
   { label: '20条/页', value: 20 },
@@ -266,7 +274,9 @@ async function loadMonitorOverview() {
   loading.value = true;
   loadError.value = '';
   try {
-    const [dateStart, dateEnd] = dateRange.value;
+    const [dateStartValue, dateEndValue] = dateRange.value;
+    const dateStart = dateStartValue.format('YYYY-MM-DD');
+    const dateEnd = dateEndValue.format('YYYY-MM-DD');
     const orgId =
       selectedTeam.value !== 'all-team'
         ? selectedTeam.value
@@ -412,7 +422,6 @@ function downloadCurrentTeamTable() {
       <DatePicker.RangePicker
         v-model:value="dateRange"
         class="date-range"
-        value-format="YYYY-MM-DD"
       />
       <div class="toolbar-spacer"></div>
       <span v-if="loading || loadError" class="data-status">

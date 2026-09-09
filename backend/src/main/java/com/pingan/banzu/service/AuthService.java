@@ -113,7 +113,7 @@ public class AuthService {
         "https://unpkg.com/@vbenjs/static-source@0.1.7/source/avatar-v1.webp",
         user.roles(),
         "平安班组用户",
-        "/pingan/three-checks/pre-shift-meeting",
+        "/pingan/monitor-center",
         "");
   }
 

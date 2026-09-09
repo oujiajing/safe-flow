@@ -56,15 +56,6 @@ const notifications = ref<NotificationItem[]>([
     title: '代办提醒',
   },
   {
-    id: 5,
-    avatar: 'https://avatar.vercel.sh/satori',
-    date: '1天前',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '跳转Workspace示例',
-    link: '/workspace',
-  },
-  {
     id: 6,
     avatar: 'https://avatar.vercel.sh/satori',
     date: '1天前',
@@ -218,6 +209,7 @@ watch(
 
 <template>
   <BasicLayout @clear-preferences-and-logout="handleLogout">
+    <template #logo-text>安全生产数字化管控平台</template>
     <template #user-dropdown>
       <UserDropdown
         :avatar

@@ -454,6 +454,33 @@ export const meetingRows: MeetingRow[] = [
   },
 ];
 
+function localizeDemoText(value: string): string {
+  return value
+    .replaceAll('Demo RegionDemo控股集团有限公司', '演示公司集团')
+    .replaceAll('Demo控股集团', '演示安全集团')
+    .replaceAll('Demo Safety Holdings', '演示安全集团')
+    .replaceAll('Demo Works Company', '演示公司')
+    .replaceAll('Demo Harbor班长', '班组负责人')
+    .replaceAll(/Demo(?: [A-Za-z]+)+/g, '演示单位')
+    .replaceAll('Demo矿投', '演示矿业');
+}
+
+function localizeOrganizationNodes(nodes: OrganizationNode[]): void {
+  nodes.forEach((node) => {
+    node.title = localizeDemoText(node.title);
+    if (node.children) localizeOrganizationNodes(node.children);
+  });
+}
+
+localizeOrganizationNodes(organizationTree);
+meetingRows.forEach((row) => {
+  row.company = localizeDemoText(row.company);
+  row.department = localizeDemoText(row.department);
+  row.owner = localizeDemoText(row.owner);
+  row.team = localizeDemoText(row.team);
+  row.attendees = localizeDemoText(row.attendees);
+});
+
 export type ThreeCheckTemplateRow = MeetingRow & Record<string, unknown>;
 
 const yuanchengOrganizationPath = [
@@ -479,7 +506,7 @@ function createTemplateRow(
     canWithdraw: status === 'OPENED',
     company: 'Demo Works Company',
     date,
-    department: '幕墙组装',
+    department: '组装',
     id,
     imageCheck: '未上传',
     organizationPath: yuanchengOrganizationPath,
@@ -488,7 +515,7 @@ function createTemplateRow(
     sourceChannel: 'PC',
     status,
     statusLabel: status === 'OPENED' ? '已开会议' : '待开会议',
-    team: '幕墙组装1班',
+    team: '组装1班',
     version: 0,
     videoCheck: '未上传',
     ...restValues,
@@ -508,11 +535,11 @@ const threeCheckTemplateRowsByRouteName: Record<string, ThreeCheckTemplateRow[]>
         id: 'curtain-wall-team-dispatch-001',
         managerCount: '3',
         team: '门窗组装1班',
-        teamTask: '幕墙单元板装配',
+        teamTask: '单元板装配',
       }),
       createTemplateRow({
         date: '2026-05-15',
-        department: '幕墙机加',
+        department: '机加',
         dispatchDate: '2026-05-15',
         dispatchStatus: '不生效',
         dispatchTime: '2026-05-15 07:50',
@@ -520,17 +547,17 @@ const threeCheckTemplateRowsByRouteName: Record<string, ThreeCheckTemplateRow[]>
         id: 'curtain-wall-team-dispatch-002',
         managerCount: '2',
         status: 'OPENED',
-        team: '幕墙机加1班',
+        team: '机加1班',
         teamTask: '型材切割开料',
       }),
     ],
     PinganKeySites: [
       createTemplateRow({
-        acceptancePerson: '幕墙安全员',
+        acceptancePerson: '安全员',
         date: '2026-05-15',
         id: 'key-sites-001',
         inspectionDepartment: '安全质量职卫部',
-        responsibleDepartment: '幕墙组装',
+        responsibleDepartment: '组装',
         responsiblePerson: 'Demo Harbor班长',
         siteType: '吊装作业区',
         statusLabel: '待检查',
@@ -541,7 +568,7 @@ const threeCheckTemplateRowsByRouteName: Record<string, ThreeCheckTemplateRow[]>
         id: 'key-sites-002',
         inspectionDepartment: '生产部',
         responsibleDepartment: '资材仓库',
-        responsiblePerson: '幕墙安全员',
+        responsiblePerson: '安全员',
         siteType: '临边防护区',
         status: 'ARCHIVED',
         statusLabel: '已验收',
@@ -561,7 +588,7 @@ const threeCheckTemplateRowsByRouteName: Record<string, ThreeCheckTemplateRow[]>
         department: '资材仓库',
         id: 'mid-shift-inspection-002',
         imageCheck: '待补传',
-        owner: '幕墙安全员',
+        owner: '安全员',
         status: 'OPENED',
         statusLabel: '已检查',
         team: '型材卸车备料班',
@@ -599,13 +626,13 @@ const threeCheckTemplateRowsByRouteName: Record<string, ThreeCheckTemplateRow[]>
       }),
       createTemplateRow({
         date: '2026-05-14',
-        department: '幕墙机加',
+        department: '机加',
         id: 'pre-shift-inspection-002',
         imageCheck: '现场照片',
-        owner: '幕墙安全员',
+        owner: '安全员',
         status: 'OPENED',
         statusLabel: '已检查',
-        team: '幕墙机加1班',
+        team: '机加1班',
       }),
     ],
     PinganPreShiftSafetyActivity: [
@@ -646,7 +673,7 @@ const threeCheckTemplateRowsByRouteName: Record<string, ThreeCheckTemplateRow[]>
         dispatchType: '常规派班',
         id: 'team-dispatch-001',
         managerCount: '2',
-        teamTask: '幕墙组装巡检',
+        teamTask: '组装巡检',
       }),
       createTemplateRow({
         date: '2026-05-14',
@@ -1116,6 +1143,7 @@ export function resolveAttachmentPreviewUrl(value?: string) {
   const normalizedValue = normalizeStorageDescriptor(value);
   if (
     /^https?:\/\//i.test(normalizedValue) ||
+    normalizedValue.startsWith('/api/attachments/') ||
     normalizedValue.startsWith('/uploads/')
   ) {
     return normalizedValue;

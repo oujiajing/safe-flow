@@ -11,8 +11,8 @@ type MonitorModule = 'accident' | 'analysis' | 'screen' | 'team';
 const activeModule = ref<MonitorModule>('screen');
 
 const moduleTabs: Array<{ label: string; value: MonitorModule }> = [
-  { label: '平安班组大屏', value: 'screen' },
-  { label: '平安班组数据分析中心', value: 'analysis' },
+  { label: '大屏', value: 'screen' },
+  { label: '数据分析中心', value: 'analysis' },
   { label: '事故看板', value: 'accident' },
   { label: '班组分析', value: 'team' },
 ];
@@ -21,7 +21,7 @@ const moduleTabs: Array<{ label: string; value: MonitorModule }> = [
 
 <template>
   <div class="monitor-center-shell">
-    <nav class="monitor-module-tabs" aria-label="平安班组监控中心模块">
+    <nav class="monitor-module-tabs" aria-label="监控中心模块">
       <button
         v-for="item in moduleTabs"
         :key="item.value"

@@ -180,7 +180,7 @@ describe('safety ledger page', () => {
     expect(page).toContain('openMeetingReport');
     expect(page).toContain('SafetyLedgerMeetingReport');
     expect(page).toContain('meetingReportOpen');
-    expect(page).toContain('Demo Safety Operations平安班组班前会议记录表');
+    expect(page).toContain('安全生产数字化管控平台班前会议记录表');
     expect(page).toContain('打印/导出 PDF');
     expect(page).toContain('window.print()');
     expect(page).toContain('record.imagePreviewUrl');

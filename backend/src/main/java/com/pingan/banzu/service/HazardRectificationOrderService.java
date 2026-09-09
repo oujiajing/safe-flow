@@ -566,16 +566,18 @@ public class HazardRectificationOrderService {
       String fileKind,
       String itemValue,
       String... snapshotKeys) {
+    // Source values can contain an expired signed URL. Generate a fresh URL from
+    // the attachment row whenever the original business record still has one.
+    String attachmentUrl = firstSourceAttachmentUrl(order, fileKind);
+    if (!isBlank(attachmentUrl)) {
+      return attachmentUrl;
+    }
     if (looksLikeMediaUrl(itemValue)) {
       return itemValue;
     }
     String snapshotValue = firstText(sourceSnapshot, snapshotKeys);
     if (looksLikeMediaUrl(snapshotValue) && mediaMatchesKind(snapshotValue, fileKind)) {
       return snapshotValue;
-    }
-    String attachmentUrl = firstSourceAttachmentUrl(order, fileKind);
-    if (!isBlank(attachmentUrl)) {
-      return attachmentUrl;
     }
     return itemValue;
   }
@@ -815,6 +817,7 @@ public class HazardRectificationOrderService {
         HazardRectificationOrderStatus.label(order.status),
         order.rectificationDepartmentId,
         order.rectificationResponsibleUserId,
+        userName(users, order.rectificationResponsibleUserId),
         order.rectificationRequirement,
         formatDateTime(order.rectificationDeadline),
         order.issuedBy,
@@ -822,8 +825,9 @@ public class HazardRectificationOrderService {
         order.rectifiedBy,
         formatDateTime(order.rectifiedAt),
         order.rectificationDescription,
-        order.rectificationAfterPhoto,
+        rectificationAfterPhotoUrl(order),
         order.acceptanceUserId,
+        userName(users, order.acceptanceUserId),
         order.acceptanceDepartmentId,
         formatDateTime(order.acceptanceAt),
         order.acceptanceResult,
@@ -875,9 +879,31 @@ public class HazardRectificationOrderService {
         sourceSnapshot);
   }
 
+  private String rectificationAfterPhotoUrl(HazardRectificationOrder order) {
+    BizAttachment attachment =
+        attachmentMapper.selectOne(
+            new QueryWrapper<BizAttachment>()
+                .eq("biz_type", "HAZARD_RECTIFICATION_ORDER")
+                .eq("biz_id", order.id)
+                .eq("file_kind", "RECTIFICATION_AFTER_PHOTO")
+                .eq("deleted", 0)
+                .orderByDesc("uploaded_at")
+                .last("limit 1"));
+    return attachment == null
+        ? order.rectificationAfterPhoto
+        : attachmentUrlResolver.url(attachment);
+  }
+
   private HazardRectificationFlowLogResponse toFlowLogResponse(
       HazardRectificationFlowLog log, Map<Long, SysUser> users) {
     SysUser operator = log.operatorId == null ? null : users.get(log.operatorId);
+    Map<String, Object> payload = new LinkedHashMap<>(readOptionalPayload(log.payloadJson));
+    enrichPayloadUserName(
+        payload,
+        "rectificationResponsibleUserId",
+        "rectificationResponsibleUserName",
+        users);
+    enrichPayloadUserName(payload, "acceptanceUserId", "acceptanceUserName", users);
     return new HazardRectificationFlowLogResponse(
         String.valueOf(log.id),
         log.fromStatus,
@@ -889,8 +915,19 @@ public class HazardRectificationOrderService {
         log.operatorId == null ? null : String.valueOf(log.operatorId),
         operator == null ? null : operator.realName,
         log.remark,
-        readOptionalPayload(log.payloadJson),
+        payload,
         formatDateTime(log.createdAt));
+  }
+
+  private void enrichPayloadUserName(
+      Map<String, Object> payload,
+      String idKey,
+      String nameKey,
+      Map<Long, SysUser> users) {
+    String name = userName(users, longValue(payload.get(idKey)));
+    if (!isBlank(name)) {
+      payload.put(nameKey, name);
+    }
   }
 
   private void writeFlowLog(
@@ -1315,13 +1352,21 @@ public class HazardRectificationOrderService {
   }
 
   private Map<Long, SysUser> userMap() {
-    return userMapper.selectList(new QueryWrapper<SysUser>().eq("deleted", 0)).stream()
+    return userMapper.selectList(new QueryWrapper<>()).stream()
         .collect(Collectors.toMap(user -> user.id, Function.identity(), (left, right) -> left));
   }
 
   private String orgName(Map<Long, SysOrg> orgs, Long id) {
     SysOrg org = id == null ? null : orgs.get(id);
     return org == null ? null : org.orgName;
+  }
+
+  private String userName(Map<Long, SysUser> users, Long id) {
+    SysUser user = id == null ? null : users.get(id);
+    if (user == null) {
+      return null;
+    }
+    return isBlank(user.realName) ? user.username : user.realName;
   }
 
   private Map<String, Object> readPayload(String payloadJson) {

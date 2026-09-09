@@ -34,7 +34,20 @@ type PanelView = 'chart' | 'detail';
 
 const selectedCompany = ref<PinganMonitorCenterApi.Id>();
 const selectedTeam = ref<PinganMonitorCenterApi.Id>();
-const dateRange = ref<[string, string]>(['2026-05-29', '2026-05-30']);
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+const analysisEndDate = new Date();
+const analysisStartDate = new Date(analysisEndDate);
+analysisStartDate.setDate(analysisStartDate.getDate() - 6);
+const dateRange = ref<[string, string]>([
+  formatLocalDate(analysisStartDate),
+  formatLocalDate(analysisEndDate),
+]);
 const overview = ref<PinganMonitorCenterApi.Overview>(
   createEmptyMonitorCenterOverview(),
 );

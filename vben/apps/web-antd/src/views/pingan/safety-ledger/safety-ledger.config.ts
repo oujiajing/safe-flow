@@ -329,11 +329,11 @@ export const safetyLedgerSections: SafetyLedgerSectionConfig[] = [
     children: [
       entry('PinganSafetyLedgerRiskControlDocument', 'risk-control-document', '安全风险分级管控文档', 'document-org', documentOrgColumns, riskControlFilters),
       entry('PinganSafetyLedgerDispatchRecord', 'dispatch-record', '派班记录表', 'dispatch', dispatchColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'team-dispatch'),
-      entry('PinganSafetyLedgerCurtainWallDispatchRecord', 'curtain-wall-dispatch-record', '幕墙派班记录表', 'dispatch', dispatchColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'curtain-wall-team-dispatch'),
+      entry('PinganSafetyLedgerCurtainWallDispatchRecord', 'curtain-wall-dispatch-record', '派班记录表', 'dispatch', dispatchColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'curtain-wall-team-dispatch'),
       entry('PinganSafetyLedgerPreShiftMeetingRecord', 'pre-shift-meeting-record', '班前会议记录表', 'meeting', meetingColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'pre-shift-meeting'),
-      entry('PinganSafetyLedgerCurtainWallSafetyActivity', 'curtain-wall-safety-activity', '幕墙班前安全活动', 'safety-activity', safetyActivityColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'pre-shift-safety-activity'),
+      entry('PinganSafetyLedgerCurtainWallSafetyActivity', 'curtain-wall-safety-activity', '班前安全活动', 'safety-activity', safetyActivityColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'pre-shift-safety-activity'),
       entry('PinganSafetyLedgerPreventionControl', 'prevention-control', '“双重预防机制”现场管控表', 'prevention-control', preventionControlColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'pre-shift-inspection'),
-      entry('PinganSafetyLedgerCurtainWallPreventionControl', 'curtain-wall-prevention-control', '幕墙“双重预防机制”现场管控表', 'prevention-control', preventionControlColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'mid-shift-inspection'),
+      entry('PinganSafetyLedgerCurtainWallPreventionControl', 'curtain-wall-prevention-control', '“双重预防机制”现场管控表', 'prevention-control', preventionControlColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'mid-shift-inspection'),
       entry('PinganSafetyLedgerKeySites', 'key-sites', '重点场所', 'key-sites', keySitesColumns, riskControlFilters, 'THREE_CHECK_RECORD', 'key-sites'),
     ],
   },
@@ -367,7 +367,7 @@ export const safetyLedgerSections: SafetyLedgerSectionConfig[] = [
         routeName: 'PinganSafetyLedgerSafetyInspection',
         title: '安全生产检查',
         children: [
-          entry('PinganSafetyLedgerCurtainWallRoutineInspection', 'curtain-wall-routine-inspection', '幕墙日周月检', 'inspection', inspectionColumns, inspectionFilters, 'THREE_CHECK_RECORD', 'curtain-wall-routine-check'),
+          entry('PinganSafetyLedgerCurtainWallRoutineInspection', 'curtain-wall-routine-inspection', '日周月检', 'inspection', inspectionColumns, inspectionFilters, 'THREE_CHECK_RECORD', 'curtain-wall-routine-check'),
           entry('PinganSafetyLedgerInspectionRectificationRecord', 'inspection-rectification-record', '安全检查及整改记录表', 'inspection', inspectionColumns, inspectionFilters, 'THREE_CHECK_RECORD', 'safety-check'),
           entry('PinganSafetyLedgerSafetyInspectionForm', 'safety-inspection-form', '安全检查表', 'inspection', inspectionColumns, inspectionFilters, 'THREE_CHECK_RECORD', 'safety-check'),
           entry('PinganSafetyLedgerHiddenDangerChecklist', 'hidden-danger-checklist', '生产安全事故隐患排查治理清单', 'hidden-danger-checklist', hiddenDangerChecklistColumns, hiddenDangerFilters, 'THREE_CHECK_RECORD', 'hazard-rectification'),

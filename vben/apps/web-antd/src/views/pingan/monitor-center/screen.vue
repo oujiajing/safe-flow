@@ -52,14 +52,28 @@ const screenCompanyOptions: Array<{
   value: PinganMonitorCenterApi.Id | 'all-company';
 }> = [
   { label: '全部公司', value: 'all-company' },
-  { label: 'Demo Works Company', value: 3 },
-  { label: 'Demo Works Company', value: 4 },
-  { label: 'Demo Company', value: 24 },
-  { label: 'Demo Materials', value: 28 },
+  { label: '演示公司', value: 100000000000 },
 ];
 const screenCompanyNames = screenCompanyOptions
   .filter((item) => item.value !== 'all-company')
   .map((item) => item.label);
+
+const featuredVisionVideo: PinganContentProfileApi.ContentProfile = {
+  id: 'featured-safety-production-video',
+  orgId: 'all-company',
+  title: '安全生产宣传片',
+  videoSortOrder: -1,
+  videoTitle: '安全生产宣传片',
+  videoAttachment: {
+    contentType: 'video/mp4',
+    fileKind: 'VIDEO',
+    fileSize: 9_472_849,
+    id: 'featured-safety-production-video-file',
+    originalName: 'safety-production-demo-10s.mp4',
+    storagePath: '/videos/safety-production-demo-10s.mp4',
+    url: '/videos/safety-production-demo-10s.mp4',
+  },
+};
 
 const overview = ref<PinganMonitorCenterApi.Overview>(createEmptyOverview());
 const isOverviewLoading = ref(false);
@@ -71,7 +85,9 @@ const selectedDateRange = ref<[string, string]>([
   formatDateValue(new Date()),
   formatDateValue(new Date()),
 ]);
-const screenVideos = ref<PinganContentProfileApi.ContentProfile[]>([]);
+const screenVideos = ref<PinganContentProfileApi.ContentProfile[]>([
+  featuredVisionVideo,
+]);
 const activeVisionVideoIndex = ref(0);
 const screenFullscreenRef = ref<HTMLElement>();
 const currentDateTime = ref(formatDateTime(new Date()));
@@ -454,12 +470,13 @@ function setPanelView(panel: PanelKey, view: PanelView) {
 async function loadScreenVideos() {
   try {
     activeVisionVideoIndex.value = 0;
-    screenVideos.value = await getScreenContentProfileVideosApi({
+    const managedVideos = await getScreenContentProfileVideosApi({
       orgId:
         selectedCompanyId.value === 'all-company' ? undefined : selectedCompanyId.value,
     });
+    screenVideos.value = [featuredVisionVideo, ...managedVideos];
   } catch {
-    screenVideos.value = [];
+    screenVideos.value = [featuredVisionVideo];
   }
 }
 
@@ -492,7 +509,7 @@ function formatDateValue(value: Date) {
 }
 
 function companyLabel(sourceName: string | undefined, index: number) {
-  const shortName = screenCompanyNames[index % screenCompanyNames.length] ?? 'Demo公司';
+  const shortName = screenCompanyNames[index % screenCompanyNames.length] ?? '演示公司';
   return {
     fullName: shortName,
     originalName: sourceName ?? shortName,
@@ -774,7 +791,7 @@ function renderCharts() {
         </span>
       </div>
       <div class="header-title">
-        <h1>Demo Safety Operations平安班组监控中心</h1>
+        <h1>安全生产数字化管控平台监控中心</h1>
       </div>
       <div class="header-right">
         <span class="date-range">{{ currentDateTime }}</span>
@@ -909,8 +926,11 @@ function renderCharts() {
                   v-if="activeVisionVideo?.videoAttachment?.url"
                   :key="activeVisionVideo.videoAttachment.id"
                   :src="activeVisionVideo.videoAttachment.url"
+                  autoplay
                   class="vision-video-player"
                   controls
+                  muted
+                  playsinline
                   @ended="handleVisionVideoEnded"
                 ></video>
                 <div v-else class="vision-video-placeholder">暂无宣传视频</div>
@@ -1050,7 +1070,7 @@ function renderCharts() {
           </div>
           <div class="ai-body">
             <div class="ai-visual">
-              <div class="ai-visual-placeholder" role="img" aria-label="Demo camera feed">Demo camera feed</div>
+              <div class="ai-visual-placeholder" role="img" aria-label="安全监控画面">安全监控画面</div>
               <button type="button" aria-label="放大AI监控画面">点击放大</button>
             </div>
             <div class="ai-alert-card">

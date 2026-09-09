@@ -479,6 +479,11 @@ describe('pre-shift-meeting data', () => {
     );
     expect(
       resolveAttachmentPreviewUrl(
+        '/api/attachments/42/content?expires=1770000000&signature=test',
+      ),
+    ).toBe('/api/attachments/42/content?expires=1770000000&signature=test');
+    expect(
+      resolveAttachmentPreviewUrl(
         'http://localhost:9000/safeteam-portfolio/pre-shift-meeting/1/image/a.jpg?X-Amz-Signature=test',
       ),
     ).toBe(

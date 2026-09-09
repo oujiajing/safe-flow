@@ -262,7 +262,7 @@ const oneShiftFlowStageConfigs: OneShiftFlowStageConfig[] = [
     icon: 'lucide:calendar-clock',
     key: 'teamDispatch',
     label: '班组派班',
-    moduleKeys: ['team-dispatch', 'curtain-wall-team-dispatch'],
+    moduleKeys: ['team-dispatch'],
     shortLabel: '派班',
   },
   {
@@ -352,7 +352,7 @@ const oneShiftRouteNameByModuleKey: Record<string, string> = {
 };
 
 const GUANGSHENG_CURTAIN_WALL_COMPANY_ID = 3;
-const GUANGSHENG_CURTAIN_WALL_COMPANY_NAME = 'Demo Works Company';
+const GUANGSHENG_CURTAIN_WALL_COMPANY_NAME = '演示公司';
 const {
   changeHistoryFilter,
   changeHistoryFilterOptions,
@@ -1044,7 +1044,7 @@ const documentFlowSidebarSubtitle = computed(() =>
   isKeySiteDocumentFlow.value
     ? '重点场所 / 检查记录 / 整改验收'
     : isPreShiftSafetyActivityDocumentFlow.value
-      ? 'Demo Works Company / 班前安全活动'
+      ? '演示公司 / 班前安全活动'
       : isStageSpecificDocumentFlow.value
         ? '班组派班 / 班前会 / 三查记录'
         : '作业排程 / 班组派班',
@@ -1498,14 +1498,7 @@ function documentFlowIsCompletedStatus(node: OneShiftFlowNode) {
 }
 
 function orderedFlowModuleKeys(stage: OneShiftFlowStageConfig) {
-  if (stage.key !== 'teamDispatch') {
-    return stage.moduleKeys;
-  }
-  const currentModuleKey = currentThreeCheckDetail.value?.moduleKey;
-  if (currentModuleKey === 'curtain-wall-team-dispatch') {
-    return ['curtain-wall-team-dispatch', 'team-dispatch'];
-  }
-  return ['team-dispatch', 'curtain-wall-team-dispatch'];
+  return stage.moduleKeys;
 }
 
 function createDocumentFlowLinkContext(
@@ -1826,8 +1819,8 @@ async function loadUsers() {
     if (!userOptions.value.length) {
       userOptions.value = [
         { id: 1, orgId: 1, realName: '系统管理员', username: 'admin' },
-        { id: 2, orgId: 4, realName: 'Demo Harbor班长', username: 'HB_MONITOR' },
-        { id: 3, orgId: 4, realName: '幕墙安全员', username: 'MQ_SAFE' },
+        { id: 2, orgId: 4, realName: '班组负责人', username: 'HB_MONITOR' },
+        { id: 3, orgId: 4, realName: '安全员', username: 'MQ_SAFE' },
         { id: 4, orgId: 8, realName: '制氧主管', username: 'ZY_SUPERVISOR' },
       ];
     }
@@ -2202,7 +2195,7 @@ function syncLocalOrganizationFields() {
 function rootDispatchOptionLabel(row: PinganThreeCheckRecordApi.RecordRow) {
   const payload = (row.payload ?? {}) as Record<string, unknown>;
   return [
-    row.moduleKey === 'curtain-wall-team-dispatch' ? '幕墙派班' : '班组派班',
+    row.moduleKey === 'curtain-wall-team-dispatch' ? '派班' : '班组派班',
     payload.dispatchTime || payload.dispatchDate || row.businessDate,
     payload.teamTask || payload.dispatchType || row.owner,
   ]
@@ -2598,9 +2591,9 @@ function openCreateModal() {
   createForm.ownerUserId =
     resolveCurrentOwnerUserId();
   createForm.attendeeNames = attendeeSelectOptions.value.some(
-    (item) => item.value === 'Demo Harbor班长',
+    (item) => item.value === '班组负责人',
   )
-    ? ['Demo Harbor班长']
+    ? ['班组负责人']
     : attendeeSelectOptions.value.slice(0, 1).map((item) => item.value);
   createRootDispatchRecordId.value = undefined;
   resetCreateAttachmentFiles();

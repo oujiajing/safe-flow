@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { TableColumnsType } from 'ant-design-vue';
 import type { PinganHazardRectificationOrderApi } from '#/api/pingan/hazard-rectification-order';
+import type { PinganPreShiftMeetingApi } from '#/api/pingan/pre-shift-meeting';
 import type { SystemManagementApi } from '#/api/system-management/types';
+import type { PinganOrganizationFilterKey } from '#/views/pingan/shared/organization-filter-permission';
 
 import { computed, onMounted, reactive, ref } from 'vue';
 
@@ -13,7 +15,6 @@ import {
   DatePicker,
   Drawer,
   Input,
-  InputNumber,
   message,
   Modal,
   Select,
@@ -30,7 +31,10 @@ import {
   getHazardRectificationOrdersApi,
   uploadHazardRectificationOrderAttachmentApi,
 } from '#/api/pingan/hazard-rectification-order';
-import { getPinganOrgTreeApi } from '#/api/pingan/pre-shift-meeting';
+import {
+  getPinganOrgTreeApi,
+  getPinganUsersApi,
+} from '#/api/pingan/pre-shift-meeting';
 import StatusFilterActions from '#/views/pingan/shared/StatusFilterActions.vue';
 import {
   canAcceptHazardRectificationOrder,
@@ -39,11 +43,11 @@ import {
   canRectifyHazardRectificationOrder,
   canVoidHazardRectificationOrder,
 } from '#/views/pingan/pre-shift-meeting/pre-shift-meeting.view-state';
+import { resolveAttachmentPreviewUrl } from '#/views/pingan/pre-shift-meeting/pre-shift-meeting.data';
 import {
   getVisiblePinganOrganizationFilterKeys,
   isPinganOrganizationFilterLocked,
   resolveScopedPinganOrganizationDefaults,
-  type PinganOrganizationFilterKey,
 } from '#/views/pingan/shared/organization-filter-permission';
 
 type OrgNode = SystemManagementApi.OrganizationNode;
@@ -65,15 +69,16 @@ type HazardOrderStatusFilter = NonNullable<
   PinganHazardRectificationOrderApi.OrderListParams['status']
 >;
 
-const statusOptions: Array<{ label: string; value: HazardOrderStatusFilter }> = [
-  { label: '全部', value: 'all' },
-  { label: '待派发', value: 'PENDING_ASSIGN' },
-  { label: '待整改', value: 'PENDING_RECTIFY' },
-  { label: '已整改', value: 'RECTIFIED' },
-  { label: '待验收', value: 'PENDING_ACCEPTANCE' },
-  { label: '已关闭', value: 'CLOSED' },
-  { label: '已作废', value: 'CANCELLED' },
-];
+const statusOptions: Array<{ label: string; value: HazardOrderStatusFilter }> =
+  [
+    { label: '全部', value: 'all' },
+    { label: '待派发', value: 'PENDING_ASSIGN' },
+    { label: '待整改', value: 'PENDING_RECTIFY' },
+    { label: '已整改', value: 'RECTIFIED' },
+    { label: '待验收', value: 'PENDING_ACCEPTANCE' },
+    { label: '已关闭', value: 'CLOSED' },
+    { label: '已作废', value: 'CANCELLED' },
+  ];
 const sourceTypeOptions = [
   { label: '全部来源', value: 'all' },
   { label: '一班三查', value: 'THREE_CHECK' },
@@ -133,6 +138,7 @@ const query = reactive<PinganHazardRectificationOrderApi.OrderListParams>({
 });
 const orgNodes = ref<OrgNode[]>([]);
 const orgTreeOptions = ref<OrgOption[]>([]);
+const responsibleUsers = ref<PinganPreShiftMeetingApi.UserOption[]>([]);
 const loading = ref(false);
 const actionSubmitting = ref(false);
 const createOpen = ref(false);
@@ -150,7 +156,7 @@ const actionForm = reactive({
     | PinganHazardRectificationOrderApi.Id
     | undefined,
   acceptanceRemark: '',
-  acceptanceUserId: '',
+  acceptanceUserId: undefined as string | undefined,
   afterPhoto: '',
   cancelReason: '',
   rectificationDeadline: '',
@@ -159,7 +165,7 @@ const actionForm = reactive({
     | undefined,
   rectificationDescription: '',
   rectificationRequirement: '',
-  rectificationResponsibleUserId: undefined as number | undefined,
+  rectificationResponsibleUserId: undefined as string | undefined,
   rejectReason: '',
 });
 const createForm = reactive({
@@ -179,7 +185,10 @@ const createItems = ref<PinganHazardRectificationOrderApi.CreateItemRequest[]>([
 const accessCodes = computed(() => accessStore.accessCodes ?? []);
 const currentUserRoles = computed(() => userStore.userInfo?.roles ?? []);
 const currentUserOrgDefaults = computed(() =>
-  resolveScopedPinganOrganizationDefaults(userStore.userInfo?.orgId, orgNodes.value),
+  resolveScopedPinganOrganizationDefaults(
+    userStore.userInfo?.orgId,
+    orgNodes.value,
+  ),
 );
 const visibleOrganizationFilterKeys = computed(() =>
   getVisiblePinganOrganizationFilterKeys(currentUserRoles.value),
@@ -214,16 +223,17 @@ const columns: TableColumnsType<PinganHazardRectificationOrderApi.OrderRow> = [
   { dataIndex: 'actions', fixed: 'right', title: '操作', width: 130 },
 ];
 
-const itemColumns: TableColumnsType<PinganHazardRectificationOrderApi.OrderItem> = [
-  { dataIndex: 'sourceLineIndex', title: '序号', width: 70 },
-  { dataIndex: 'riskType', title: '风险', width: 130 },
-  { dataIndex: 'checkItem', title: '检查项', width: 260 },
-  { dataIndex: 'aiEnabled', title: '是否启用AI', width: 120 },
-  { dataIndex: 'hazardDescription', title: '隐患描述', width: 260 },
-  { dataIndex: 'hazardMedia', title: '隐患图片/视频', width: 180 },
-  { dataIndex: 'rectificationStatusLabel', title: '整改状态', width: 120 },
-  { dataIndex: 'closedAt', title: '闭环时间', width: 170 },
-];
+const itemColumns: TableColumnsType<PinganHazardRectificationOrderApi.OrderItem> =
+  [
+    { dataIndex: 'sourceLineIndex', title: '序号', width: 70 },
+    { dataIndex: 'riskType', title: '风险', width: 130 },
+    { dataIndex: 'checkItem', title: '检查项', width: 260 },
+    { dataIndex: 'aiEnabled', title: '是否启用AI', width: 120 },
+    { dataIndex: 'hazardDescription', title: '隐患描述', width: 260 },
+    { dataIndex: 'hazardMedia', title: '隐患图片/视频', width: 180 },
+    { dataIndex: 'rectificationStatusLabel', title: '整改状态', width: 120 },
+    { dataIndex: 'closedAt', title: '闭环时间', width: 170 },
+  ];
 
 const availableActions = computed(() => {
   const status = currentOrder.value?.status;
@@ -252,7 +262,9 @@ const detailItemColumns = computed(() =>
     : itemColumns,
 );
 
-function canPerformOrderAction(action: PinganHazardRectificationOrderApi.Action) {
+function canPerformOrderAction(
+  action: PinganHazardRectificationOrderApi.Action,
+) {
   if (
     action === 'ISSUE_RECTIFICATION' ||
     action === 'MARK_RECTIFIED' ||
@@ -270,6 +282,46 @@ function canPerformOrderAction(action: PinganHazardRectificationOrderApi.Action)
 }
 
 const flatOrganizations = computed(() => flattenOrganizations(orgNodes.value));
+const responsibleUserOptions = computed(() => {
+  const options = responsibleUsers.value.map((user) => ({
+    label:
+      user.realName === user.username
+        ? user.realName
+        : `${user.realName}（${user.username}）`,
+    value: String(user.id),
+  }));
+  const selectedId = String(
+    currentOrder.value?.rectificationResponsibleUserId ?? '',
+  );
+  const selectedName = currentOrder.value?.rectificationResponsibleUserName;
+  if (
+    selectedId &&
+    selectedName &&
+    !options.some((option) => option.value === selectedId)
+  ) {
+    options.push({ label: selectedName, value: selectedId });
+  }
+  return options;
+});
+const acceptanceUserOptions = computed(() => {
+  const options = responsibleUsers.value.map((user) => ({
+    label:
+      user.realName === user.username
+        ? user.realName
+        : `${user.realName}（${user.username}）`,
+    value: String(user.id),
+  }));
+  const selectedId = String(currentOrder.value?.acceptanceUserId ?? '');
+  const selectedName = currentOrder.value?.acceptanceUserName;
+  if (
+    selectedId &&
+    selectedName &&
+    !options.some((option) => option.value === selectedId)
+  ) {
+    options.push({ label: selectedName, value: selectedId });
+  }
+  return options;
+});
 const companyOptions = computed(() => orgOptionsByType('COMPANY'));
 const departmentOptions = computed(() =>
   childOptionsUnderSelectedCompany('DEPARTMENT'),
@@ -347,6 +399,10 @@ async function loadOrgTreeOptions() {
   enforceHazardUserOrganizationScope();
 }
 
+async function loadResponsibleUsers() {
+  responsibleUsers.value = await getPinganUsersApi();
+}
+
 async function openDetail(id: string) {
   currentOrder.value = await getHazardRectificationOrderDetailApi(id);
   detailOpen.value = true;
@@ -355,7 +411,7 @@ async function openDetail(id: string) {
 function resetActionForm() {
   actionForm.acceptanceDepartmentId = undefined;
   actionForm.acceptanceRemark = '';
-  actionForm.acceptanceUserId = '';
+  actionForm.acceptanceUserId = undefined;
   actionForm.afterPhoto = '';
   actionForm.cancelReason = '';
   actionForm.rectificationDeadline = '';
@@ -384,9 +440,9 @@ function openAction(action: PinganHazardRectificationOrderApi.Action) {
     actionForm.acceptanceDepartmentId =
       currentOrder.value?.acceptanceDepartmentId ??
       currentOrder.value?.departmentId;
-    actionForm.acceptanceUserId = String(
-      currentOrder.value?.acceptanceUserId ?? '',
-    );
+    actionForm.acceptanceUserId = currentOrder.value?.acceptanceUserId
+      ? String(currentOrder.value.acceptanceUserId)
+      : undefined;
   }
   currentAction.value = action;
   actionOpen.value = true;
@@ -438,7 +494,10 @@ function normalizeOrgTree(nodes: OrgNode[]): OrgOption[] {
 }
 
 function flattenOrganizations(nodes: OrgNode[]): OrgNode[] {
-  return nodes.flatMap((node) => [node, ...flattenOrganizations(node.children ?? [])]);
+  return nodes.flatMap((node) => [
+    node,
+    ...flattenOrganizations(node.children ?? []),
+  ]);
 }
 
 function orgOptionsByType(orgType: string) {
@@ -465,7 +524,10 @@ function childOptionsUnder(
   return orgOptionsByType(orgType);
 }
 
-function optionsUnder(parentId: PinganHazardRectificationOrderApi.Id, orgType: 'DEPARTMENT' | 'TEAM') {
+function optionsUnder(
+  parentId: PinganHazardRectificationOrderApi.Id,
+  orgType: 'DEPARTMENT' | 'TEAM',
+) {
   const path = findOrganizationPath(orgNodes.value, parentId);
   const parent = path.at(-1);
   return flattenOrganizations(parent?.children ?? [])
@@ -473,7 +535,10 @@ function optionsUnder(parentId: PinganHazardRectificationOrderApi.Id, orgType: '
     .map((node) => ({ label: node.title, value: node.id }));
 }
 
-function findOrganizationPath(nodes: OrgNode[], id: PinganHazardRectificationOrderApi.Id): OrgNode[] {
+function findOrganizationPath(
+  nodes: OrgNode[],
+  id: PinganHazardRectificationOrderApi.Id,
+): OrgNode[] {
   for (const node of nodes) {
     if (String(node.id) === String(id)) return [node];
     const childPath = findOrganizationPath(node.children ?? [], id);
@@ -482,9 +547,7 @@ function findOrganizationPath(nodes: OrgNode[], id: PinganHazardRectificationOrd
   return [];
 }
 
-function isHazardOrganizationFieldLocked(
-  field: PinganOrganizationFilterKey,
-) {
+function isHazardOrganizationFieldLocked(field: PinganOrganizationFilterKey) {
   return isPinganOrganizationFilterLocked(currentUserRoles.value, field);
 }
 
@@ -566,7 +629,9 @@ function isHiddenSourceColumn(
 function itemHazardMediaUrl(
   record: Partial<PinganHazardRectificationOrderApi.OrderItem>,
 ) {
-  return record.beforeVideo || record.beforePhoto || '';
+  return resolveAttachmentPreviewUrl(
+    record.beforeVideo || record.beforePhoto || '',
+  );
 }
 
 function itemHazardMediaIsVideo(
@@ -678,15 +743,16 @@ async function submitManualOrder() {
   try {
     await createHazardRectificationOrderApi({
       businessDate: createForm.businessDate,
-      companyId: createForm.companyId!,
-      departmentId: createForm.departmentId!,
+      companyId: createForm.companyId as PinganHazardRectificationOrderApi.Id,
+      departmentId:
+        createForm.departmentId as PinganHazardRectificationOrderApi.Id,
       items: createItems.value.map((item) => ({
         beforePhoto: item.beforePhoto?.trim() || undefined,
         checkItem: item.checkItem.trim(),
         hazardDescription: item.hazardDescription.trim(),
         riskType: item.riskType?.trim() || undefined,
       })),
-      teamId: createForm.teamId!,
+      teamId: createForm.teamId as PinganHazardRectificationOrderApi.Id,
     });
     createOpen.value = false;
     query.sourceType = 'all';
@@ -698,11 +764,13 @@ async function submitManualOrder() {
 }
 
 function selectedAcceptanceUserId() {
-  const rawValue = String(actionForm.acceptanceUserId).trim();
-  if (!rawValue || !/^\d+$/.test(rawValue)) {
-    return undefined;
-  }
-  return Number(rawValue);
+  const value = Number(actionForm.acceptanceUserId);
+  return Number.isSafeInteger(value) && value > 0 ? value : undefined;
+}
+
+function selectedRectificationResponsibleUserId() {
+  const value = Number(actionForm.rectificationResponsibleUserId);
+  return Number.isSafeInteger(value) && value > 0 ? value : undefined;
 }
 
 function actionRequiresAcceptanceUser() {
@@ -720,7 +788,8 @@ function actionPayload() {
         rectificationDepartmentId: actionForm.rectificationDepartmentId,
         rectificationDeadline: actionForm.rectificationDeadline,
         rectificationRequirement: actionForm.rectificationRequirement,
-        rectificationResponsibleUserId: actionForm.rectificationResponsibleUserId,
+        rectificationResponsibleUserId:
+          selectedRectificationResponsibleUserId(),
       };
     case 'MARK_RECTIFIED':
       return {
@@ -767,14 +836,50 @@ function organizationNameById(value: unknown) {
     return '';
   }
   return (
-    flatOrganizations.value.find((organization) => String(organization.id) === id)
-      ?.title ?? ''
+    flatOrganizations.value.find(
+      (organization) => String(organization.id) === id,
+    )?.title ?? ''
   );
 }
 
-function flowLogPayloadValue(key: string, value: unknown) {
+function userNameById(value: unknown) {
+  const id = unknownToText(value);
+  if (!id) return '';
+  if (String(currentOrder.value?.rectificationResponsibleUserId ?? '') === id) {
+    return currentOrder.value?.rectificationResponsibleUserName ?? '';
+  }
+  if (String(currentOrder.value?.acceptanceUserId ?? '') === id) {
+    return currentOrder.value?.acceptanceUserName ?? '';
+  }
+  return (
+    responsibleUsers.value.find((user) => String(user.id) === id)?.realName ??
+    ''
+  );
+}
+
+function flowLogPayloadValue(
+  key: string,
+  value: unknown,
+  payload: Record<string, unknown>,
+) {
   if (['rectificationDepartmentId', 'acceptanceDepartmentId'].includes(key)) {
     return organizationNameById(value) || unknownToText(value);
+  }
+  if (['rectificationResponsibleUserId', 'acceptanceUserId'].includes(key)) {
+    const nameKey =
+      key === 'rectificationResponsibleUserId'
+        ? 'rectificationResponsibleUserName'
+        : 'acceptanceUserName';
+    return (
+      unknownToText(payload[nameKey]) ||
+      userNameById(value) ||
+      unknownToText(value)
+    );
+  }
+  if (key === 'afterPhoto') {
+    return resolveAttachmentPreviewUrl(
+      currentOrder.value?.rectificationAfterPhoto || unknownToText(value),
+    );
   }
   return unknownToText(value);
 }
@@ -782,11 +887,14 @@ function flowLogPayloadValue(key: string, value: unknown) {
 function flowLogDetailItems(log: PinganHazardRectificationOrderApi.FlowLog) {
   const payload = log.payload ?? {};
   return Object.entries(flowLogPayloadLabels)
-    .map(([key, label]): FlowLogDetail => ({
-      key,
-      label,
-      value: flowLogPayloadValue(key, payload[key]),
-    }))
+    .filter(([key]) => key !== 'afterPhoto' || log.action === 'MARK_RECTIFIED')
+    .map(
+      ([key, label]): FlowLogDetail => ({
+        key,
+        label,
+        value: flowLogPayloadValue(key, payload[key], payload),
+      }),
+    )
     .filter((item) => item.value);
 }
 
@@ -805,6 +913,13 @@ async function submitAction() {
     return;
   }
   if (
+    currentAction.value === 'ISSUE_RECTIFICATION' &&
+    !selectedRectificationResponsibleUserId()
+  ) {
+    message.error('请选择整改责任人');
+    return;
+  }
+  if (
     currentAction.value === 'REQUEST_ACCEPTANCE' &&
     !actionForm.acceptanceDepartmentId &&
     !selectedAcceptanceUserId()
@@ -813,13 +928,8 @@ async function submitAction() {
     return;
   }
   if (actionRequiresAcceptanceUser()) {
-    const rawAcceptanceUserId = String(actionForm.acceptanceUserId).trim();
-    if (!rawAcceptanceUserId) {
-      message.error('请填写验收人');
-      return;
-    }
     if (!selectedAcceptanceUserId()) {
-      message.error('验收人必须是数字');
+      message.error('请选择验收人');
       return;
     }
   }
@@ -857,6 +967,7 @@ function onPageChange(page: number, pageSize: number) {
 
 onMounted(() => {
   void loadOrgTreeOptions();
+  void loadResponsibleUsers();
   void loadOrders();
 });
 </script>
@@ -883,7 +994,12 @@ onMounted(() => {
           :disabled="isHazardOrganizationFieldLocked('company')"
           :options="companyOptions"
           placeholder="请选择公司"
-          @change="(value) => setCompany(value as PinganHazardRectificationOrderApi.Id | undefined)"
+          @change="
+            (value) =>
+              setCompany(
+                value as PinganHazardRectificationOrderApi.Id | undefined,
+              )
+          "
         />
       </label>
       <label
@@ -894,10 +1010,17 @@ onMounted(() => {
         <Select
           v-model:value="query.departmentId"
           :allow-clear="!isHazardOrganizationFieldLocked('department')"
-          :disabled="!query.companyId || isHazardOrganizationFieldLocked('department')"
+          :disabled="
+            !query.companyId || isHazardOrganizationFieldLocked('department')
+          "
           :options="departmentOptions"
           placeholder="请选择部门"
-          @change="(value) => setDepartment(value as PinganHazardRectificationOrderApi.Id | undefined)"
+          @change="
+            (value) =>
+              setDepartment(
+                value as PinganHazardRectificationOrderApi.Id | undefined,
+              )
+          "
         />
       </label>
       <label
@@ -908,13 +1031,22 @@ onMounted(() => {
         <Select
           v-model:value="query.teamId"
           :allow-clear="!isHazardOrganizationFieldLocked('team')"
-          :disabled="!query.departmentId || isHazardOrganizationFieldLocked('team')"
+          :disabled="
+            !query.departmentId || isHazardOrganizationFieldLocked('team')
+          "
           :options="teamOptions"
           placeholder="请选择班组"
-          @change="(value) => setTeam(value as PinganHazardRectificationOrderApi.Id | undefined)"
+          @change="
+            (value) =>
+              setTeam(value as PinganHazardRectificationOrderApi.Id | undefined)
+          "
         />
       </label>
-      <Button type="primary" :disabled="!canCreateOrder" @click="openCreateDrawer">
+      <Button
+        type="primary"
+        :disabled="!canCreateOrder"
+        @click="openCreateDrawer"
+      >
         <IconifyIcon icon="lucide:plus" />
         新增工单
       </Button>
@@ -950,7 +1082,10 @@ onMounted(() => {
       row-key="id"
       :scroll="{ x: 1500 }"
       size="small"
-      @change="(pagination: any) => onPageChange(pagination.current, pagination.pageSize)"
+      @change="
+        (pagination: any) =>
+          onPageChange(pagination.current, pagination.pageSize)
+      "
     >
       <template #bodyCell="{ column, record }">
         <Tag
@@ -991,14 +1126,37 @@ onMounted(() => {
               {{ currentOrder.statusLabel }}
             </Tag>
           </div>
-          <div><span>来源</span>{{ sourceTypeLabel(currentOrder.sourceType) }}</div>
           <div>
-            <span>来源模块</span>{{ sourceModuleLabel(currentOrder.sourceModuleKey) }}
+            <span>来源</span>{{ sourceTypeLabel(currentOrder.sourceType) }}
           </div>
-          <div><span>来源单据</span>{{ currentOrder.sourceRecordNo || '-' }}</div>
+          <div>
+            <span>来源模块</span
+            >{{ sourceModuleLabel(currentOrder.sourceModuleKey) }}
+          </div>
+          <div>
+            <span>来源单据</span>{{ currentOrder.sourceRecordNo || '-' }}
+          </div>
           <div><span>班组</span>{{ currentOrder.team }}</div>
           <div><span>隐患数</span>{{ currentOrder.hazardCount }}</div>
-          <div><span>整改期限</span>{{ currentOrder.rectificationDeadline || '-' }}</div>
+          <div>
+            <span>整改责任人</span>
+            {{
+              currentOrder.rectificationResponsibleUserName ||
+              userNameById(currentOrder.rectificationResponsibleUserId) ||
+              '-'
+            }}
+          </div>
+          <div>
+            <span>验收人</span>
+            {{
+              currentOrder.acceptanceUserName ||
+              userNameById(currentOrder.acceptanceUserId) ||
+              '-'
+            }}
+          </div>
+          <div>
+            <span>整改期限</span>{{ currentOrder.rectificationDeadline || '-' }}
+          </div>
           <div><span>闭环时间</span>{{ currentOrder.closedAt || '-' }}</div>
         </section>
 
@@ -1008,12 +1166,20 @@ onMounted(() => {
             :key="action"
             size="small"
             type="primary"
-            @click="openAction(action as PinganHazardRectificationOrderApi.Action)"
+            @click="
+              openAction(action as PinganHazardRectificationOrderApi.Action)
+            "
           >
             <IconifyIcon
-              :icon="action === 'REJECT_ACCEPTANCE' ? 'lucide:circle-x' : 'lucide:check-circle'"
+              :icon="
+                action === 'REJECT_ACCEPTANCE'
+                  ? 'lucide:circle-x'
+                  : 'lucide:check-circle'
+              "
             />
-            {{ actionLabels[action as PinganHazardRectificationOrderApi.Action] }}
+            {{
+              actionLabels[action as PinganHazardRectificationOrderApi.Action]
+            }}
           </Button>
         </section>
 
@@ -1028,7 +1194,9 @@ onMounted(() => {
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex === 'hazardMedia'">
               <video
-                v-if="itemHazardMediaUrl(record) && itemHazardMediaIsVideo(record)"
+                v-if="
+                  itemHazardMediaUrl(record) && itemHazardMediaIsVideo(record)
+                "
                 controls
                 :src="itemHazardMediaUrl(record)"
                 class="order-item-media"
@@ -1065,7 +1233,9 @@ onMounted(() => {
           </div>
           <img
             v-if="currentOrder.rectificationAfterPhoto"
-            :src="currentOrder.rectificationAfterPhoto"
+            :src="
+              resolveAttachmentPreviewUrl(currentOrder.rectificationAfterPhoto)
+            "
             alt="整改后照片"
             class="order-result-photo"
           />
@@ -1074,7 +1244,10 @@ onMounted(() => {
         <Timeline class="order-flow">
           <Timeline.Item v-for="log in currentOrder.flowLogs" :key="log.id">
             <strong>{{ log.actionLabel }}</strong>
-            <span>{{ log.toStatusLabel }} · {{ log.operatorName || '系统' }} · {{ log.createdAt }}</span>
+            <span
+              >{{ log.toStatusLabel }} · {{ log.operatorName || '系统' }} ·
+              {{ log.createdAt }}</span
+            >
             <p v-if="log.remark">{{ log.remark }}</p>
             <div
               v-if="flowLogDetailItems(log).length"
@@ -1116,14 +1289,24 @@ onMounted(() => {
             :disabled="isHazardOrganizationFieldLocked('company')"
             :options="companyOptions"
             placeholder="请选择公司"
-            @change="(value) => setCreateCompany(value as PinganHazardRectificationOrderApi.Id | undefined)"
+            @change="
+              (value) =>
+                setCreateCompany(
+                  value as PinganHazardRectificationOrderApi.Id | undefined,
+                )
+            "
           />
           <Select
             v-model:value="createForm.departmentId"
             :disabled="isHazardOrganizationFieldLocked('department')"
             :options="createDepartmentOptions"
             placeholder="请选择部门"
-            @change="(value) => setCreateDepartment(value as PinganHazardRectificationOrderApi.Id | undefined)"
+            @change="
+              (value) =>
+                setCreateDepartment(
+                  value as PinganHazardRectificationOrderApi.Id | undefined,
+                )
+            "
           />
           <Select
             v-model:value="createForm.teamId"
@@ -1190,15 +1373,25 @@ onMounted(() => {
             :options="actionDepartmentOptions"
             placeholder="请选择整改部门"
           />
-          <InputNumber
+          <Select
             v-model:value="actionForm.rectificationResponsibleUserId"
+            allow-clear
             class="form-control"
-            placeholder="整改责任人"
+            :options="responsibleUserOptions"
+            option-filter-prop="label"
+            option-label-prop="label"
+            placeholder="请选择整改责任人"
+            show-search
           />
-          <Input
+          <Select
             v-model:value="actionForm.acceptanceUserId"
+            allow-clear
             class="form-control acceptance-user-input"
-            placeholder="验收人"
+            :options="acceptanceUserOptions"
+            option-filter-prop="label"
+            option-label-prop="label"
+            placeholder="请选择验收人"
+            show-search
           />
           <DatePicker
             v-model:value="actionForm.rectificationDeadline"
@@ -1232,7 +1425,7 @@ onMounted(() => {
             </Button>
             <img
               v-if="actionForm.afterPhoto"
-              :src="actionForm.afterPhoto"
+              :src="resolveAttachmentPreviewUrl(actionForm.afterPhoto)"
               alt="整改后照片预览"
               class="rectified-photo-preview"
             />
@@ -1245,10 +1438,15 @@ onMounted(() => {
             :options="actionDepartmentOptions"
             placeholder="请选择验收部门"
           />
-          <Input
+          <Select
             v-model:value="actionForm.acceptanceUserId"
+            allow-clear
             class="form-control acceptance-user-input"
-            placeholder="验收人"
+            :options="acceptanceUserOptions"
+            option-filter-prop="label"
+            option-label-prop="label"
+            placeholder="请选择验收人"
+            show-search
           />
           <Input.TextArea
             v-model:value="actionForm.acceptanceRemark"
@@ -1257,10 +1455,15 @@ onMounted(() => {
         </template>
         <template v-if="currentAction === 'ACCEPT'">
           <div class="acceptance-action-fields">
-            <Input
+            <Select
               v-model:value="actionForm.acceptanceUserId"
+              allow-clear
               class="form-control acceptance-user-input"
-              placeholder="验收人"
+              :options="acceptanceUserOptions"
+              option-filter-prop="label"
+              option-label-prop="label"
+              placeholder="请选择验收人"
+              show-search
             />
             <Input.TextArea
               v-model:value="actionForm.acceptanceRemark"
@@ -1270,10 +1473,15 @@ onMounted(() => {
         </template>
         <template v-else-if="currentAction === 'REJECT_ACCEPTANCE'">
           <div class="acceptance-action-fields">
-            <Input
+            <Select
               v-model:value="actionForm.acceptanceUserId"
+              allow-clear
               class="form-control acceptance-user-input"
-              placeholder="验收人"
+              :options="acceptanceUserOptions"
+              option-filter-prop="label"
+              option-label-prop="label"
+              placeholder="请选择验收人"
+              show-search
             />
             <Input.TextArea
               v-model:value="actionForm.rejectReason"

@@ -18,8 +18,8 @@ export const THREE_CHECK_LIST_AUTO_REFRESH_INTERVAL_MS = 10_000;
 export const threeCheckWorkbenchUserFallbacks: PinganPreShiftMeetingApi.UserOption[] =
   [
     { id: 1, orgId: 1, realName: '系统管理员', username: 'admin' },
-    { id: 2, orgId: 4, realName: 'Demo Harbor班长', username: 'HB_MONITOR' },
-    { id: 3, orgId: 4, realName: '幕墙安全员', username: 'MQ_SAFE' },
+    { id: 2, orgId: 4, realName: '班组负责人', username: 'HB_MONITOR' },
+    { id: 3, orgId: 4, realName: '安全员', username: 'MQ_SAFE' },
     { id: 4, orgId: 8, realName: '制氧主管', username: 'ZY_SUPERVISOR' },
   ];
 
@@ -59,7 +59,7 @@ export function createSharedThreeCheckWorkbenchState<Row, InspectionLine>(
     status: 'all',
   });
   const createForm = reactive<ThreeCheckCreateFormState>({
-    attendeeNames: ['Demo Harbor班长'],
+    attendeeNames: ['班组负责人'],
     companyId: undefined,
     departmentId: undefined,
     meetingContent: '',

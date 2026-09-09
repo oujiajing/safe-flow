@@ -45,6 +45,11 @@ lerna-debug.log*
 skills-lock.json
 
 # Private/local documentation artifacts
+/docs/
+/task_plan.md
+/findings.md
+/progress.md
+/PORTFOLIO_READINESS.md
 docs/private/
 docs/internal/
 docs/local/

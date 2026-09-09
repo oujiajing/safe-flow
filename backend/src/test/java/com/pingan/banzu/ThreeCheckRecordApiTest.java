@@ -3295,6 +3295,12 @@ class ThreeCheckRecordApiTest {
 
     assertThat(closed.path("status").asText()).isEqualTo("CLOSED");
     assertThat(closed.path("acceptanceUserId").asLong()).isEqualTo(3);
+    assertThat(closed.path("rectificationResponsibleUserName").asText())
+        .isEqualTo("Demo Harbor班长");
+    assertThat(closed.path("acceptanceUserName").asText()).isEqualTo("幕墙安全员");
+    assertThat(closed.path("flowLogs").toString())
+        .contains("rectificationResponsibleUserName", "Demo Harbor班长")
+        .contains("acceptanceUserName", "幕墙安全员");
     assertThat(closed.path("rectificationDeadline").asText()).isEqualTo("2026-09-20 18:30:00");
     assertThat(closed.path("rectificationAfterPhoto").asText())
         .startsWith("data:image/png;base64,");

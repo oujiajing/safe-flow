@@ -98,9 +98,9 @@ describe('hazard rectification order page', () => {
     expect(page).not.toContain('来源记录ID');
     expect(page).toContain('<span>来源类型</span>');
     expect(page).toContain('class="toolbar-filter"');
-    expect(page.indexOf('class="hazard-order-toolbar__status"')).toBeGreaterThan(
-      page.indexOf('lucide:refresh-cw'),
-    );
+    expect(
+      page.indexOf('class="hazard-order-toolbar__status"'),
+    ).toBeGreaterThan(page.indexOf('lucide:refresh-cw'));
     expect(page).toMatch(
       /\.hazard-order-toolbar\s*\{[\s\S]*flex-wrap: nowrap;[\s\S]*align-items: flex-end;[\s\S]*overflow: hidden;/,
     );
@@ -156,7 +156,9 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('accept="image/*"');
     expect(page).toContain('上传整改后照片');
     expect(page).toContain('class="rectified-photo-preview"');
-    expect(page).toContain(':src="actionForm.afterPhoto"');
+    expect(page).toContain(
+      ':src="resolveAttachmentPreviewUrl(actionForm.afterPhoto)"',
+    );
     expect(page).not.toContain('FileReader');
     expect(page).not.toContain('data:image/png;base64');
     expect(page).not.toContain('placeholder="整改后照片URL"');
@@ -176,6 +178,9 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('flowLogDetailItems(log)');
     expect(page).toContain('isFlowLogPhotoDetail');
     expect(page).toContain('flow-log-photo');
+    expect(page).toContain(
+      "key !== 'afterPhoto' || log.action === 'MARK_RECTIFIED'",
+    );
   });
 
   it('allows selecting an acceptance user when accepting or rejecting acceptance', () => {
@@ -192,14 +197,22 @@ describe('hazard rectification order page', () => {
     );
     expect(page).toContain('function selectedAcceptanceUserId()');
     expect(page).toContain('function actionRequiresAcceptanceUser()');
-    expect(page).toContain('请填写验收人');
-    expect(page).toContain('验收人必须是数字');
-    expect(page).toMatch(/String\(\s*currentOrder\.value\?\.acceptanceUserId \?\?/);
+    expect(page).toContain('请选择验收人');
+    expect(page).not.toContain('验收人必须是数字');
+    expect(page).toContain('String(currentOrder.value.acceptanceUserId)');
+    expect(page).toContain('const acceptanceUserOptions = computed');
+    expect(page).toContain('value: String(user.id)');
+    expect(page).toContain('options.push({ label: selectedName, value: selectedId })');
     expect(page).toContain('acceptance-action-fields');
-    expect(page).toContain("v-if=\"currentAction === 'ACCEPT'\"");
-    expect(page).toContain("v-else-if=\"currentAction === 'REJECT_ACCEPTANCE'\"");
+    expect(page).toContain('v-if="currentAction === \'ACCEPT\'"');
+    expect(page).toContain(
+      'v-else-if="currentAction === \'REJECT_ACCEPTANCE\'"',
+    );
     expect(page).toContain('acceptance-user-input');
-    expect(page).toContain('placeholder="验收人"');
+    expect(page).toContain('placeholder="请选择验收人"');
+    expect(page).toMatch(
+      /<Select\s+[\s\S]*v-model:value="actionForm\.acceptanceUserId"[\s\S]*:options="acceptanceUserOptions"[\s\S]*show-search/,
+    );
     expect(page).toContain('placeholder="验收意见"');
     expect(page).toContain('placeholder="驳回原因"');
   });
@@ -226,6 +239,29 @@ describe('hazard rectification order page', () => {
     );
   });
 
+  it('loads scoped users and selects a rectification responsible person by name', () => {
+    const page = readFileSync(
+      appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
+      'utf8',
+    );
+
+    expect(page).toContain('getPinganUsersApi');
+    expect(page).toContain('loadResponsibleUsers');
+    expect(page).toContain('responsibleUserOptions');
+    expect(page).toContain('function selectedRectificationResponsibleUserId()');
+    expect(page).toMatch(
+      /rectificationResponsibleUserId:\s*selectedRectificationResponsibleUserId\(\)/,
+    );
+    expect(page).toMatch(
+      /<Select\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserId"[\s\S]*:options="responsibleUserOptions"[\s\S]*show-search/,
+    );
+    expect(page).toContain('placeholder="请选择整改责任人"');
+    expect(page).toContain("message.error('请选择整改责任人')");
+    expect(page).not.toMatch(
+      /<InputNumber\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserId"/,
+    );
+  });
+
   it('uses person and department labels without exposing ID wording in flow details or action forms', () => {
     const page = readFileSync(
       appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
@@ -236,10 +272,10 @@ describe('hazard rectification order page', () => {
     expect(page).toContain("acceptanceUserId: '验收人'");
     expect(page).toContain("rectificationDepartmentId: '整改部门'");
     expect(page).toContain("rectificationResponsibleUserId: '整改责任人'");
-    expect(page).toContain('placeholder="整改责任人"');
-    expect(page).toContain('placeholder="验收人"');
-    expect(page).toContain('请填写验收人');
-    expect(page).toContain('验收人必须是数字');
+    expect(page).toContain('placeholder="请选择整改责任人"');
+    expect(page).toContain('placeholder="请选择验收人"');
+    expect(page).toContain("message.error('请选择验收人')");
+    expect(page).not.toContain('验收人必须是数字');
     expect(page).not.toContain('整改责任人ID');
     expect(page).not.toContain('验收人ID');
     expect(page).not.toContain('整改部门ID');
@@ -257,10 +293,14 @@ describe('hazard rectification order page', () => {
     expect(page).toMatch(
       /if \(\['rectificationDepartmentId', 'acceptanceDepartmentId'\]\.includes\(key\)\)/,
     );
-    expect(page).toContain('organizationNameById(value) || unknownToText(value)');
-    expect(page).toMatch(
-      /value:\s*flowLogPayloadValue\(key,\s*payload\[key\]\)/,
+    expect(page).toContain(
+      'organizationNameById(value) || unknownToText(value)',
     );
+    expect(page).toMatch(
+      /value:\s*flowLogPayloadValue\(key,\s*payload\[key\],\s*payload\)/,
+    );
+    expect(page).toContain('function userNameById');
+    expect(page).toContain('unknownToText(payload[nameKey])');
   });
 
   it('supports cancelling active orders with a cancel reason', () => {
@@ -309,13 +349,16 @@ describe('hazard rectification order page', () => {
       'utf8',
     );
 
-    expect(page).toContain("{ dataIndex: 'hazardMedia', title: '隐患图片/视频'");
+    expect(page).toContain(
+      "{ dataIndex: 'hazardMedia', title: '隐患图片/视频'",
+    );
     expect(page).toContain('itemHazardMediaUrl(record)');
     expect(page).toContain('itemHazardMediaIsVideo(record)');
     expect(page).toContain('<video');
     expect(page).toContain('class="order-item-media"');
     expect(page).toContain('record.beforePhoto');
     expect(page).toContain('record.beforeVideo');
+    expect(page).toContain('resolveAttachmentPreviewUrl');
   });
 
   it('supports selecting and batch deleting hazard rectification orders', () => {
@@ -382,15 +425,23 @@ describe('hazard rectification order page', () => {
 
     expect(page).toContain('isHazardOrganizationFilterVisible');
     expect(page).toContain('applyScopedOrganizationDefaults(query)');
-    expect(page).toContain("v-if=\"isHazardOrganizationFilterVisible('company')\"");
-    expect(page).toContain("v-if=\"isHazardOrganizationFilterVisible('department')\"");
-    expect(page).toContain("v-if=\"isHazardOrganizationFilterVisible('team')\"");
-    expect(page).toContain(":disabled=\"isHazardOrganizationFieldLocked('company')\"");
     expect(page).toContain(
-      ":disabled=\"!query.companyId || isHazardOrganizationFieldLocked('department')\"",
+      'v-if="isHazardOrganizationFilterVisible(\'company\')"',
     );
     expect(page).toContain(
-      ":disabled=\"!query.departmentId || isHazardOrganizationFieldLocked('team')\"",
+      'v-if="isHazardOrganizationFilterVisible(\'department\')"',
+    );
+    expect(page).toContain(
+      'v-if="isHazardOrganizationFilterVisible(\'team\')"',
+    );
+    expect(page).toContain(
+      ':disabled="isHazardOrganizationFieldLocked(\'company\')"',
+    );
+    expect(page).toMatch(
+      /:disabled="\s*!query\.companyId \|\|\s*isHazardOrganizationFieldLocked\('department'\)\s*"/,
+    );
+    expect(page).toMatch(
+      /:disabled="\s*!query\.departmentId \|\|\s*isHazardOrganizationFieldLocked\('team'\)\s*"/,
     );
   });
 
@@ -401,6 +452,8 @@ describe('hazard rectification order page', () => {
     );
 
     expect(page).not.toContain('查看旧隐患整改记录');
-    expect(page).not.toContain('/pingan/hazard-inspection/rectification/legacy');
+    expect(page).not.toContain(
+      '/pingan/hazard-inspection/rectification/legacy',
+    );
   });
 });

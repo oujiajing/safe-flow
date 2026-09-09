@@ -26,7 +26,7 @@ describe('monitor center page', () => {
 
   it('keeps the original blue large-screen dashboard as its own module', () => {
     for (const text of [
-      'Demo Safety Operations平安班组监控中心',
+      '安全生产数字化管控平台监控中心',
       '平安大视界',
       '风险分级管控',
       '一班三查',
@@ -145,6 +145,10 @@ describe('monitor center page', () => {
       'screenVideos',
       'activeVisionVideo',
       'handleVisionVideoEnded',
+      '/videos/safety-production-demo-10s.mp4',
+      'autoplay',
+      'muted',
+      'playsinline',
       'vision-safety-copy',
       '安全，是一切工作的基石，是每个人最基本的保障。',
       '无论是工作还是生活，都要时刻牢记，生命是无价的，它承载着责任、家庭和未来。',

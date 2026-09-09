@@ -109,6 +109,7 @@ export namespace PinganHazardRectificationOrderApi {
     acceptanceRemark?: string;
     acceptanceResult?: string;
     acceptanceUserId?: Id;
+    acceptanceUserName?: string;
     flowLogs: FlowLog[];
     issuedBy?: Id;
     items: OrderItem[];
@@ -116,6 +117,7 @@ export namespace PinganHazardRectificationOrderApi {
     rectificationAfterPhoto?: string;
     rectificationDescription?: string;
     rectificationResponsibleUserId?: Id;
+    rectificationResponsibleUserName?: string;
     rectificationRequirement?: string;
     rectifiedBy?: Id;
   }

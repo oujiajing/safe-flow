@@ -16,7 +16,8 @@ import {
   type PinganMonitorCenterApi,
 } from '#/api/pingan/monitor-center';
 
-const selectedGroup = ref<PinganMonitorCenterApi.Id>('guangsheng');
+const selectedGroup = ref<PinganMonitorCenterApi.Id>('demo-company');
+const dataAsOf = new Date().toLocaleDateString('zh-CN');
 const overview = ref<PinganMonitorCenterApi.Overview>(
   createEmptyMonitorCenterOverview(),
 );
@@ -43,8 +44,8 @@ const groupOptions = computed(() => {
     value: item.id,
   }));
   return companyOptions.length
-    ? [{ label: 'Demo Safety Holdings', value: 'guangsheng' }, ...companyOptions]
-    : [{ label: 'Demo Safety Holdings', value: 'guangsheng' }];
+    ? [{ label: '演示公司', value: 'demo-company' }, ...companyOptions]
+    : [{ label: '演示公司', value: 'demo-company' }];
 });
 const summary = computed(() => {
   const source = overview.value.summary;
@@ -209,7 +210,7 @@ async function loadMonitorOverview() {
   overviewLoadError.value = '';
   try {
     const orgId =
-      selectedGroup.value === 'guangsheng' ? undefined : selectedGroup.value;
+      selectedGroup.value === 'demo-company' ? undefined : selectedGroup.value;
     overview.value = normalizeMonitorCenterOverview(
       await getMonitorCenterOverviewApi({ orgId }),
     );
@@ -468,7 +469,7 @@ function renderCharts() {
       <section class="panel stats-panel">
         <div class="panel-title">
           <span>统计情况</span>
-          <small>数据截至：2026-05-29</small>
+          <small>数据截至：{{ dataAsOf }}</small>
         </div>
         <div class="stat-grid">
           <article

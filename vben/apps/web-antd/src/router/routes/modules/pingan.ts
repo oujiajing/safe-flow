@@ -124,7 +124,7 @@ const routes: RouteRecordRaw[] = [
       hideInTab: true,
       icon: 'lucide:gauge',
       order: -100,
-      title: '平安班组监控中心',
+      title: '监控中心',
     },
     name: 'PinganMonitorCenter',
     path: '/pingan/monitor-center',
@@ -192,15 +192,6 @@ const routes: RouteRecordRaw[] = [
         },
         name: 'PinganTeamDispatch',
         path: '/pingan/three-checks/team-dispatch',
-      },
-      {
-        component: OneShiftThreeChecksWorkbench,
-        meta: {
-          authority: [routeAuthorityCodes.curtainWallTeamDispatch],
-          title: '幕墙班组派班',
-        },
-        name: 'PinganCurtainWallTeamDispatch',
-        path: '/pingan/three-checks/curtain-wall-team-dispatch',
       },
       {
         component: OneShiftThreeChecksWorkbench,
@@ -310,7 +301,7 @@ const routes: RouteRecordRaw[] = [
         component: GenericThreeCheckRecordWorkbench,
         meta: {
           authority: [routeAuthorityCodes.hazardCurtainWallPenalty],
-          title: '幕墙处罚管理',
+          title: '处罚管理',
         },
         name: 'PinganCurtainWallPenalty',
         path: '/pingan/hazard-inspection/curtain-wall-penalty',
@@ -319,7 +310,7 @@ const routes: RouteRecordRaw[] = [
         component: GenericThreeCheckRecordWorkbench,
         meta: {
           authority: [routeAuthorityCodes.hazardCurtainWallRoutineCheck],
-          title: '幕墙日周月检',
+          title: '日周月检',
         },
         name: 'PinganCurtainWallRoutineCheck',
         path: '/pingan/hazard-inspection/curtain-wall-routine-check',

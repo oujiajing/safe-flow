@@ -1,14 +1,12 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
-
 import { AuthPageLayout } from '@vben/layouts';
 import { preferences } from '@vben/preferences';
 
 import { $t } from '#/locales';
 
-const appName = computed(() => preferences.app.name);
-const logo = computed(() => preferences.logo.source);
-const logoDark = computed(() => preferences.logo.sourceDark);
+const appName = '安全生产数字化管控平台';
+const logo = preferences.logo.source;
+const logoDark = preferences.logo.sourceDark;
 </script>
 
 <template>

@@ -48,11 +48,7 @@ public class MonitorCenterService {
   private static final String PERMISSION_MONITOR_CENTER_GLOBAL_VIEW =
       "PINGAN_MONITOR_CENTER_GLOBAL_VIEW";
   private static final List<CompanyOption> APPROVED_COMPANIES =
-      List.of(
-          new CompanyOption(3L, "Demo Works Company"),
-          new CompanyOption(4L, "Demo Works Company"),
-          new CompanyOption(24L, "Demo Company"),
-          new CompanyOption(28L, "Demo Materials"));
+      List.of(new CompanyOption(100000000000L, "演示公司"));
   private static final Map<Long, String> APPROVED_COMPANY_NAMES =
       APPROVED_COMPANIES.stream().collect(Collectors.toMap(CompanyOption::id, CompanyOption::name));
 

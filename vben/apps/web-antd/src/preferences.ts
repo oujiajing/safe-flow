@@ -18,8 +18,8 @@ interface WebAntdPreferencesExtension {
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    defaultHomePath: '/pingan/three-checks/pre-shift-meeting',
-    name: 'Demo Safety Operations“平安班组”微流程管控系统',
+    defaultHomePath: '/pingan/monitor-center',
+    name: '安全生产数字化管控平台',
   },
 });
 

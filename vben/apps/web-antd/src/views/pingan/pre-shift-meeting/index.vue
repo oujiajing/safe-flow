@@ -1458,8 +1458,8 @@ async function loadUsers() {
     if (!userOptions.value.length) {
       userOptions.value = [
         { id: 1, orgId: 1, realName: '系统管理员', username: 'admin' },
-        { id: 2, orgId: 4, realName: 'Demo Harbor班长', username: 'HB_MONITOR' },
-        { id: 3, orgId: 4, realName: '幕墙安全员', username: 'MQ_SAFE' },
+        { id: 2, orgId: 4, realName: '班组负责人', username: 'HB_MONITOR' },
+        { id: 3, orgId: 4, realName: '安全员', username: 'MQ_SAFE' },
         { id: 4, orgId: 8, realName: '制氧主管', username: 'ZY_SUPERVISOR' },
       ];
     }
@@ -2255,9 +2255,9 @@ function openCreateModal() {
   createForm.ownerUserId =
     resolveCurrentOwnerUserId();
   createForm.attendeeNames = attendeeSelectOptions.value.some(
-    (item) => item.value === 'Demo Harbor班长',
+    (item) => item.value === '班组负责人',
   )
-    ? ['Demo Harbor班长']
+    ? ['班组负责人']
     : attendeeSelectOptions.value.slice(0, 1).map((item) => item.value);
   applyFixedCompanyDefaults();
   if (

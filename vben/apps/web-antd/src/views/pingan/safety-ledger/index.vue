@@ -1803,9 +1803,9 @@ watch(
       <div v-if="meetingReport" class="meeting-report-print-area">
         <div class="meeting-report">
           <header class="meeting-report__header">
-            <div class="meeting-report__logo">Demo Safety Operations</div>
+            <div class="meeting-report__logo">安全生产数字化管控平台</div>
             <div>
-              <h3>Demo Safety Operations平安班组班前会议记录表</h3>
+              <h3>安全生产数字化管控平台班前会议记录表</h3>
               <p>
                 单位：{{ meetingReport.company || '-' }}
                 <span>班组：{{ meetingReport.team || '-' }}</span>
