@@ -163,7 +163,7 @@ catalog:
   stylelint-config-recommended-vue: ^1.6.1
   stylelint-config-standard: ^40.0.0
   stylelint-order: ^8.1.1
-  stylelint-scss: ^7.0.0
+  stylelint-scss: ^7.2.0
   tailwind-merge: ^3.5.0
   tailwindcss: ^4.2.2
   tdesign-vue-next: ^1.19.0
