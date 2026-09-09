@@ -60,7 +60,7 @@ catalog:
   '@tiptap/starter-kit': ^3.22.3
   '@tiptap/vue-3': ^3.22.3
   '@tsdown/css': ^0.21.8
-  '@types/archiver': ^7.0.0
+  '@types/archiver': ^8.0.0
   '@types/html-minifier-terser': ^7.0.2
   '@types/json-bigint': ^1.0.4
   '@types/jsonwebtoken': ^9.0.10
@@ -83,7 +83,7 @@ catalog:
   '@vueuse/motion': ^3.0.3
   ant-design-vue: ^4.2.6
   antdv-next: ^1.1.9
-  archiver: ^7.0.1
+  archiver: ^8.0.0
   axios: ^1.15.0
   axios-mock-adapter: ^2.1.0
   cac: ^7.0.0
