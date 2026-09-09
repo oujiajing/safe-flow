@@ -1,0 +1,107 @@
+# Dependencies
+node_modules/
+**/node_modules/
+**/miniprogram_npm/
+
+# Build outputs
+dist/
+dist-ssr/
+dev-dist/
+target/
+**/target/
+coverage/
+.nitro/
+.output/
+.vitepress/cache/
+.cache/
+.turbo/
+.temp/
+tmp/
+
+# Logs
+logs/
+.codex-run-logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Local tool state
+.codex-run/
+.codex-shims/
+.codex/
+.planning/
+.superpowers/
+.agent/
+.agents/
+.claude/
+skills-lock.json
+
+# Private/local documentation artifacts
+/docs/
+/task_plan.md
+/findings.md
+/progress.md
+/PORTFOLIO_READINESS.md
+docs/private/
+docs/internal/
+docs/local/
+docs/**/~$*
+docs/**/*.tmp
+docs/**/*.bak
+docs/**/*.private.*
+docs/**/*.internal.*
+docs/**/*internal*
+docs/**/*private*
+docs/**/*sensitive*
+docs/**/*temporary*
+docs/**/*draft*
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+!vben/.vscode/
+!vben/.vscode/**
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.history/
+.cursor/
+
+# Package manager alternates
+yarn.lock
+package-lock.json
+!mini-program/package-lock.json
+
+# Archives and temporary exports
+*.zip
+*.tar
+*.war
+*-dist.zip
+*-dist.tar
+*-dist.war
+
+# Project runtime data
+**/backend-mock/data/
+backend/uploads/
+backend/uploads-local/
+
+# WeChat Mini Program local developer settings
+**/project.private.config.json
+
+# Portfolio-local generated configuration and demo data
+portfolio.local.yml
+demo-data/generated/
+backend/uploads-local/
+mini-program/project.private.config.json

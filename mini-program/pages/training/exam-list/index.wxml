@@ -1,0 +1,105 @@
+<green-header title="安全考试" bind:back="goBack" />
+<view class="exam-page">
+  <view class="exam-search-row">
+    <t-icon t-class="exam-search-icon" name="search" size="36rpx" color="#b0b6c0" />
+    <input class="exam-search-input" placeholder="使用编码、考试人员、考试日期 搜索" value="{{keyword}}" bindinput="updateKeyword" confirm-type="search" bindconfirm="search" />
+    <view class="exam-search-submit" bindtap="search">搜索</view>
+  </view>
+
+  <view class="exam-toolbar">
+    <view class="exam-create-btn" bindtap="openCreate">
+      <t-icon name="add-circle" size="32rpx" color="#ffffff" />
+      <text class="exam-create-label">创建</text>
+    </view>
+    <view class="exam-filter-btn" bindtap="openFilter">
+      <t-icon name="filter" size="38rpx" color="#172033" />
+      <text>筛选</text>
+    </view>
+  </view>
+
+  <view class="exam-filter-panel" wx:if="{{filterVisible}}">
+    <view class="exam-filter-title">
+      <text>筛选条件</text>
+      <view class="exam-filter-close" bindtap="closeFilter">×</view>
+    </view>
+    <view class="exam-filter-grid">
+      <view class="exam-filter-field">
+        <text class="exam-filter-label">开始日期</text>
+        <picker mode="date" value="{{filterStartDate}}" bindchange="changeFilterStartDate">
+          <view class="exam-filter-value">
+            <t-icon name="calendar" size="30rpx" color="#078249" />
+            <text>{{filterStartDate}}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="exam-filter-field">
+        <text class="exam-filter-label">结束日期</text>
+        <picker mode="date" value="{{filterEndDate}}" bindchange="changeFilterEndDate">
+          <view class="exam-filter-value">
+            <t-icon name="calendar" size="30rpx" color="#078249" />
+            <text>{{filterEndDate}}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="exam-filter-field">
+        <text class="exam-filter-label">部门</text>
+        <picker mode="selector" range="{{departmentOptions}}" range-key="label" value="{{departmentIndex}}" bindchange="changeDepartmentFilter">
+          <view class="exam-filter-value">
+            <t-icon name="building" size="30rpx" color="#078249" />
+            <text>{{currentDepartmentLabel}}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="exam-filter-field">
+        <text class="exam-filter-label">班组</text>
+        <picker mode="selector" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeTeamFilter">
+          <view class="exam-filter-value">
+            <t-icon name="usergroup" size="30rpx" color="#078249" />
+            <text>{{currentTeamLabel}}</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="exam-filter-actions">
+      <view class="exam-filter-action" bindtap="resetFilter">重置</view>
+      <view class="exam-filter-action primary" bindtap="applyFilter">筛选</view>
+    </view>
+  </view>
+
+  <view class="exam-status-tabs">
+    <view class="exam-status-tab-list">
+      <view class="exam-status-tab {{activeStatus === 'pending' ? 'active' : ''}}" data-status="pending" bindtap="changeStatus">待考试（{{statusCounts.pending}}）</view>
+      <view class="exam-status-tab {{activeStatus === 'done' ? 'active' : ''}}" data-status="done" bindtap="changeStatus">已考试（{{statusCounts.done}}）</view>
+    </view>
+  </view>
+
+  <view class="exam-card-list">
+    <view wx:for="{{records}}" wx:key="id" class="exam-card" data-id="{{item.id}}" bindtap="openBasic">
+      <view class="exam-card-head">
+        <view class="exam-card-company">{{item.company}}</view>
+        <view class="exam-card-status {{item.statusKey}}">{{item.statusLabel}}</view>
+      </view>
+      <view class="exam-card-meta">
+        <view class="exam-meta-item">
+          <t-icon name="calendar" size="32rpx" color="#078249" />
+          <text>{{item.examDate}}</text>
+        </view>
+        <view class="exam-meta-divider"></view>
+        <view class="exam-meta-item exam-name">
+          <t-icon name="file-paste" size="32rpx" color="#078249" />
+          <text>{{item.exam}}</text>
+        </view>
+      </view>
+      <view class="exam-card-bottom">
+        <view class="exam-person-pill">
+          <t-icon name="user" size="32rpx" color="#078249" />
+          <text>{{item.person}}</text>
+        </view>
+        <view class="exam-card-actions">
+          <view class="exam-detail-btn" data-id="{{item.id}}" catchtap="openBasic">明细</view>
+          <view wx:if="{{item.statusKey === 'pending'}}" class="exam-start-btn" data-id="{{item.id}}" catchtap="startExam">{{item.hasProgress ? '继续考试' : '去考试'}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

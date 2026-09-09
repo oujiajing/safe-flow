@@ -1,0 +1,60 @@
+<view class="analysis-page">
+  <green-header title="安全学习分析" bind:back="goBack" />
+  <view class="analysis-content learning-analysis">
+    <scope-filter compact="{{true}}" context="{{context}}" scopeTree="{{scopeTree}}" scopeAccess="{{scopeAccess}}" rangeText="{{rangeText}}" updatedAt="{{updatedAt}}" bind:apply="handleFilterApply" />
+    <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载学习内容分析" />
+    <state-view wx:elif="{{errorMessage}}" errorText="{{errorMessage}}" bind:retry="retryLoad" />
+    <view wx:elif="{{noPermission}}" class="permission-card"><t-icon name="lock-on" size="66rpx" color="#94a3b8" /><view class="permission-title">暂无查看权限</view></view>
+    <block wx:else>
+      <view class="learning-kpi-grid">
+        <view class="learning-kpi-card"><text>区间新增</text><view><text class="learning-kpi-value">{{model.learning.periodTotal}}</text><text class="learning-kpi-unit">条</text></view></view>
+        <view class="learning-kpi-card"><text>今日新增</text><view><text class="learning-kpi-value">{{model.learning.today}}</text><text class="learning-kpi-unit">条</text></view></view>
+        <view class="learning-kpi-card"><text>覆盖组织</text><view><text class="learning-kpi-value">{{model.learning.coveredOrgs}}</text><text class="learning-kpi-unit">个</text></view></view>
+        <view class="learning-kpi-card"><text>近7日峰值</text><view><text class="learning-kpi-value">{{model.learning.peak}}</text><text class="learning-kpi-unit">条</text></view></view>
+      </view>
+
+      <view class="analysis-section learning-trend-card">
+        <view class="section-head"><view class="section-title">截至结束日近7天</view><view class="section-detail-action {{detailCards.learningTrend ? 'active' : ''}}" data-card="learningTrend" bindtap="toggleCardDetail">{{detailCards.learningTrend ? '图表' : '明细'}}</view></view>
+        <block wx:if="{{!detailCards.learningTrend}}">
+          <canvas wx:if="{{model.learning.trend.length}}" class="chart-canvas" canvas-id="learningTrend"></canvas>
+          <view wx:if="{{model.learning.trend.length}}" class="learning-chart-legend"><t-icon name="chart-line" size="34rpx" color="#1677e8" /><text>内容数量（条）</text></view>
+        </block>
+        <view wx:else class="analysis-detail-table">
+          <view class="analysis-detail-head learning-trend-grid"><text>日期</text><text>内容数量（条）</text></view>
+          <view wx:for="{{model.learning.trend}}" wx:key="date" class="analysis-detail-row learning-trend-grid"><text>{{item.date}}</text><text class="blue">{{item.value}}</text></view>
+        </view>
+        <view wx:if="{{!model.learning.trend.length}}" class="empty-inline">暂无趋势数据</view>
+      </view>
+
+      <view class="analysis-section learning-ranking-card">
+        <view class="section-head"><view class="section-title">组织内容数量 TOP5</view><view class="section-detail-action {{detailCards.learningRanking ? 'active' : ''}}" data-card="learningRanking" bindtap="toggleCardDetail">{{detailCards.learningRanking ? '图表' : '明细'}}</view></view>
+        <view wx:if="{{!detailCards.learningRanking}}">
+          <view wx:for="{{model.learning.rankings}}" wx:key="name" class="learning-rank-chart-row">
+            <text class="learning-rank-index">{{item.rank}}</text><text class="learning-rank-name">{{item.name}}</text><view class="bar-track"><view class="bar-fill blue" style="width:{{item.width}}"></view></view><text class="learning-rank-value">{{item.value}}</text>
+          </view>
+        </view>
+        <view wx:else class="analysis-detail-table">
+          <view class="analysis-detail-head learning-ranking-grid"><text>排名</text><text>组织名称</text><text>内容数量</text></view>
+          <view wx:for="{{model.learning.rankings}}" wx:key="name" class="analysis-detail-row learning-ranking-grid"><text>{{item.rank}}</text><text>{{item.name}}</text><text class="blue">{{item.value}} 条</text></view>
+        </view>
+        <view wx:if="{{!model.learning.rankings.length}}" class="empty-inline">暂无组织排行数据</view>
+      </view>
+
+      <view class="analysis-section learning-category-card">
+        <view class="section-head"><view class="section-title">内容分类分布<text class="learning-title-unit">（条）</text></view><view class="section-detail-action {{detailCards.learningCategory ? 'active' : ''}}" data-card="learningCategory" bindtap="toggleCardDetail">{{detailCards.learningCategory ? '图表' : '明细'}}</view></view>
+        <view wx:if="{{!detailCards.learningCategory}}" class="learning-category-chart">
+          <view wx:for="{{model.learning.categories}}" wx:key="name" class="learning-category-chart-row">
+            <view class="learning-category-icon {{item.tone}}"><t-icon name="{{item.icon}}" size="42rpx" color="#ffffff" /></view><text>{{item.name}}</text><view class="bar-track"><view class="bar-fill {{item.tone}}" style="width:{{item.width}}"></view></view><text class="learning-category-value {{item.tone}}">{{item.value}}</text>
+          </view>
+        </view>
+        <view wx:else class="analysis-detail-table">
+          <view class="analysis-detail-head learning-category-detail-grid"><text>内容分类</text><text>数量</text></view>
+          <view wx:for="{{model.learning.categories}}" wx:key="name" class="analysis-detail-row learning-category-detail-grid"><text>{{item.name}}</text><text class="{{item.tone}}">{{item.value}} 条</text></view>
+        </view>
+        <view wx:if="{{!model.learning.categories.length}}" class="empty-inline">暂无内容分类数据</view>
+      </view>
+
+      <view class="analysis-cta analysis-cta--primary learning-cta" data-type="learning" bindtap="openBusiness"><text>查看学习内容</text><t-icon class="cta-arrow" name="chevron-right" size="38rpx" color="#ffffff" /></view>
+    </block>
+  </view>
+</view>

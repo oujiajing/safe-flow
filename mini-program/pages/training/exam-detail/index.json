@@ -1,0 +1,7 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}

@@ -1,0 +1,355 @@
+page {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+  background: #f4f6f8;
+}
+
+.page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  overflow-x: hidden;
+  background: #f4f6f8;
+  color: #1f2937;
+  box-sizing: border-box;
+  --td-brand-color: #1f9d67;
+  --td-brand-color-active: #178257;
+  --td-brand-color-focus: #e7f5ef;
+  --td-brand-color-light: #e7f5ef;
+}
+
+.order-toolbar {
+  height: 92rpx;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  padding: 0 20rpx;
+  border-bottom: 1rpx solid #edf1f5;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.order-date-filter {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: stretch;
+  gap: 14rpx;
+  padding: 0 8rpx 0 20rpx;
+  border: 1rpx solid #d8dee8;
+  border-radius: 8rpx;
+  background: #ffffff;
+  color: #253042;
+  font-size: 28rpx;
+  line-height: 60rpx;
+  box-sizing: border-box;
+}
+
+.order-date-icon {
+  width: 34rpx;
+  height: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34rpx;
+}
+
+.order-date-arrow {
+  width: 30rpx;
+  height: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30rpx;
+}
+
+.order-date-filter picker {
+  min-width: 0;
+}
+
+.order-date-value {
+  min-width: 0;
+  color: #253042;
+  font-size: 28rpx;
+  line-height: 60rpx;
+  white-space: nowrap;
+}
+
+.order-date-separator {
+  flex: 0 0 auto;
+  color: #253042;
+  font-size: 28rpx;
+  line-height: 60rpx;
+}
+
+.order-tabs-wrap {
+  padding: 0 20rpx;
+  background: #ffffff;
+}
+
+.order-tabs {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.order-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  height: 88rpx;
+  min-width: max-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #202733;
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 88rpx;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.order-tab.active {
+  color: #0b9860;
+  font-weight: 900;
+}
+
+.order-tab.active::after {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 52rpx;
+  height: 4rpx;
+  background: #0b9860;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.order-org-filter-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18rpx;
+  padding: 18rpx 20rpx 20rpx;
+  border-bottom: 1rpx solid #eef0f3;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.order-org-filter-row picker {
+  display: block;
+  min-width: 0;
+}
+
+.order-org-filter {
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  min-width: 0;
+  padding: 0 16rpx;
+  border: 1rpx solid #d8dee8;
+  border-radius: 6rpx;
+  background: #ffffff;
+  color: #253042;
+  box-sizing: border-box;
+}
+
+.order-org-icon {
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32rpx;
+}
+
+.order-org-label {
+  flex: 0 0 auto;
+  color: #253042;
+  font-size: 27rpx;
+  line-height: 72rpx;
+  white-space: nowrap;
+}
+
+.order-org-value {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  color: #253042;
+  font-size: 27rpx;
+  line-height: 72rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-org-arrow {
+  width: 28rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28rpx;
+}
+
+.order-card {
+  position: relative;
+  margin: 24rpx 20rpx 16rpx;
+  padding: 24rpx 24rpx 0;
+  border: 1rpx solid #e9edf2;
+  border-radius: 18rpx;
+  background: #fff;
+  box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.order-card-main,
+.order-card-title {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 214rpx;
+  gap: 18rpx;
+  align-items: start;
+}
+
+.order-card-fields,
+.order-card-body {
+  min-width: 0;
+}
+
+.order-status-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  padding-top: 2rpx;
+}
+
+.order-status-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 112rpx;
+  height: 42rpx;
+  padding: 0 13rpx;
+  border-radius: 9rpx;
+  background: #fff0d3;
+  color: #ff9f1a;
+  font-size: 25rpx;
+  font-weight: 600;
+  line-height: 42rpx;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.order-status-PENDING_ASSIGN {
+  background: #fff0d3;
+  color: #ff9f1a;
+}
+
+.order-status-PENDING_RECTIFY {
+  background: #e8f1ff;
+  color: #3d7cff;
+}
+
+.order-status-PENDING_ACCEPTANCE {
+  background: #efe6ff;
+  color: #8b5cf6;
+}
+
+.order-status-CLOSED {
+  background: #ddf6ea;
+  color: #16b978;
+}
+
+.order-status-icon {
+  margin-right: 8rpx;
+  color: currentColor;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.order-card-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+  margin-top: 6rpx;
+  color: #172033;
+  font-size: 27rpx;
+  line-height: 38rpx;
+  word-break: break-all;
+}
+
+.order-card-line:first-child {
+  margin-top: 0;
+}
+
+.order-card-line > text:first-child {
+  flex: 0 0 106rpx;
+  color: #5f6878;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.order-card-line > text:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #202a3a;
+  font-weight: 600;
+}
+
+.order-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-top: 18rpx;
+  padding: 16rpx 0 17rpx;
+}
+
+.order-card-date {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #536071;
+  font-size: 26rpx;
+  line-height: 36rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-date-label {
+  flex: 0 0 auto;
+  color: #5f6878;
+  font-size: 26rpx;
+  font-weight: 600;
+  line-height: 36rpx;
+}
+
+.rectification-status {
+  color: #0f9f6e;
+}
+
+.rectification-state {
+  padding: 80rpx 32rpx;
+  text-align: center;
+  color: #64748b;
+}
+
+.rectification-retry {
+  margin-top: 24rpx;
+  --td-button-border-radius: 24rpx;
+}

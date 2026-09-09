@@ -1,0 +1,12 @@
+{
+  "navigationBarTitleText": "班前会",
+  "navigationBarTextStyle": "white",
+  "navigationBarBackgroundColor": "#078249",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "safe-card": "/components/ui/safe-card/index",
+    "state-view": "/components/ui/state-view/index",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}

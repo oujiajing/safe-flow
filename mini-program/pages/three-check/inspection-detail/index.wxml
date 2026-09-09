@@ -1,0 +1,88 @@
+<view class="page">
+  <view class="inspection-detail-page detail-screen">
+    <green-header title="{{moduleTitle}}" bind:back="goBack" />
+
+    <view class="inspection-detail-action-bar detail-return-strip">
+      <view class="inspection-back-button inspection-action-control" bindtap="goBack"><t-icon t-class="inspection-back-icon" name="chevron-left" size="50rpx" color="#078249" />返回</view>
+      <view wx:if="{{canUpdateAction}}" class="inspection-save-button inspection-action-control detail-save-btn {{saving ? 'is-loading' : ''}}" bindtap="saveInspectionDetail">保存</view>
+    </view>
+
+    <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载检查详情" />
+    <state-view wx:elif="{{errorText}}" errorText="{{errorText}}" bind:retry="loadRecord" />
+
+    <view wx:elif="{{inspectionRecord}}" class="inspection-detail-content inspection-form detail-content-full">
+      <view class="inspection-detail-tabs meeting-section-tabs">
+        <view class="inspection-detail-tab meeting-section-tab {{activeDetailTab === 'basic' ? 'active' : ''}}" data-tab="basic" bindtap="switchDetailTab">基础信息</view>
+        <view class="inspection-detail-tab meeting-section-tab {{activeDetailTab === 'detail' ? 'active' : ''}}" data-tab="detail" bindtap="switchDetailTab">明细信息</view>
+      </view>
+
+      <view wx:if="{{activeDetailTab === 'basic'}}" class="inspection-basic-panel">
+        <safe-card compact="{{true}}" elevated="{{true}}" class="inspection-basic-card">
+          <view class="inspection-row inspection-field"><view class="inspection-label required-label">编号</view><view class="inspection-value">{{inspectionRecord.code}}</view></view>
+          <view class="inspection-row inspection-field"><view class="inspection-label required-label">公司</view><view class="inspection-value inspection-link">{{inspectionRecord.company}}</view><text class="inspection-row-arrow">›</text></view>
+          <view class="inspection-row inspection-field"><view class="inspection-label required-label">车间</view><view class="inspection-value inspection-link">{{inspectionRecord.dept}}</view><text class="inspection-row-arrow">›</text></view>
+          <view class="inspection-row inspection-field"><view class="inspection-label required-label">班组</view><view class="inspection-value inspection-link">{{inspectionRecord.team}}</view><text class="inspection-row-arrow">›</text></view>
+          <view class="inspection-row inspection-field"><view class="inspection-label required-label">负责人</view><view class="inspection-value">{{inspectionRecord.owner}}</view></view>
+          <view class="inspection-row inspection-field"><view class="inspection-label required-label">检查日期</view><view class="inspection-value">{{inspectionRecord.date}}</view><t-icon t-class="inspection-calendar-icon" name="calendar" size="32rpx" color="#6b7280" /></view>
+          <view class="inspection-row inspection-field inspection-media-row">
+            <view class="inspection-label required-label">图片打卡</view>
+            <view class="inspection-value inspection-media-value">
+              <text>{{inspectionRecord.imageCheck}}</text>
+              <view wx:if="{{canUpdateAction}}" class="inspection-upload-grid">
+                <view class="inspection-upload-column">
+                  <view class="inspection-upload-box inspection-action-control {{uploadingImageCheck ? 'is-loading' : ''}}" bindtap="uploadInspectionImageCheck"><t-icon t-class="inspection-upload-icon" name="image" size="40rpx" color="#8b94a3" />上传图片</view>
+                  <text class="inspection-upload-limit">最多上传9张</text>
+                </view>
+                <view class="inspection-upload-action inspection-action-control {{uploadingImageCheck ? 'is-loading' : ''}}" bindtap="uploadInspectionImageCheck"><t-icon t-class="inspection-upload-action-icon" name="camera" size="34rpx" color="#078249" />拍照上传</view>
+              </view>
+              <view class="inspection-media-preview-list"><view wx:for="{{inspectionRecord.imageAttachments}}" wx:key="id" class="inspection-media-preview"><image class="inspection-media-thumb" src="{{item.url}}" mode="aspectFill" /><text class="inspection-media-name">{{item.originalName}}</text></view></view>
+            </view>
+          </view>
+          <view wx:if="{{moduleKey === 'mid-shift-inspection'}}" class="inspection-row inspection-field"><view class="inspection-label required-label">视频打卡</view><view class="inspection-value">{{inspectionRecord.videoCheck}}</view></view>
+          <view wx:if="{{inspectionRecord.isPostShiftInspection}}" class="inspection-row inspection-field"><view class="inspection-label required-label">交班状态</view><view class="inspection-value">{{inspectionRecord.handoverStatus}}</view></view>
+          <view class="inspection-row inspection-field"><view class="inspection-label required-label">状态</view><view class="inspection-value"><text class="inspection-detail-status {{inspectionRecord.statusClass}} before-status">{{inspectionRecord.status}}</text></view></view>
+          <view class="inspection-row inspection-field remark-row"><view class="inspection-label required-placeholder-label">备注</view><view class="inspection-value"><input class="remark-input inspection-note-input" value="{{inspectionRecord.remark}}" bindinput="updateRemark" placeholder-class="remark-placeholder" placeholder="请输入备注" /></view></view>
+        </safe-card>
+      </view>
+
+      <view wx:elif="{{activeDetailTab === 'detail'}}" class="inspection-detail-panel">
+        <view class="inspection-check-list">
+          <view wx:if="{{inspectionRecord.checkItems.length === 0}}" class="inspection-empty small">暂无检查项模板</view>
+          <safe-card wx:for="{{inspectionRecord.checkItems}}" wx:key="index" compact="{{true}}" elevated="{{true}}" class="inspection-check-card">
+            <view class="inspection-check-head {{item.expanded ? 'open' : ''}}" data-index="{{index}}" bindtap="toggleDetailItem">
+              <text class="inspection-check-no">{{index + 1}}</text>
+              <text class="inspection-check-title">{{inspectionRecord.isPostShiftInspection ? '' : (item.riskType || item.checkItem || '检查项')}}</text>
+              <t-icon t-class="inspection-check-chevron" name="{{item.expanded ? 'chevron-up' : 'chevron-down'}}" size="30rpx" color="#078249" />
+            </view>
+            <view wx:if="{{item.expanded}}" class="inspection-check-body">
+              <view wx:if="{{!inspectionRecord.isPostShiftInspection}}" class="inspection-check-field">
+                <text>风险</text>
+                <view class="inspection-check-value link"><text class="inspection-risk-icon">!</text>{{item.riskType}}</view>
+              </view>
+              <view class="inspection-check-field block">
+                <text>检查项</text>
+                <view class="inspection-check-text">{{item.checkItem}}</view>
+              </view>
+              <view class="inspection-check-field inspection-check-result-field">
+                <text>检查结果</text>
+                <view class="inspection-select-wrap">
+                  <view class="inspection-select-value {{item.checkResult ? 'selected' : ''}} {{item.checkResult === '有隐患' ? 'hazard' : ''}}" data-index="{{index}}" bindtap="toggleCheckResultDropdown">
+                    <text>{{item.checkResult || '点击选择'}}</text>
+                    <t-icon t-class="inspection-select-arrow" name="{{checkResultDropdownIndex === index ? 'chevron-up' : 'chevron-down'}}" size="24rpx" color="#078249" />
+                  </view>
+                  <view wx:if="{{checkResultDropdownIndex === index}}" class="inspection-select-dropdown">
+                    <view class="inspection-select-option {{item.checkResult === '无隐患' ? 'active' : ''}}" data-index="{{index}}" data-value="无隐患" bindtap="chooseCheckResult">无隐患</view>
+                    <view class="inspection-select-option hazard {{item.checkResult === '有隐患' ? 'active' : ''}}" data-index="{{index}}" data-value="有隐患" bindtap="chooseCheckResult">有隐患</view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </safe-card>
+        </view>
+      </view>
+
+      <view class="result-tip" wx:if="{{operationResult}}">{{operationResult}}</view>
+    </view>
+    <state-view wx:else empty="{{true}}" emptyText="未找到检查详情" />
+  </view>
+</view>

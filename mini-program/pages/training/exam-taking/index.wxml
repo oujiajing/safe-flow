@@ -1,0 +1,152 @@
+<view class="exam-taking-page" style="padding-top: {{statusBarHeight}}px;">
+  <view class="exam-taking-topbar" style="padding-right: {{capsuleSafeRight}}px;">
+    <view class="exam-taking-back" bindtap="goBack">
+      <t-icon name="chevron-left" size="48rpx" color="#2d3035" />
+    </view>
+    <view class="exam-taking-timer">
+      <view class="exam-taking-timer-gauge"></view>
+      <text>{{remainingText}}</text>
+    </view>
+    <view class="exam-taking-spacer"></view>
+    <view class="exam-taking-mark {{annotationMode ? 'active' : ''}} {{hasCurrentAnnotation ? 'annotated' : ''}}" bindtap="toggleAnnotation">
+      <t-icon name="edit-1" size="46rpx" color="#2d3035" />
+    </view>
+    <view class="exam-taking-answer-card" bindtap="openAnswerCard">
+      <t-icon name="file-paste" size="46rpx" color="#2d3035" />
+    </view>
+    <view class="exam-taking-count">{{currentQuestionIndex + 1}}/{{questionTotal}}</view>
+  </view>
+
+  <view class="exam-taking-progress">
+    <view class="exam-taking-progress-fill" style="width: {{progressPercent}}%"></view>
+  </view>
+
+  <view class="exam-taking-body">
+    <canvas
+      canvas-id="examAnnotationCanvas"
+      class="exam-annotation-canvas {{annotationMode ? 'active' : ''}}"
+      width="{{annotationCanvasWidth}}"
+      height="{{annotationCanvasHeight}}"
+      disable-scroll="{{annotationMode}}"
+      bindtouchstart="startAnnotation"
+      catchtouchmove="moveAnnotation"
+      bindtouchend="endAnnotation"
+      bindtouchcancel="endAnnotation"
+    ></canvas>
+    <view wx:if="{{annotationMode}}" class="exam-annotation-toolbar">
+      <view class="exam-annotation-action clear" bindtap="clearCurrentAnnotation">清除标注</view>
+      <view class="exam-annotation-action done" bindtap="toggleAnnotation">完成</view>
+    </view>
+    <view class="exam-taking-type-row">
+      <text class="exam-taking-type">{{currentQuestion.type}}</text>
+      <text class="exam-taking-instruction">{{currentQuestion.instruction}}</text>
+    </view>
+    <view wx:if="{{currentQuestion.caseMaterial}}" class="exam-taking-case">
+      <view class="exam-taking-case-title">{{currentQuestion.caseTitle || '案例材料'}}</view>
+      <view class="exam-taking-case-material">{{currentQuestion.caseMaterial}}</view>
+    </view>
+
+    <view wx:if="{{currentQuestion.isCase}}" class="exam-taking-case-children">
+      <view wx:for="{{currentQuestion.children}}" wx:for-item="child" wx:key="id" class="exam-taking-case-child">
+        <view class="exam-taking-case-child-heading">
+          <text>第{{child.subNo}}小题</text>
+          <text>{{child.type}}</text>
+        </view>
+        <view class="exam-taking-question">{{child.question}}</view>
+        <view wx:if="{{!child.isShortAnswer}}" class="exam-taking-options">
+          <view
+            wx:for="{{child.options}}"
+            wx:for-item="option"
+            wx:key="id"
+            class="exam-taking-option {{option.selected ? 'selected' : ''}}"
+            data-question-id="{{child.id}}"
+            data-index="{{index}}"
+            bindtap="selectOption"
+          >
+            <text class="exam-taking-option-letter">{{option.letter}}</text>
+            <text class="exam-taking-option-text">{{option.text}}</text>
+          </view>
+        </view>
+        <textarea
+          wx:else
+          class="exam-taking-short-answer"
+          data-question-id="{{child.id}}"
+          value="{{child.answerText}}"
+          maxlength="2000"
+          placeholder="请输入答案"
+          bindinput="inputShortAnswer"
+        />
+      </view>
+    </view>
+
+    <block wx:else>
+      <view class="exam-taking-question">{{currentQuestion.question}}</view>
+      <view wx:if="{{!currentQuestion.isShortAnswer}}" class="exam-taking-options">
+        <view wx:for="{{currentQuestion.options}}" wx:key="id" class="exam-taking-option {{item.selected ? 'selected' : ''}}" data-index="{{index}}" bindtap="selectOption">
+          <text class="exam-taking-option-letter">{{item.letter}}</text>
+          <text class="exam-taking-option-text">{{item.text}}</text>
+        </view>
+      </view>
+      <textarea
+      wx:else
+      class="exam-taking-short-answer"
+      value="{{currentQuestion.answerText}}"
+      maxlength="2000"
+      placeholder="请输入答案"
+      bindinput="inputShortAnswer"
+      />
+    </block>
+
+    <view wx:if="{{currentQuestionAnswered}}" class="exam-taking-nav">
+      <view class="exam-taking-nav-btn primary" bindtap="goNext">{{currentQuestionIndex + 1 === questionTotal ? '完成' : '下一题'}}</view>
+    </view>
+  </view>
+</view>
+
+<view wx:if="{{exitConfirmVisible}}" class="exam-exit-mask" bindtap="cancelExitExam" catchtouchmove="preventTouchMove">
+  <view class="exam-exit-dialog" catchtap="stopPropagation">
+    <view class="exam-exit-title">确定要退出考试吗？</view>
+    <view class="exam-exit-description">退出会自动保存进度</view>
+    <view class="exam-exit-actions">
+      <view class="exam-exit-action confirm" bindtap="confirmExitExam">确定退出</view>
+      <view class="exam-exit-action continue" bindtap="cancelExitExam">继续答题</view>
+    </view>
+  </view>
+</view>
+
+<view wx:if="{{answerCardVisible}}" class="answer-card-mask" bindtap="closeAnswerCard" catchtouchmove="preventTouchMove">
+  <view class="answer-card-sheet" catchtap="stopPropagation">
+    <view class="answer-card-header">
+      <text class="answer-card-title">{{resultMode ? '考试结果' : '答题卡'}}</text>
+      <view class="answer-card-close" bindtap="closeAnswerCard">
+        <t-icon name="close" size="50rpx" color="#8b8f94" />
+      </view>
+    </view>
+    <view wx:if="{{resultMode}}" class="answer-card-summary">
+      <view><b>{{resultSummary.correctCount}}</b><text>答对</text></view>
+      <view><b>{{resultSummary.incorrectCount}}</b><text>答错</text></view>
+      <view><b>{{resultSummary.elapsedText}}</b><text>用时</text></view>
+    </view>
+
+    <scroll-view class="answer-card-content" scroll-y enhanced show-scrollbar="{{false}}">
+      <view wx:for="{{answerCardGroups}}" wx:key="key" class="answer-card-section">
+        <view class="answer-card-section-title">{{item.title}}</view>
+        <view class="answer-card-grid">
+          <view
+            wx:for="{{item.questions}}"
+            wx:for-item="question"
+            wx:key="id"
+            class="answer-card-number {{question.answered ? 'answered' : ''}} {{question.current ? 'current' : ''}} {{question.resultState}}"
+            data-index="{{question.index}}"
+            bindtap="jumpToQuestion"
+          >{{question.no}}</view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="answer-card-footer">
+      <view wx:if="{{!resultMode}}" class="answer-card-submit" bindtap="submitAnswers">提交</view>
+      <view wx:else class="answer-card-submit result" bindtap="goBack">返回安全考试</view>
+    </view>
+  </view>
+</view>

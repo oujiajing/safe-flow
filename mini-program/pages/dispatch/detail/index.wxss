@@ -1,0 +1,157 @@
+.detail-screen {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #202a37;
+}
+
+.detail-return-strip {
+  height: 86rpx;
+  padding: 18rpx 28rpx 0;
+  background: #f6f6f8;
+  box-sizing: border-box;
+}
+
+.detail-return-strip button {
+  height: 56rpx;
+  margin: 0;
+  padding: 0 18rpx;
+  border: 1rpx solid #d9dde4;
+  border-radius: 4rpx;
+  background: #ffffff;
+  color: #263241;
+  font-size: 26rpx;
+  line-height: 54rpx;
+}
+
+.detail-content-full {
+  width: 100%;
+  margin: 0;
+  padding: 24rpx 40rpx 40rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.meeting-section-tabs {
+  display: flex;
+  gap: 34rpx;
+  margin-bottom: 28rpx;
+  color: #44505f;
+  font-size: 28rpx;
+}
+
+.meeting-section-tab {
+  position: relative;
+  line-height: 48rpx;
+}
+
+.meeting-section-tab.active {
+  color: #172033;
+  font-weight: 800;
+}
+
+.meeting-section-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 12rpx;
+  right: 12rpx;
+  bottom: -6rpx;
+  height: 4rpx;
+  border-radius: 4rpx;
+  background: #1689ff;
+}
+
+.dispatch-field {
+  display: flex;
+  align-items: flex-start;
+  min-height: 64rpx;
+  margin-bottom: 18rpx;
+  color: #202a37;
+  font-size: 26rpx;
+}
+
+.dispatch-field.top {
+  align-items: flex-start;
+}
+
+.dispatch-label {
+  width: 220rpx;
+  flex: 0 0 220rpx;
+  color: #202a37;
+  font-weight: 800;
+  line-height: 42rpx;
+}
+
+.dispatch-value {
+  flex: 1;
+  min-width: 0;
+  color: #263241;
+  line-height: 42rpx;
+  word-break: break-all;
+}
+
+.dispatch-link {
+  color: #1689ff;
+  font-weight: 800;
+}
+
+.dispatch-date-value {
+  color: #263241;
+  font-weight: 400;
+}
+
+.task {
+  line-height: 1.72;
+}
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+.dispatch-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.dispatch-form {
+  display: grid;
+  gap: 26rpx;
+}
+
+.dispatch-report-empty {
+  padding: 56rpx 0;
+  color: #b0b7c3;
+  text-align: center;
+}
+
+.required-label::before {
+  content: "*";
+  margin-right: 4rpx;
+  color: #e11d48;
+}
+
+.person-pill {
+  display: inline-flex;
+  min-height: 44rpx;
+  align-items: center;
+  padding: 0 14rpx;
+  margin-right: 8rpx;
+  border: 1rpx solid #edf0f3;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #5f6772;
+  font-size: 26rpx;
+}
+
+.person-pill.blue {
+  border-color: #8fc3ff;
+  color: #2690ff;
+}
+
+.dispatch-date-text {
+  min-width: 0;
+  color: #2f96ff;
+  font-size: 26rpx;
+  line-height: 1.35;
+  font-weight: 900;
+  white-space: nowrap;
+}

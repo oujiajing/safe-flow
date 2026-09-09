@@ -1,0 +1,17 @@
+.state-view {
+  min-height: 260rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  padding: 52rpx 28rpx;
+  color: #7b8492;
+  box-sizing: border-box;
+}
+
+.state-view__retry {
+  --td-button-border-radius: 999rpx;
+  --td-button-primary-color: #13a66b;
+  --td-button-primary-border-color: #13a66b;
+}

@@ -1,0 +1,26 @@
+package com.pingan.banzu.system.dto;
+
+public record SystemCompanyResponse(
+    Long id,
+    String code,
+    Integer sortOrder,
+    String name,
+    String shortName,
+    String description,
+    String status,
+    String address,
+    String companyType,
+    String level1Name,
+    String level2Name,
+    String level3Name,
+    String level4Name,
+    String safetyManagerUsername,
+    String reporterL1Usernames,
+    String reporterL2Usernames,
+    String reporterL3Usernames,
+    Integer reportL1Time,
+    Integer reportL2Time,
+    Integer reportL3Time,
+    String attachment1Url,
+    String attachment2Url,
+    String companyIntro) {}

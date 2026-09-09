@@ -1,0 +1,50 @@
+manifestVersion: portfolio-demo-v1
+environment:
+  database: portfolio_demo
+  databaseHost: localhost
+  databasePort: 15434
+  storage: portfolio-demo-minio-data
+  isolation: dedicated-compose-project-and-volumes
+anchorDate: runtime-local-date
+company:
+  displayName: 演示公司
+  orgCode: DEMO-COMPANY
+  dataPolicy: fictional-chinese-business-content
+identityPolicy:
+  usernamePattern: "^[a-z][a-z0-9-]{2,31}$"
+  employeeCodePrefix: DEMO-E
+  businessKeyPrefix: DEMO-
+  clientRequestIdPrefix: portfolio-demo-v1-
+  passwords: generated-at-initialization-never-stored-in-fixtures
+preservedBaseline:
+  - flyway_schema_history
+  - sys_menu
+  - sys_role
+  - sys_role_menu
+targets:
+  organizations:
+    groups: 1
+    companies: 1
+    departments: 3
+    workshops: 2
+    teams: 5
+  people:
+    total: 14
+    loginAccounts: 8
+  risk:
+    libraries: 2
+    hazards: 16
+    fourColorMaps: 1
+  threeChecks:
+    moduleKeys: 14
+    records: 61
+  rectificationOrders: 7
+  specialWorkRecords: 4
+  learningContent: 6
+  examQuestions: 12
+  examPapers: 2
+  examTasks: 3
+  pointsFlows: 12
+  ledgerDocuments: 9
+  announcements: 3
+status: clean-baseline-ready

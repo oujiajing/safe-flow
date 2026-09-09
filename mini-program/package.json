@@ -1,0 +1,19 @@
+{
+  "name": "mini-program",
+  "version": "1.0.0",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check:size": "node scripts/check-package-size.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "tdesign-miniprogram": "^1.15.2"
+  }
+}

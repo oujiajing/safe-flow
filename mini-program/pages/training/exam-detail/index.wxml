@@ -1,0 +1,52 @@
+<green-header title="安全考试" bind:back="goBack" />
+<view class="exam-detail-page">
+  <view class="exam-detail-toolbar">
+    <view class="exam-back-btn" bindtap="goBack">
+      <t-icon name="chevron-left" size="38rpx" color="#078249" />
+      <text>返回</text>
+    </view>
+    <view class="exam-toolbar-actions">
+      <view class="exam-draft-btn" bindtap="saveDraft">
+        <t-icon name="file-paste" size="34rpx" color="#172033" />
+        <text>草稿</text>
+      </view>
+      <view class="exam-submit-btn" bindtap="submitExam">
+        <t-icon name="send" size="34rpx" color="#ffffff" />
+        <text>提交</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="exam-detail-tabs">
+    <view class="exam-detail-tab" bindtap="openBasic">基础信息</view>
+    <view class="exam-detail-tab active" bindtap="openDetail">明细信息</view>
+  </view>
+
+  <view class="exam-question-list">
+    <view wx:for="{{questions}}" wx:key="id" class="exam-question-card {{item.expanded ? 'expanded' : ''}}" data-id="{{item.id}}" bindtap="toggleQuestion">
+      <view class="exam-question-head">
+        <view class="exam-question-title">
+          <text class="exam-question-no">{{item.no}}</text>
+          <text>{{item.title}}</text>
+        </view>
+        <t-icon name="{{item.expanded ? 'chevron-up' : 'chevron-right'}}" size="32rpx" color="{{item.expanded ? '#078249' : '#8a95a3'}}" />
+      </view>
+      <view wx:if="{{item.expanded}}" class="exam-question-body">
+        <view class="exam-question-row">
+          <view class="exam-question-label">题型</view>
+          <view class="exam-question-value">{{item.type}}</view>
+        </view>
+        <view class="exam-question-row">
+          <view class="exam-question-label">考题</view>
+          <view class="exam-question-value exam-question-link">2026年5月12日是我国第18个全国防灾减灾日，主题是（ ）</view>
+        </view>
+        <view class="exam-question-row option-row">
+          <view class="exam-question-label">选项</view>
+          <view class="exam-options">
+            <view wx:for="{{item.options}}" wx:for-item="option" wx:key="*this" class="exam-option">{{option}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,124 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/analysis/analysis",
+    "pages/message/message",
+    "pages/mine/mine",
+    "pages/login/index"
+  ],
+  "subPackages": [
+    {
+      "root": "pages/analysis/dispatch",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/analysis/hazard",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/analysis/three-check",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/analysis/learning",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/mine-records",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/settings",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/profile",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/avatar",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/help",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/about",
+      "pages": ["index"]
+    },
+    {
+      "root": "pages/dispatch",
+      "pages": ["list/index", "form/index", "detail/index", "record-detail/index"]
+    },
+    {
+      "root": "pages/three-check",
+      "pages": ["meeting/index", "meeting-detail/index", "inspection-list/index", "inspection-detail/index"]
+    },
+    {
+      "root": "pages/key-sites",
+      "pages": ["list/index", "form/index", "detail/index", "inspection/index", "workflow/index"]
+    },
+    {
+      "root": "pages/special-work",
+      "pages": ["list/index", "form/index", "detail/index", "workflow/index"]
+    },
+    {
+      "root": "pages/hazard",
+      "pages": ["source-list/index", "source-form/index", "source-detail/index"]
+    },
+    {
+      "root": "pages/hazard-rectification",
+      "pages": ["order-list/index", "order-detail/index"]
+    },
+    {
+      "root": "pages/training",
+      "pages": ["learning-list/index", "learning-detail/index", "exam-list/index", "exam-create-basic/index", "exam-basic/index", "exam-detail/index", "exam-taking/index"]
+    },
+    {
+      "root": "pages/points",
+      "pages": ["flow/index", "rank/index"]
+    }
+  ],
+  "window": {
+    "navigationBarTitleText": "平安班组",
+    "navigationBarBackgroundColor": "#1f9d67",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f4f6f8"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#333333",
+    "selectedColor": "#1f9d67",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "iconPath": "assets/tab-bar/home.png",
+        "pagePath": "pages/home/home",
+        "selectedIconPath": "assets/tab-bar/home-active.png",
+        "text": "首页"
+      },
+      {
+        "iconPath": "assets/tab-bar/analysis.png",
+        "pagePath": "pages/analysis/analysis",
+        "selectedIconPath": "assets/tab-bar/analysis-active.png",
+        "text": "数据分析"
+      },
+      {
+        "iconPath": "assets/tab-bar/message.png",
+        "pagePath": "pages/message/message",
+        "selectedIconPath": "assets/tab-bar/message-active.png",
+        "text": "消息"
+      },
+      {
+        "iconPath": "assets/tab-bar/mine.png",
+        "pagePath": "pages/mine/mine",
+        "selectedIconPath": "assets/tab-bar/mine-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

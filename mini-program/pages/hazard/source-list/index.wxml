@@ -1,0 +1,102 @@
+<view class="source-page {{moduleKey === 'quick-shot' ? 'quick-shot-page' : ''}} {{moduleKey === 'safety-check' ? 'safety-check-page' : ''}}">
+  <green-header title="{{title}}" bind:back="goBack" />
+
+  <view class="source-toolbar {{moduleKey === 'safety-check' || moduleKey === 'quick-shot' ? 'source-toolbar-inline' : ''}} {{moduleKey === 'safety-check' ? 'source-toolbar-safety' : ''}}">
+    <view class="source-primary" bindtap="openCreate"><t-icon name="add-circle" size="32rpx" color="currentColor" /><text>创建</text></view>
+    <view wx:if="{{moduleKey === 'safety-check' || moduleKey === 'quick-shot'}}" class="source-date-filter safety-date-filter">
+      <t-icon class="source-date-icon safety-date-icon" name="calendar" size="34rpx" color="#253042" />
+      <picker mode="date" value="{{startDate}}" bindchange="changeInlineStartDate">
+        <view class="source-date-value safety-date-value">{{startDate}}</view>
+      </picker>
+      <text class="source-date-separator safety-date-separator">至</text>
+      <picker mode="date" value="{{endDate}}" bindchange="changeInlineEndDate">
+        <view class="source-date-value safety-date-value">{{endDate}}</view>
+      </picker>
+      <t-icon class="source-date-arrow safety-date-arrow" name="chevron-down" size="30rpx" color="#253042" />
+    </view>
+  </view>
+
+  <view class="source-tabs {{moduleKey === 'quick-shot' ? 'quick-shot-tabs' : ''}}">
+    <view wx:for="{{tabs}}" wx:key="status" class="source-tab {{status === item.status ? 'active' : ''}}" data-status="{{item.status}}" bindtap="changeStatus">{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{moduleKey === 'safety-check' || moduleKey === 'quick-shot'}}" class="source-org-filter-row">
+    <picker mode="selector" range="{{departmentOptions}}" range-key="label" value="{{departmentIndex}}" bindchange="changeDepartmentFilter">
+      <view class="source-org-filter">
+        <t-icon class="source-org-icon" name="building" size="32rpx" color="#0b9860" />
+        <text class="source-org-label">部门：</text>
+        <text class="source-org-value">{{currentDepartmentLabel}}</text>
+        <t-icon name="chevron-down" size="28rpx" color="#334155" />
+      </view>
+    </picker>
+    <picker mode="selector" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeTeamFilter">
+      <view class="source-org-filter">
+        <t-icon class="source-org-icon" name="usergroup" size="32rpx" color="#0b9860" />
+        <text class="source-org-label">班组：</text>
+        <text class="source-org-value">{{currentTeamLabel}}</text>
+        <t-icon name="chevron-down" size="28rpx" color="#334155" />
+      </view>
+    </picker>
+  </view>
+
+  <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载记录..." />
+  <state-view wx:elif="{{errorText}}" errorText="{{errorText}}" bind:retry="loadRecords" />
+  <block wx:elif="{{records.length > 0 && moduleKey === 'safety-check'}}">
+    <view class="source-safety-list">
+      <safe-card wx:for="{{records}}" wx:key="id" compact="{{true}}" elevated="{{true}}">
+        <view class="source-safety-record safety-check-card" data-id="{{item.id}}" bindtap="openDetail">
+          <view class="safety-check-card-main">
+            <view class="safety-check-unit-icon"><t-icon name="building" size="50rpx" color="#0b9860" /></view>
+            <view class="safety-check-card-info">
+              <view class="safety-check-card-title">{{item.safetyTitle}}</view>
+              <view class="safety-check-card-unit">检查单位：{{item.safetyInspectionUnit}}</view>
+              <view class="safety-check-type-tag"><text>检查类型</text>{{item.safetyCheckType}}</view>
+            </view>
+            <view class="safety-check-card-status">{{item.safetyStatusLabel}}</view>
+          </view>
+          <view class="safety-check-divider"></view>
+          <view class="safety-check-fields">
+            <view class="safety-check-row">
+              <t-icon name="time" size="30rpx" color="#334155" />
+              <text class="safety-check-label">检查时间</text>
+              <view class="safety-check-value">{{item.safetyCheckTime}}</view>
+            </view>
+            <view class="safety-check-row">
+              <t-icon name="assignment" size="30rpx" color="#334155" />
+              <text class="safety-check-label">检查方式</text>
+              <view class="safety-check-value safety-check-method-value">{{item.safetyCheckMethod}}</view>
+            </view>
+            <view class="safety-check-row">
+              <t-icon name="user" size="30rpx" color="#334155" />
+              <text class="safety-check-label">检查人员</text>
+              <view class="safety-check-value">{{item.safetyInspectors}}</view>
+            </view>
+            <view class="safety-check-row">
+              <t-icon name="verified" size="30rpx" color="#334155" />
+              <text class="safety-check-label">整改验收</text>
+              <view class="safety-check-value">{{item.safetyAcceptance}}</view>
+            </view>
+          </view>
+        </view>
+      </safe-card>
+    </view>
+  </block>
+  <block wx:elif="{{records.length > 0}}">
+    <view class="source-record source-record-card quick-shot-record-card" wx:for="{{records}}" wx:key="id" data-id="{{item.id}}" bindtap="openDetail">
+      <view class="source-record-values quick-shot-record-fields">
+        <view class="source-record-value source-record-muted quick-shot-record-line"><t-icon name="city-1" size="30rpx" /><text>{{item.displayDepartmentName || '-'}}</text></view>
+        <view class="source-record-value source-record-muted quick-shot-record-line"><t-icon name="usergroup" size="30rpx" /><text>{{item.displayTeamName || '-'}}</text></view>
+        <view class="source-record-value quick-shot-record-line">
+          <t-icon name="user" size="30rpx" />
+          <text class="source-reporter">{{item.displayReporterName || '-'}}</text>
+        </view>
+        <view class="source-record-value source-record-date quick-shot-record-line"><t-icon name="calendar" size="30rpx" /><text>{{item.displayDate || '-'}}</text></view>
+      </view>
+      <view class="source-record-actions quick-shot-record-actions">
+        <button class="source-secondary source-rectify-btn" data-id="{{item.id}}" catchtap="openRectificationOrder">开整改单</button>
+      </view>
+    </view>
+  </block>
+  <state-view wx:else empty="{{true}}" emptyText="没有更多了" />
+
+</view>

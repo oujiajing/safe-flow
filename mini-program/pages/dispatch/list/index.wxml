@@ -1,0 +1,99 @@
+<view class="page">
+  <view class="dispatch-report-page">
+    <green-header title="派班记录表" bind:back="goBack" />
+
+    <view class="dispatch-tabs">
+      <view class="dispatch-tab {{dispatchListTab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="changeDispatchListTab">待提交 ({{tabCounts.pending}})</view>
+      <view class="dispatch-tab {{dispatchListTab === 'done' ? 'active' : ''}}" data-tab="done" bindtap="changeDispatchListTab">已提交 ({{tabCounts.done}})</view>
+      <view class="dispatch-tab {{dispatchListTab === 'withdrawn' ? 'active' : ''}}" data-tab="withdrawn" bindtap="changeDispatchListTab">已撤回 ({{tabCounts.withdrawn}})</view>
+    </view>
+
+    <view class="dispatch-filter-row">
+      <view class="dispatch-filter-trigger" bindtap="openDispatchFilter">
+        <t-icon t-class="dispatch-filter-icon" name="filter" size="44rpx" color="#078249" />
+        <text>筛选</text>
+      </view>
+      <view class="dispatch-filter-date" bindtap="openDispatchFilter">
+        <t-icon name="calendar" size="28rpx" color="#667085" />
+        <text>{{dispatchDateStart}} 至 {{dispatchDateEnd}}</text>
+      </view>
+      <view class="dispatch-create-link" bindtap="openCreate">
+        <t-icon name="add-circle" size="32rpx" color="#078249" />
+        <text>创建派班</text>
+      </view>
+    </view>
+
+    <view class="dispatch-summary-grid">
+      <view class="dispatch-summary-card"><text>今日派班</text><strong>{{summary.total}}</strong></view>
+      <view class="dispatch-summary-card done"><text>已提交</text><strong>{{summary.submitted}}</strong></view>
+      <view class="dispatch-summary-card pending"><text>待提交</text><strong>{{summary.draft}}</strong></view>
+      <view class="dispatch-summary-card blue"><text>三查任务</text><strong>{{summary.tasks}}</strong></view>
+    </view>
+
+    <view class="dispatch-task-list">
+      <view wx:if="{{actionMessage}}" class="dispatch-action-message">{{actionMessage}}</view>
+      <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载派班记录" />
+      <state-view wx:elif="{{errorText}}" errorText="{{errorText}}" bind:retry="loadRecords" />
+      <block wx:elif="{{dispatchRecordRows.length > 0}}">
+        <safe-card wx:for="{{dispatchRecordRows}}" wx:key="id" compact="{{true}}" elevated="{{true}}" data-id="{{item.id}}" bindtap="openDetail" class="dispatch-reference-card">
+          <view class="dispatch-card-head">
+            <view class="dispatch-field-row dispatch-field-row--date">
+              <t-icon t-class="dispatch-row-icon" name="calendar" size="34rpx" color="#078249" />
+              <text class="dispatch-field-value">{{item.date}}</text>
+            </view>
+            <text class="dispatch-status-pill {{item.statusClass}}">{{item.statusLabel}}</text>
+          </view>
+          <view class="dispatch-field-row">
+            <t-icon t-class="dispatch-row-icon" name="building" size="34rpx" color="#078249" />
+            <text class="dispatch-field-value">车间 {{item.department}}　班组 {{item.team}}</text>
+          </view>
+          <view class="dispatch-field-row">
+            <t-icon t-class="dispatch-row-icon" name="user" size="34rpx" color="#078249" />
+            <text class="dispatch-field-value">人名 {{item.name}}　工种 {{item.work}}</text>
+          </view>
+          <view class="dispatch-field-row dispatch-field-row--content">
+            <t-icon t-class="dispatch-row-icon" name="file-paste" size="34rpx" color="#078249" />
+            <text class="dispatch-field-value">任务 {{item.task}}</text>
+          </view>
+          <view class="dispatch-actions">
+            <view class="dispatch-action-btn dispatch-outline-green" data-id="{{item.id}}" catchtap="openDetail">明细</view>
+            <view class="dispatch-action-btn dispatch-primary-btn" data-id="{{item.id}}" catchtap="openDetail">查看链路</view>
+          </view>
+        </safe-card>
+      </block>
+      <state-view wx:else empty="{{true}}" emptyText="没有更多了" />
+    </view>
+
+    <block wx:if="{{showDispatchFilter}}">
+      <view class="dispatch-filter-mask" bindtap="closeDispatchFilter"></view>
+      <view class="dispatch-filter-drawer">
+        <view class="dispatch-filter-title"><text>过滤条件</text><button class="dispatch-filter-close" bindtap="closeDispatchFilter">×</button></view>
+        <view class="dispatch-filter-field">
+          <text>开始日期</text>
+          <picker mode="date" value="{{dispatchDateStart}}" data-field="dateStart" bindchange="changeDispatchFilterDate">
+            <view class="dispatch-date-input">{{dispatchDateStart}}</view>
+          </picker>
+        </view>
+        <view class="dispatch-filter-field">
+          <text>结束日期</text>
+          <picker mode="date" value="{{dispatchDateEnd}}" data-field="dateEnd" bindchange="changeDispatchFilterDate">
+            <view class="dispatch-date-input">{{dispatchDateEnd}}</view>
+          </picker>
+        </view>
+        <view class="dispatch-filter-field">
+          <text>车间</text>
+          <picker mode="selector" range="{{departmentOptions}}" value="{{departmentIndex}}" bindchange="changeDepartment">
+            <view class="dispatch-date-input">{{departmentOptions[departmentIndex]}}</view>
+          </picker>
+        </view>
+        <view class="dispatch-filter-field">
+          <text>班组</text>
+          <picker mode="selector" range="{{teamOptions}}" value="{{teamIndex}}" bindchange="changeTeam">
+            <view class="dispatch-date-input">{{teamOptions[teamIndex]}}</view>
+          </picker>
+        </view>
+        <button class="dispatch-filter-submit" bindtap="applyDispatchFilter">筛选</button>
+      </view>
+    </block>
+  </view>
+</view>

@@ -1,0 +1,139 @@
+<green-header title="安全考试" bind:back="goBack" />
+<view class="exam-create-page">
+  <view class="exam-create-toolbar">
+    <view class="exam-create-back-btn" bindtap="goBack">
+      <t-icon name="chevron-left" size="36rpx" color="#172033" />
+      <text>返回</text>
+    </view>
+    <view class="exam-create-toolbar-right">
+      <view class="exam-create-draft-btn" bindtap="saveDraft">
+        <t-icon name="file-paste" size="34rpx" color="#078249" />
+        <text>草稿</text>
+      </view>
+      <view wx:if="{{activeCreateTab === 'basic'}}" class="exam-create-next-btn" bindtap="goNext">
+        <text>下一步</text>
+        <t-icon name="chevron-right" size="36rpx" color="#ffffff" />
+      </view>
+      <view wx:if="{{activeCreateTab === 'detail'}}" class="exam-create-submit-btn {{submitting ? 'disabled' : ''}}" bindtap="submitExamTask">
+        <t-icon name="send" size="32rpx" color="#ffffff" />
+        <text>{{submitting ? '提交中' : '提交'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="exam-create-tabs">
+    <view class="exam-create-tab {{activeCreateTab === 'basic' ? 'active' : ''}}" bindtap="openBasic">基础信息</view>
+    <view class="exam-create-tab {{activeCreateTab === 'detail' ? 'active' : ''}}" bindtap="goNext">选择试题</view>
+  </view>
+
+  <view wx:if="{{activeCreateTab === 'basic'}}" class="exam-create-form-card">
+    <view class="exam-create-scope-tip">
+      <t-icon name="usergroup" size="34rpx" color="#078249" />
+      <text>考试人员将按所选组织范围自动生成</text>
+    </view>
+    <view class="exam-create-field">
+      <view class="exam-create-label required">公司</view>
+      <picker mode="selector" range="{{companyOptions}}" range-key="label" value="{{companyIndex}}" bindchange="changeCompany">
+        <view class="exam-create-value">
+          <text>{{companyName}}</text>
+          <t-icon name="chevron-right" size="34rpx" color="#9aa2ad" />
+        </view>
+      </picker>
+    </view>
+    <view class="exam-create-field">
+      <view class="exam-create-label">部门</view>
+      <picker mode="selector" range="{{departmentOptions}}" range-key="label" value="{{departmentIndex}}" bindchange="changeDepartment">
+        <view class="exam-create-value">
+          <text>{{departmentName}}</text>
+          <t-icon name="chevron-right" size="34rpx" color="#9aa2ad" />
+        </view>
+      </picker>
+    </view>
+    <view class="exam-create-field">
+      <view class="exam-create-label">班组</view>
+      <picker disabled="{{!departmentId}}" mode="selector" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeTeam">
+        <view class="exam-create-value {{!departmentId ? 'muted' : ''}}">
+          <text>{{departmentId ? teamName : '请先选择部门'}}</text>
+          <t-icon name="chevron-right" size="34rpx" color="#9aa2ad" />
+        </view>
+      </picker>
+    </view>
+    <view class="exam-create-field">
+      <view class="exam-create-label required">考试名称</view>
+      <input class="exam-create-input" value="{{exam}}" placeholder="请输入考试名称" bindinput="changeExamName" />
+    </view>
+    <view class="exam-create-field">
+      <view class="exam-create-label required">考试日期</view>
+      <picker mode="date" value="{{examDate}}" bindchange="changeExamDate">
+        <view class="exam-create-date">
+          <t-icon name="calendar" size="34rpx" color="#078249" />
+          <text>{{examDate}}</text>
+        </view>
+      </picker>
+    </view>
+    <view class="exam-create-field">
+      <view class="exam-create-label required">考试时长（分钟）</view>
+      <input class="exam-create-input" type="number" value="{{durationMinutes}}" placeholder="请输入 1-480" bindinput="changeDuration" />
+    </view>
+    <view class="exam-create-field remark">
+      <view class="exam-create-label">备注</view>
+      <textarea class="exam-create-textarea" value="{{remark}}" placeholder="请输入备注" bindinput="changeRemark" />
+    </view>
+  </view>
+
+  <view wx:if="{{activeCreateTab === 'detail'}}" class="exam-source-panel">
+    <view class="exam-source-segment">
+      <view class="exam-source-segment-item {{sourceMode === 'paper' ? 'active' : ''}}" bindtap="selectPaperMode">
+        <t-icon name="file-paste" size="32rpx" color="{{sourceMode === 'paper' ? '#ffffff' : '#59616d'}}" />
+        <text>现有试卷</text>
+      </view>
+      <view class="exam-source-segment-item {{sourceMode === 'bank' ? 'active' : ''}}" bindtap="selectBankMode">
+        <t-icon name="book-open" size="32rpx" color="{{sourceMode === 'bank' ? '#ffffff' : '#59616d'}}" />
+        <text>题库选题</text>
+      </view>
+    </view>
+
+    <view class="exam-source-caption">
+      <text wx:if="{{sourceMode === 'paper'}}">选择一份适用于当前组织范围的试卷</text>
+      <text wx:else>已选择 {{selectedCount}} 道题</text>
+      <view class="exam-source-refresh" bindtap="loadQuestionSources">
+        <t-icon name="refresh" size="30rpx" color="#078249" />
+        <text>刷新</text>
+      </view>
+    </view>
+
+    <view wx:if="{{sourceLoading}}" class="exam-source-empty">正在加载试题资源...</view>
+
+    <view wx:elif="{{sourceMode === 'paper'}}" class="exam-source-list">
+      <view wx:for="{{papers}}" wx:key="id" class="exam-paper-card {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectPaper">
+        <view class="exam-select-mark">
+          <t-icon wx:if="{{item.selected}}" name="check" size="28rpx" color="#ffffff" />
+        </view>
+        <view class="exam-paper-main">
+          <view class="exam-paper-name">{{item.paperName}}</view>
+          <view class="exam-paper-meta">{{item.questionCount}} 道题 · {{item.totalScore}} 分</view>
+          <view class="exam-paper-scope">{{item.scopeLabel}}</view>
+          <view wx:if="{{item.description}}" class="exam-paper-description">{{item.description}}</view>
+        </view>
+      </view>
+      <view wx:if="{{!papers.length}}" class="exam-source-empty">当前组织范围暂无可用试卷</view>
+    </view>
+
+    <view wx:else class="exam-source-list">
+      <view wx:for="{{questionBankRows}}" wx:key="id" class="exam-bank-card {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="toggleBankQuestion">
+        <view class="exam-select-mark square">
+          <t-icon wx:if="{{item.selected}}" name="check" size="28rpx" color="#ffffff" />
+        </view>
+        <view class="exam-bank-main">
+          <view class="exam-bank-head">
+            <text class="exam-bank-type">{{item.questionTypeLabel || item.questionType}}</text>
+            <text class="exam-bank-score">{{item.score}} 分</text>
+          </view>
+          <view class="exam-bank-question">{{item.questionText}}</view>
+          <view class="exam-bank-scope">{{item.team || item.department || item.company}}</view>
+        </view>
+      </view>
+      <view wx:if="{{!questionBankRows.length}}" class="exam-source-empty">当前组织范围暂无可用题目</view>
+    </view>
+  </view>
+</view>

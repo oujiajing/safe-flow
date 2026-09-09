@@ -1,0 +1,12 @@
+<view class="section-header section-header--{{sizeClass}} {{showAccent ? 'section-header--accent' : ''}}">
+  <view wx:if="{{showAccent}}" class="section-header__accent"></view>
+  <view class="section-header__main">
+    <view class="section-header__icon">
+      <t-icon name="{{resolvedIcon}}" size="{{iconSize}}" color="#13a66b" />
+    </view>
+    <text class="section-header__title">{{title}}</text>
+  </view>
+  <view class="section-header__extra">
+    <slot name="extra"></slot>
+  </view>
+</view>

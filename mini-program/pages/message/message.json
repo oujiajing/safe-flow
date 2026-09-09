@@ -1,0 +1,12 @@
+{
+  "navigationBarTitleText": "消息中心",
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f3f6f4",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "t-empty": "tdesign-miniprogram/empty/empty",
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-loading": "tdesign-miniprogram/loading/loading"
+  }
+}

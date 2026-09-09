@@ -1,0 +1,87 @@
+<green-header title="学习详情" bind:back="goBack" />
+<view class="page">
+  <t-loading wx:if="{{loading}}" text="加载中" />
+  <block wx:elif="{{content}}">
+    <view class="detail-summary-card">
+      <view class="detail-category">{{content.category}}</view>
+      <view class="detail-title">{{content.title}}</view>
+      <view class="detail-meta">
+        <view class="detail-meta-item">
+          <t-icon name="calendar" size="32rpx" color="#737d90" />
+          <text>{{content.learningDate || '-'}}</text>
+        </view>
+        <view class="detail-meta-item">
+          <t-icon name="time" size="32rpx" color="#737d90" />
+          <text>{{requiredWatchText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="video-card">
+      <view class="section-title-row">
+        <view class="section-title">
+          <t-icon name="play-circle-filled" size="36rpx" color="#08a45f" />
+          <text>学习视频</text>
+        </view>
+      </view>
+      <video
+        wx:if="{{content.videoUrl}}"
+        id="learningVideo"
+        class="learning-video"
+        src="{{content.videoUrl}}"
+        controls
+        show-fullscreen-btn="{{true}}"
+        direction="90"
+        show-center-play-btn="{{true}}"
+        show-play-btn="{{true}}"
+        enable-progress-gesture="{{true}}"
+        enable-auto-rotation="{{true}}"
+        show-screen-lock-button="{{true}}"
+        object-fit="contain"
+        bindfullscreenchange="handleVideoFullscreenChange"
+        bindtimeupdate="handleVideoTimeUpdate"
+        bindloadedmetadata="handleVideoLoadedMetadata"
+      ></video>
+      <view wx:else class="video-empty">
+        <t-icon name="video" size="48rpx" color="#94a3b8" />
+        <text>暂无学习视频</text>
+      </view>
+      <view class="detail-content">{{content.content || '暂无课程说明'}}</view>
+    </view>
+
+    <view class="requirement-card">
+      <view class="requirement-heading">
+        <view class="requirement-icon">
+          <t-icon name="task-checked" size="36rpx" color="#08a45f" />
+        </view>
+        <view class="requirement-title">
+          <text>学习要求：</text>
+          <text class="requirement-desc">累计学习满{{requiredWatchText}}后可打卡</text>
+        </view>
+      </view>
+      <view class="watch-stat">
+        <text>已学习：</text>
+        <text class="watch-highlight">{{watchedText}}</text>
+        <text> / {{requiredWatchText}}</text>
+      </view>
+      <view class="watch-progress-row">
+        <view class="watch-progress-track">
+          <view class="watch-progress-fill" style="width: {{watchProgress}}%;"></view>
+        </view>
+        <text>{{watchProgress}}%</text>
+      </view>
+      <view class="watch-tip">
+        <t-icon name="info-circle" size="28rpx" color="#737d90" />
+        <text>{{canCheckIn ? '已完成学习，可进行打卡' : remainingWatchText}}</text>
+      </view>
+      <view class="checkin-action {{canCheckIn ? '' : 'disabled'}}" bindtap="checkIn">
+        <t-icon name="calendar" size="42rpx" color="#ffffff" />
+        <text>学习打卡</text>
+      </view>
+      <view wx:if="{{checkIn}}" class="points-result">
+        <text>打卡成功</text>
+        <text>+{{checkIn.pointsAwarded}} 积分</text>
+      </view>
+    </view>
+  </block>
+</view>

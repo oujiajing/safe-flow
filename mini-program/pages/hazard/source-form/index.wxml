@@ -1,0 +1,234 @@
+<view class="source-page {{moduleKey === 'quick-shot' ? 'quick-shot-page' : ''}} {{moduleKey === 'safety-check' ? 'safety-check-page' : ''}}">
+  <green-header title="{{moduleKey === 'quick-shot' ? '新增随手拍' : (moduleKey === 'safety-check' ? '新增安全检查' : title)}}" bind:back="goBack" />
+
+  <view class="source-form-toolbar">
+    <button wx:if="{{moduleKey === 'safety-check'}}" class="source-back-btn" bindtap="goBack"><text class="source-btn-back-icon"></text>返回</button>
+    <view class="source-form-actions {{moduleKey === 'quick-shot' ? 'quick-shot-form-actions' : ''}}">
+      <button class="source-draft" bindtap="saveDraft"><t-icon wx:if="{{moduleKey === 'quick-shot'}}" name="file-paste" size="32rpx" /><text wx:else class="source-draft-icon"></text>草稿</button>
+      <button wx:if="{{moduleKey === 'safety-check'}}" class="source-submit-mini" loading="{{submitting}}" bindtap="submitForm"><text class="source-submit-icon"></text>提交</button>
+      <button wx:else class="source-submit-mini" loading="{{submitting}}" bindtap="submitForm"><t-icon name="send" size="32rpx" />提交</button>
+    </view>
+  </view>
+
+  <view class="source-form {{moduleKey === 'quick-shot' ? 'quick-shot-form' : ''}}">
+    <view wx:if="{{moduleKey === 'safety-check'}}" class="source-tabs create-tabs">
+      <view class="source-tab {{safetyFormTab === 'base' ? 'active' : ''}}" data-tab="base" bindtap="changeSafetyFormTab">基础信息</view>
+      <view class="source-tab {{safetyFormTab === 'hazards' ? 'active' : ''}}" data-tab="hazards" bindtap="changeSafetyFormTab">隐患明细</view>
+    </view>
+
+    <block wx:if="{{moduleKey === 'safety-check'}}">
+      <safe-card wx:if="{{safetyFormTab === 'base'}}" compact="{{true}}" elevated="{{true}}">
+        <view class="safety-form-card" data-empty-count="0/500">
+          <view class="safety-form-row">
+            <text class="safety-form-required">检查单位</text>
+            <picker mode="selector" range="{{inspectionUnitOptions}}" range-key="label" value="{{inspectionUnitIndex}}" bindchange="changeInspectionUnit">
+              <view class="source-picker-value {{selectedInspectionUnitId ? 'selected' : ''}}">{{currentInspectionUnitName || '点击选择'}}</view>
+            </picker>
+            <text class="safety-arrow">›</text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-required">受检单位</text>
+            <picker mode="selector" range="{{inspectedUnitOptions}}" range-key="label" value="{{inspectedUnitIndex}}" bindchange="changeInspectedUnit">
+              <view class="source-picker-value {{selectedInspectedUnitId ? 'selected' : ''}}">{{currentInspectedUnitName || '点击选择'}}</view>
+            </picker>
+            <text class="safety-arrow">›</text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-required">受检项目</text>
+            <input value="{{form.inspectedProject}}" data-field="inspectedProject" bindinput="updateField" placeholder="点击选择" />
+            <text class="safety-arrow">›</text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-required">检查类型</text>
+            <input class="source-select-input" value="{{form.checkTheme}}" data-field="checkTheme" bindinput="updateField" placeholder="点击选择" />
+            <text class="safety-arrow">›</text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-optional">检查类型（手录）</text>
+            <input value="{{form.manualCheckType}}" data-field="manualCheckType" bindinput="updateField" placeholder="请输入" />
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-required">检查日期</text>
+            <picker mode="date" value="{{form.checkDate}}" bindchange="changeCheckDate">
+              <view class="source-date-box">{{form.checkDate || uploadDate}}</view>
+            </picker>
+            <text class="source-calendar-icon"></text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-required">检查时间</text>
+            <picker mode="time" value="{{checkClock}}" bindchange="changeCheckTime">
+              <view class="source-date-box">{{checkClock}}</view>
+            </picker>
+            <text class="source-clock-icon"></text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-required">创建人</text>
+            <text class="source-chip">{{currentUser.realName || currentUser.username || '-'}}</text>
+          </view>
+          <view class="safety-form-row safety-check-method-row">
+            <text class="safety-form-required">检查方式</text>
+            <view class="source-checks">
+              <label wx:for="{{checkMethodOptions}}" wx:key="label" class="source-check-item">
+                <checkbox checked="{{item.checked}}" color="#13a66b" data-value="{{item.label}}" bindtap="toggleCheckMethod" />{{item.label}}
+              </label>
+            </view>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-required">检查人员</text>
+            <text class="safety-person-chip">{{currentUser.realName || currentUser.username || '请选择'}} ×</text>
+            <text class="safety-arrow">›</text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-optional">验收人员</text>
+            <text class="safety-placeholder">请选择</text>
+            <text class="safety-arrow">›</text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-optional">检查人员（手录）</text>
+            <input value="{{form.manualInspectors}}" data-field="manualInspectors" bindinput="updateField" placeholder="请输入" />
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-optional">受检单位人员</text>
+            <text class="safety-placeholder">请选择</text>
+            <text class="safety-arrow">›</text>
+          </view>
+          <view class="safety-form-row">
+            <text class="safety-form-optional">受检单位人员（手录）</text>
+            <input value="{{form.manualInspectedUnitUsers}}" data-field="manualInspectedUnitUsers" bindinput="updateField" placeholder="请输入" />
+          </view>
+          <view class="safety-textarea-section">
+            <text class="safety-form-required">检查内容</text>
+            <view class="safety-textarea-wrap">
+              <textarea value="{{form.checkContent}}" data-field="checkContent" bindinput="updateField" maxlength="500" placeholder="请输入检查内容" />
+              <view class="safety-textarea-count">{{form.checkContent.length || 0}}/500</view>
+            </view>
+          </view>
+          <view class="safety-textarea-section">
+            <text class="safety-form-optional">备注</text>
+            <view class="safety-textarea-wrap">
+              <textarea value="{{form.remark}}" data-field="remark" bindinput="updateField" maxlength="500" placeholder="请输入备注" />
+              <view class="safety-textarea-count">{{form.remark.length || 0}}/500</view>
+            </view>
+          </view>
+          <view class="safety-upload-panel">
+            <text class="safety-form-optional">附件</text>
+            <button class="safety-upload" bindtap="choosePhoto"><text class="safety-upload-icon"></text><view><text>上传附件</text><text>支持图片、文件</text></view></button>
+          </view>
+          <view wx:if="{{attachments.length > 0}}" class="safety-attachment-preview">
+            <block wx:for="{{attachments}}" wx:key="path">
+              <view class="safety-preview-item">
+                <image wx:if="{{item.type === 'image'}}" class="safety-image-preview" src="{{item.path}}" mode="aspectFill" data-index="{{index}}" bindtap="previewAttachment" />
+                <video wx:else class="safety-video-preview" src="{{item.path}}" controls></video>
+                <text class="safety-preview-name">{{item.name}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+      </safe-card>
+      <view wx:if="{{safetyFormTab === 'hazards'}}" class="safety-hazard-tab">
+        <view class="safety-hazard-add" bindtap="addSafetyHazardCard"><text>+</text>新增</view>
+        <view wx:for="{{safetyHazardCards}}" wx:key="id" class="safety-hazard-entry">
+          <view class="safety-hazard-head">
+            <view class="safety-hazard-index">{{item.index}}</view>
+            <view class="safety-hazard-delete" data-id="{{item.id}}" bindtap="deleteSafetyHazardCard"></view>
+            <view class="safety-hazard-chevron {{item.collapsed ? 'collapsed' : ''}}" data-id="{{item.id}}" bindtap="toggleSafetyHazardCard">⌄</view>
+          </view>
+          <view class="safety-hazard-card {{item.collapsed ? 'safety-hazard-card-collapsed' : ''}}">
+            <block wx:if="{{!item.collapsed}}">
+              <view class="safety-hazard-field safety-hazard-ai-field">
+                <text class="safety-hazard-required">是否启用AI</text>
+                <view class="safety-hazard-ai-options">
+                  <view class="safety-hazard-ai-option {{form.enableAi === '是' ? 'active' : ''}}" data-value="是" bindtap="changeAi">是</view>
+                  <view class="safety-hazard-ai-option {{form.enableAi === '否' ? 'active' : ''}}" data-value="否" bindtap="changeAi">否</view>
+                </view>
+              </view>
+              <view class="safety-hazard-field safety-hazard-upload-field">
+                <text class="safety-hazard-required">整改前照片</text>
+                <button class="safety-hazard-upload" bindtap="choosePhoto"><text class="safety-hazard-upload-icon"></text>请上传</button>
+              </view>
+              <view class="safety-hazard-textarea-field">
+                <text class="safety-hazard-required">隐患描述</text>
+                <textarea class="safety-hazard-textarea focus" value="{{form.hazardDescription}}" data-field="hazardDescription" bindinput="updateField" placeholder="请输入 隐患描述" />
+              </view>
+              <view class="safety-hazard-textarea-field">
+                <text class="safety-hazard-required">整改措施</text>
+                <textarea class="safety-hazard-textarea" value="{{form.rectificationMeasures}}" data-field="rectificationMeasures" bindinput="updateField" placeholder="请输入 整改措施" />
+              </view>
+              <view class="safety-hazard-field">
+                <text class="safety-hazard-required">整改责任人</text>
+                <text class="safety-hazard-copy"></text>
+              </view>
+              <view class="safety-hazard-field safety-hazard-date-field">
+                <text class="safety-hazard-required">整改截止日期</text>
+                <picker mode="date" value="{{form.rectificationDeadline || form.checkDate}}" data-field="rectificationDeadline" bindchange="updateField">
+                  <view class="safety-hazard-date"><text class="source-calendar-icon"></text>{{form.rectificationDeadline || form.checkDate}}</view>
+                </picker>
+              </view>
+            </block>
+            <block wx:else>
+              <view class="safety-hazard-collapsed-tip">已收起</view>
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <safe-card compact="{{true}}" elevated="{{true}}">
+        <view class="quick-shot-form-card">
+          <picker mode="selector" range="{{companyOptions}}" range-key="label" value="{{companyIndex}}" bindchange="changeCompany" disabled="{{organizationLocks.company}}">
+            <view class="quick-shot-form-row"><text>公司</text><view>{{currentCompany.company || '点击选择'}}</view><text class="quick-shot-arrow">›</text></view>
+          </picker>
+          <picker mode="selector" range="{{departmentOptions}}" range-key="label" value="{{departmentIndex}}" bindchange="changeDepartment" disabled="{{organizationLocks.department}}">
+            <view class="quick-shot-form-row"><text>部门</text><view>{{currentCompany.workshop || '点击选择'}}</view><text class="quick-shot-arrow">›</text></view>
+          </picker>
+          <picker mode="selector" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeTeam" disabled="{{organizationLocks.team}}">
+            <view class="quick-shot-form-row"><text>班组</text><view>{{currentTeam || '点击选择'}}</view><text class="quick-shot-arrow">›</text></view>
+          </picker>
+          <info-row label="上报人" value="{{currentUser.realName || currentUser.username || '-'}}" arrow="{{true}}" />
+          <picker mode="date" value="{{uploadDate}}" bindchange="changeUploadDate">
+            <view class="quick-shot-form-row"><text>上传日期</text><view>{{uploadDate}}</view><text class="quick-shot-arrow">›</text></view>
+          </picker>
+          <view class="quick-shot-form-row quick-shot-ai-row">
+            <text>是否启用AI</text>
+            <view class="quick-shot-ai-options">
+              <view class="quick-shot-ai-option {{form.enableAi === '是' ? 'active' : ''}}" data-value="是" bindtap="changeAi"><text></text>是</view>
+              <view class="quick-shot-ai-option {{form.enableAi === '否' ? 'active' : ''}}" data-value="否" bindtap="changeAi"><text></text>否</view>
+            </view>
+          </view>
+          <view class="quick-shot-upload-section">
+            <view class="quick-shot-field-title">隐患图片</view>
+            <upload-panel photo="{{photo}}" emptyText="请选择图片来源" bind:upload="uploadPhoto" bind:preview="previewPhoto" />
+            <view class="quick-shot-photo-actions">
+              <view class="quick-shot-photo-action quick-shot-photo-action--camera" bindtap="takePhoto">
+                <t-icon name="camera" size="34rpx" color="#0b9860" />
+                <text>手机拍照</text>
+              </view>
+              <view class="quick-shot-photo-action" bindtap="uploadPhoto">
+                <t-icon name="image" size="34rpx" color="#0b9860" />
+                <text>上传图片</text>
+              </view>
+            </view>
+          </view>
+          <view class="quick-shot-textarea-section">
+            <view class="quick-shot-field-title">隐患描述</view>
+            <view class="quick-shot-textarea-wrap">
+              <textarea class="quick-shot-textarea" value="{{form.hazardDescription}}" data-field="hazardDescription" bindinput="updateField" placeholder="请输入 隐患描述" placeholder-class="quick-shot-textarea-placeholder" />
+              <view class="quick-shot-textarea-count">{{form.hazardDescription.length || 0}}/500</view>
+            </view>
+          </view>
+          <view class="quick-shot-textarea-section">
+            <view class="quick-shot-field-title">整改措施</view>
+            <view class="quick-shot-textarea-wrap">
+              <textarea class="quick-shot-textarea" value="{{form.rectificationMeasures}}" data-field="rectificationMeasures" bindinput="updateField" placeholder="请输入 整改措施" placeholder-class="quick-shot-textarea-placeholder" />
+              <view class="quick-shot-textarea-count">{{form.rectificationMeasures.length || 0}}/500</view>
+            </view>
+          </view>
+        </view>
+      </safe-card>
+    </block>
+
+    <view wx:if="{{errorText}}" class="source-error">{{errorText}}</view>
+    <view wx:if="{{operationResult}}" class="source-success">{{operationResult}}</view>
+  </view>
+</view>

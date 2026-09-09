@@ -1,0 +1,11 @@
+{
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "green-header": "../../../components/ui/green-header/index",
+    "scope-filter": "../../../components/analysis/scope-filter/index",
+    "state-view": "../../../components/ui/state-view/index",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}

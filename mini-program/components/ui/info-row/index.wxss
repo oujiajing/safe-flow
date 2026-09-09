@@ -1,0 +1,43 @@
+.info-row {
+  display: grid;
+  grid-template-columns: 168rpx minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 88rpx;
+  border-bottom: 1rpx solid #edf0f3;
+  color: #172033;
+  box-sizing: border-box;
+}
+
+.info-row__label {
+  color: #172033;
+  font-size: var(--info-row-font-size, 28rpx);
+  font-weight: 600;
+  line-height: var(--info-row-line-height, 40rpx);
+}
+
+.info-row__label--required::after {
+  margin-left: 4rpx;
+  color: #ef4444;
+  content: "*";
+}
+
+.info-row__value {
+  min-width: 0;
+  color: #343b48;
+  font-size: var(--info-row-font-size, 28rpx);
+  line-height: var(--info-row-line-height, 40rpx);
+  text-align: right;
+  word-break: break-all;
+}
+
+.info-row__text {
+  color: inherit;
+}
+
+.info-row__arrow {
+  margin-left: 14rpx;
+  color: #a7afbb;
+  font-size: 48rpx;
+  font-weight: 300;
+  line-height: 1;
+}

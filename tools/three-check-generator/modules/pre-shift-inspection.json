@@ -1,0 +1,25 @@
+{
+  "moduleKey": "pre-shift-inspection",
+  "bizType": "PRE_SHIFT_INSPECTION",
+  "entityName": "PreShiftInspection",
+  "tableName": "pre_shift_inspection",
+  "routePath": "/pingan/three-checks/pre-shift-inspection",
+  "apiBase": "/pingan/pre-shift-inspections",
+  "title": "班前检查",
+  "primaryNoField": "inspectionNo",
+  "businessDateField": "inspectionDate",
+  "sync": {
+    "sourceChannels": ["PC", "WECHAT_MINI_PROGRAM", "API_IMPORT"],
+    "idempotencyField": "clientRequestId",
+    "clientRecordField": "sourceRecordId",
+    "miniApiBase": "/mini/pingan/pre-shift-inspections"
+  },
+  "extraFields": [
+    {
+      "name": "inspectionItems",
+      "javaType": "List<String>",
+      "tsType": "string[]",
+      "label": "检查项"
+    }
+  ]
+}

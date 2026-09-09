@@ -1,0 +1,46 @@
+page {
+  margin: 0;
+  padding: 0;
+  background: #f4f6f8;
+  color: #253042;
+}
+
+.page {
+  padding: 20rpx;
+}
+
+.flow-list {
+  display: grid;
+  gap: 18rpx;
+}
+
+.flow-card {
+  position: relative;
+  padding: 24rpx 140rpx 24rpx 24rpx;
+  background: #ffffff;
+  border: 1rpx solid #e2e8f0;
+  border-radius: 8rpx;
+}
+
+.flow-title {
+  color: #172033;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.flow-meta {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 12rpx;
+  color: #667085;
+  font-size: 24rpx;
+}
+
+.flow-points {
+  position: absolute;
+  top: 32rpx;
+  right: 24rpx;
+  color: #0b9860;
+  font-size: 36rpx;
+  font-weight: 900;
+}

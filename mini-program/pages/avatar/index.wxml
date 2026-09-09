@@ -1,0 +1,60 @@
+<view class="avatar-page">
+  <view class="avatar-nav">
+    <view class="avatar-status-bar" style="height: {{statusBarHeight}}px;"></view>
+    <view class="avatar-nav-bar" style="height: {{navigationBarHeight}}px;">
+      <view
+        class="avatar-nav-action"
+        bindtap="goBack"
+        hover-class="avatar-nav-action--pressed"
+        aria-role="button"
+        aria-label="返回"
+      >
+        <t-icon name="chevron-left" size="58rpx" color="#252a30" />
+      </view>
+      <text class="avatar-nav-title">设置个人头像</text>
+      <view class="avatar-nav-space"></view>
+    </view>
+  </view>
+
+  <view class="avatar-preview-panel">
+    <t-loading wx:if="{{loading}}" text="加载中" />
+    <image
+      wx:elif="{{avatarUrl}}"
+      class="avatar-preview-image"
+      src="{{avatarUrl}}"
+      mode="aspectFit"
+    />
+    <view wx:else class="avatar-preview-placeholder" aria-label="默认头像">
+      <t-icon name="user" size="390rpx" color="#c8c8c8" />
+    </view>
+  </view>
+
+  <view class="avatar-page-spacer"></view>
+
+  <view class="avatar-actions">
+    <view
+      class="avatar-action-row"
+      bindtap="chooseFromAlbum"
+      hover-class="avatar-action-row--pressed"
+      aria-role="button"
+    >从相册选一张</view>
+    <view
+      class="avatar-action-row"
+      bindtap="takePhoto"
+      hover-class="avatar-action-row--pressed"
+      aria-role="button"
+    >拍一张照片</view>
+    <view
+      class="avatar-action-row"
+      bindtap="openAvatarDecoration"
+      hover-class="avatar-action-row--pressed"
+      aria-role="button"
+    >设置头像装扮</view>
+    <view
+      class="avatar-action-row"
+      bindtap="openAiAvatar"
+      hover-class="avatar-action-row--pressed"
+      aria-role="button"
+    >使用AI头像</view>
+  </view>
+</view>

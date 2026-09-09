@@ -1,0 +1,26 @@
+<green-header title="帮助与反馈" bind:back="goBack" />
+<view class="help-page">
+  <view class="intro-card">
+    <t-icon name="help-circle" size="60rpx" color="#078c59" />
+    <view>
+      <view class="intro-title">常见问题</view>
+      <view class="intro-note">先看看下面的解答，通常可以快速解决问题</view>
+    </view>
+  </view>
+
+  <view class="faq-card">
+    <view class="faq-item" wx:for="{{faqs}}" wx:key="question" data-index="{{index}}" bindtap="toggleFaq">
+      <view class="faq-question">
+        <text>{{item.question}}</text>
+        <t-icon name="{{expandedIndex === index ? 'chevron-up' : 'chevron-down'}}" size="36rpx" color="#8a949f" />
+      </view>
+      <view wx:if="{{expandedIndex === index}}" class="faq-answer">{{item.answer}}</view>
+    </view>
+  </view>
+
+  <view class="support-card">
+    <view class="support-title">仍需帮助？</view>
+    <view class="support-note">请联系本单位系统管理员，并说明账号、发生时间和问题现象。</view>
+    <button class="support-button" bindtap="copySupportInfo">复制反馈标题</button>
+  </view>
+</view>

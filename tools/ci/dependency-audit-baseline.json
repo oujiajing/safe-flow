@@ -1,0 +1,15 @@
+{
+  "policy": "阻断新增 high/critical；既有项由 Dependabot 逐步修复，修复后从基线删除且不得重新加入。",
+  "reviewedAt": "2026-09-09",
+  "registry": "https://registry.npmjs.org",
+  "pc": {
+    "allowedAdvisories": [
+      "1138808",
+      "1138809"
+    ],
+    "reviewNote": "image-size 0.5.5 is pulled transitively by vite > less; the registry advisories report no patched version. Keep blocked against every other new high/critical advisory."
+  },
+  "miniProgram": {
+    "allowedAdvisories": []
+  }
+}

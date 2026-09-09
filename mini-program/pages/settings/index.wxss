@@ -1,0 +1,132 @@
+page {
+  background: #f4f6f5;
+}
+
+.settings-page {
+  min-height: 100vh;
+  color: #20262d;
+  background: #f4f6f5;
+}
+
+.settings-nav {
+  background: rgba(249, 252, 251, 0.96);
+}
+
+.settings-status-bar {
+  width: 100%;
+}
+
+.settings-nav-bar {
+  display: flex;
+  align-items: center;
+}
+
+.settings-nav-action,
+.settings-nav-space {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.settings-nav-action {
+  width: 88rpx;
+}
+
+.settings-nav-space {
+  flex: 1;
+}
+
+.settings-nav-action--pressed {
+  background: rgba(0, 140, 98, 0.08);
+}
+
+.settings-nav-title {
+  overflow: hidden;
+  color: #20262d;
+  font-size: 38rpx;
+  font-weight: 800;
+  line-height: 54rpx;
+  margin-left: 4rpx;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-content {
+  padding: 38rpx 32rpx 48rpx;
+}
+
+.settings-card,
+.account-action-card {
+  border: 1rpx solid rgba(224, 231, 228, 0.82);
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 12rpx 30rpx rgba(23, 32, 51, 0.05);
+}
+
+.settings-card {
+  overflow: hidden;
+  padding: 0 40rpx;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  min-height: 136rpx;
+  border-bottom: 1rpx solid #e5eae7;
+}
+
+.settings-row:last-child {
+  border-bottom: 0;
+}
+
+.settings-row--pressed {
+  background: #f1f8f4;
+}
+
+.settings-row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66rpx;
+  margin-right: 36rpx;
+}
+
+.settings-row-label {
+  flex: 1;
+  min-width: 0;
+  color: #242a31;
+  font-size: 29rpx;
+  line-height: 42rpx;
+}
+
+.settings-row-value {
+  margin-right: 16rpx;
+  color: #929996;
+  font-size: 25rpx;
+  line-height: 38rpx;
+}
+
+.account-action-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 128rpx;
+  color: #20262d;
+  font-size: 30rpx;
+  font-weight: 500;
+  line-height: 44rpx;
+}
+
+.switch-account-card {
+  margin-top: 40rpx;
+}
+
+.logout-card {
+  margin-top: 20rpx;
+}
+
+.account-action-card--pressed {
+  background: #f1f4f3;
+}

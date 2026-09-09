@@ -1,0 +1,20 @@
+<view class="ks-page">
+  <green-header title="执行检查" bind:back="goBack" />
+  <view wx:if="{{record}}" class="ks-site-banner"><view class="ks-site-mark">重点</view><view><text>{{record.payload.siteType || '重点场所'}}</text><text>{{record.recordNo}}</text></view></view>
+  <view wx:if="{{checkItems.length}}" class="ks-progress-card"><view><text>检查进度</text><text>{{completed}} / {{checkItems.length}}</text></view><progress percent="{{completed * 100 / checkItems.length}}" stroke-width="6" activeColor="#0878f9" backgroundColor="#e8edf3" /></view>
+  <view wx:for="{{checkItems}}" wx:key="lineId" class="ks-inspection-card">
+    <view class="ks-question"><text class="ks-index">{{index + 1}}</text><text>{{item.checkItem}}</text><text wx:if="{{item.requireImage || item.requireVideo}}" class="ks-star">*</text></view>
+    <view class="ks-result-grid"><view class="ks-result safe {{item.checkResult === '无隐患' ? 'active' : ''}}" data-index="{{index}}" data-value="无隐患" bindtap="chooseResult">无隐患</view><view class="ks-result danger {{item.checkResult === '有隐患' ? 'active' : ''}}" data-index="{{index}}" data-value="有隐患" bindtap="chooseResult">有隐患</view></view>
+    <block wx:if="{{item.checkResult === '有隐患'}}">
+      <view class="ks-field-title">隐患描述 <text>*</text></view>
+      <textarea value="{{item.hazardDescription}}" data-index="{{index}}" bindinput="updateDescription" maxlength="200" placeholder="请描述存在的隐患情况" />
+      <view class="ks-field-title">现场图片 <text wx:if="{{item.requireImage}}">*</text></view>
+      <view class="ks-upload" data-index="{{index}}" bindtap="uploadPhoto">
+        <image wx:if="{{item.localPhoto || item.beforePhoto}}" src="{{item.localPhoto || item.beforePhoto}}" mode="aspectFill" />
+        <block wx:else><text class="ks-camera">拍照</text><text>{{uploadingIndex === index ? '上传中' : '拍照上传'}}</text></block>
+      </view>
+    </block>
+  </view>
+  <view wx:if="{{errorText}}" class="ks-error">{{errorText}}</view>
+  <view class="ks-bottom ks-bottom-one"><button class="ks-primary" bindtap="submit" loading="{{saving}}">提交检查</button></view>
+</view>

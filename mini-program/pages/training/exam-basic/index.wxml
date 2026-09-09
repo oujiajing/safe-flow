@@ -1,0 +1,66 @@
+<green-header title="安全考试" bind:back="goBack" />
+<view class="exam-detail-page">
+  <view class="exam-detail-toolbar">
+    <view class="exam-back-btn" bindtap="goBack">
+      <t-icon name="chevron-left" size="38rpx" color="#078249" />
+      <text>返回</text>
+    </view>
+    <view class="exam-toolbar-actions">
+      <view class="exam-draft-btn" bindtap="saveDraft">
+        <t-icon name="file-paste" size="34rpx" color="#172033" />
+        <text>草稿</text>
+      </view>
+      <view class="exam-submit-btn" bindtap="submitExam">
+        <t-icon name="send" size="34rpx" color="#ffffff" />
+        <text>提交</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="exam-detail-tabs">
+    <view class="exam-detail-tab {{activeDetailTab === 'basic' ? 'active' : ''}}" bindtap="openBasic">基础信息</view>
+    <view class="exam-detail-tab {{activeDetailTab === 'detail' ? 'active' : ''}}" bindtap="openDetail">明细信息</view>
+  </view>
+
+  <view wx:if="{{activeDetailTab === 'basic'}}" class="exam-info-card">
+    <view wx:for="{{infoRows}}" wx:key="label" class="exam-info-row">
+      <t-icon t-class="exam-info-icon" name="{{item.icon}}" size="46rpx" color="#078249" />
+      <view class="exam-info-label">
+        <text>{{item.label}}</text>
+        <text wx:if="{{item.required}}" class="required">*</text>
+      </view>
+      <view class="exam-info-value">
+        <text wx:if="{{item.type === 'status'}}" class="exam-status-pill">{{item.value}}</text>
+        <text wx:else>{{item.value}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeDetailTab === 'detail'}}" class="exam-question-list">
+    <view wx:for="{{questions}}" wx:key="id" class="exam-question-card {{item.expanded ? 'expanded' : ''}}" data-id="{{item.id}}" bindtap="toggleQuestion">
+      <view class="exam-question-head">
+        <view class="exam-question-title">
+          <text class="exam-question-no">{{item.no}}</text>
+          <text>{{item.title}}</text>
+        </view>
+        <t-icon name="{{item.expanded ? 'chevron-up' : 'chevron-right'}}" size="32rpx" color="{{item.expanded ? '#078249' : '#8a95a3'}}" />
+      </view>
+      <view wx:if="{{item.expanded}}" class="exam-question-body">
+        <view class="exam-question-row">
+          <view class="exam-question-label">题型</view>
+          <view class="exam-question-value">{{item.type}}</view>
+        </view>
+        <view class="exam-question-row">
+          <view class="exam-question-label">考题</view>
+          <view class="exam-question-value exam-question-link">{{item.question}}</view>
+        </view>
+        <view class="exam-question-row option-row">
+          <view class="exam-question-label">选项</view>
+          <view class="exam-options">
+            <view wx:for="{{item.options}}" wx:for-item="option" wx:key="*this" class="exam-option">{{option}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

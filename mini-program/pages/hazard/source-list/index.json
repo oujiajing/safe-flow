@@ -1,0 +1,15 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "info-row": "/components/ui/info-row/index",
+    "safe-card": "/components/ui/safe-card/index",
+    "state-view": "/components/ui/state-view/index",
+    "status-badge": "/components/ui/status-badge/index",
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-empty": "tdesign-miniprogram/empty/empty",
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-loading": "tdesign-miniprogram/loading/loading",
+    "upload-panel": "/components/ui/upload-panel/index"
+  }
+}

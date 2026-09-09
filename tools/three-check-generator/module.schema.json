@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "moduleKey",
+    "bizType",
+    "entityName",
+    "tableName",
+    "routePath",
+    "apiBase",
+    "title",
+    "primaryNoField",
+    "businessDateField",
+    "sync",
+    "extraFields"
+  ],
+  "properties": {
+    "moduleKey": { "type": "string", "minLength": 1 },
+    "bizType": { "type": "string", "minLength": 1 },
+    "entityName": { "type": "string", "minLength": 1 },
+    "tableName": { "type": "string", "minLength": 1 },
+    "routePath": { "type": "string", "minLength": 1 },
+    "apiBase": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "primaryNoField": { "type": "string", "minLength": 1 },
+    "businessDateField": { "type": "string", "minLength": 1 },
+    "sync": {
+      "type": "object",
+      "required": [
+        "sourceChannels",
+        "idempotencyField",
+        "clientRecordField",
+        "miniApiBase"
+      ],
+      "properties": {
+        "sourceChannels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "idempotencyField": { "type": "string", "minLength": 1 },
+        "clientRecordField": { "type": "string", "minLength": 1 },
+        "miniApiBase": { "type": "string", "minLength": 1 }
+      }
+    },
+    "extraFields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "javaType", "tsType", "label"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "javaType": { "type": "string", "minLength": 1 },
+          "tsType": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+<view class="mine-page">
+  <view class="mine-hero" style="padding-top: {{navHeight}}px;">
+    <view class="mine-settings-row">
+      <view
+        class="mine-settings-button"
+        bindtap="openSettings"
+        hover-class="mine-settings-button--pressed"
+        aria-role="button"
+        aria-label="设置"
+      >
+        <t-icon name="setting" size="58rpx" color="#263238" />
+      </view>
+    </view>
+
+    <view class="identity-card" bindtap="openProfile" hover-class="identity-card--pressed" aria-role="button">
+      <view class="identity-watermark" aria-hidden="true">
+        <t-icon name="secured" size="210rpx" color="#d6eee4" />
+      </view>
+      <view class="identity-avatar" aria-hidden="true">
+        <image wx:if="{{avatarUrl}}" class="identity-avatar-image" src="{{avatarUrl}}" mode="aspectFill" />
+        <text wx:else>{{avatarText}}</text>
+      </view>
+      <view class="identity-copy">
+        <view class="identity-heading">
+          <text class="identity-name">{{profile.realName || profile.username || '未登录'}}</text>
+          <text wx:if="{{profile.positionName}}" class="identity-position">{{profile.positionName}}</text>
+        </view>
+        <view class="identity-org">{{organizationText}}</view>
+      </view>
+      <view class="identity-chevron">
+        <t-icon name="chevron-right" size="42rpx" color="#30363d" />
+      </view>
+    </view>
+  </view>
+
+  <view class="mine-content">
+    <block wx:if="{{loggedIn}}">
+      <view class="work-card mine-card">
+        <view class="section-title">
+          <text>我的工作记录</text>
+        </view>
+        <view class="work-grid">
+          <view
+            class="work-item"
+            wx:for="{{workEntries}}"
+            wx:key="type"
+            data-type="{{item.type}}"
+            data-label="{{item.label}}"
+            bindtap="openRecordEntry"
+            hover-class="entry-pressed"
+          >
+            <image class="record-icon" src="{{item.iconPath}}" mode="aspectFit" />
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="growth-card mine-card">
+        <view class="section-title">
+          <text>安全成长</text>
+        </view>
+        <view class="growth-grid">
+          <view
+            class="growth-item"
+            wx:for="{{growthEntries}}"
+            wx:key="type"
+            data-type="{{item.type}}"
+            data-label="{{item.label}}"
+            bindtap="openRecordEntry"
+            hover-class="entry-pressed"
+          >
+            <image class="record-icon" src="{{item.iconPath}}" mode="aspectFit" />
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view wx:if="{{errorText}}" class="error-row">
+      <text>{{errorText}}</text>
+      <text class="retry" bindtap="retry">重新加载</text>
+    </view>
+  </view>
+</view>

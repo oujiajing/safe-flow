@@ -1,0 +1,25 @@
+@import "../../../styles/analysis.wxss";
+
+.three-rate-card { min-height:326rpx; }
+.three-rate-donut-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6rpx; margin-top:26rpx; }
+.three-rate-donut-item { display:flex; flex-direction:column; align-items:center; min-width:0; }
+.three-rate-donut-wrap { position:relative; width:158rpx; height:158rpx; }
+.three-rate-donut { width:158rpx; height:158rpx; }
+.three-rate-donut-value { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#07965e; font-size:22rpx; font-weight:600; }
+.three-rate-donut-value.blue { color:#1677e8; }.three-rate-donut-value.orange { color:#ff7100; }.three-rate-donut-value.purple { color:#8b5cf6; }
+.three-rate-donut-label { margin-top:14rpx; color:#3f495d; font-size:20rpx; white-space:nowrap; }
+.three-detail-card { min-height:520rpx; }
+.unfinished-link { display:flex; align-items:center; color:#ff7100; font-size:21rpx; white-space:nowrap; }
+.three-rate-detail-grid { grid-template-columns:1.5fr 1fr; }
+.three-rate-detail-grid > text:first-child { text-align:left; }
+.three-rate-detail-grid .green { color:#07965e; }.three-rate-detail-grid .blue { color:#1677e8; }.three-rate-detail-grid .orange { color:#ff7100; }.three-rate-detail-grid .purple { color:#8b5cf6; }
+.three-unfinished-link { justify-content:flex-end; min-height:64rpx; margin-top:12rpx; }
+.three-table-head,.three-table-row { display:grid; grid-template-columns:1.7fr 1fr 1fr 1fr .8fr; align-items:center; text-align:center; }
+.three-table-head { padding:4rpx 8rpx 14rpx; color:#697386; font-size:19rpx; }
+.three-table-row { min-height:108rpx; margin-top:10rpx; padding:10rpx 8rpx; border:1rpx solid #e1e6eb; border-radius:10rpx; font-size:19rpx; }
+.three-table-row > view:not(.team-cell) { display:flex; flex-direction:column; align-items:center; gap:8rpx; }
+.team-cell { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+.team-cell .emphasis { max-width:100%; font-size:22rpx; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.team-cell text { margin-top:8rpx; color:#697386; font-size:18rpx; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini-track { width:74rpx; height:10rpx; border-radius:999rpx; background:#e9edf0; overflow:hidden; }
+.unfinished-count { color:#ef2b34; font-size:29rpx; font-weight:500; }

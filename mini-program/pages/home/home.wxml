@@ -1,0 +1,79 @@
+<view class="home-page">
+  <view class="top-area {{hasInfoCards ? '' : 'top-area--compact'}}" style="height: calc({{statusBarHeight}}px + {{navigationBarHeight}}px + {{profileAreaHeightRpx}}rpx);">
+    <view class="home-custom-nav" style="height: calc({{statusBarHeight}}px + {{navigationBarHeight}}px); padding-top: {{statusBarHeight}}px;">
+      <view class="home-nav-title" style="height: {{navigationBarHeight}}px; line-height: {{navigationBarHeight}}px;">平安班组微应用</view>
+    </view>
+
+    <view class="profile-area">
+      <view class="user-row">
+        <view class="avatar">
+          <image class="avatar-logo" src="/static/home/pabzlogo.webp" mode="aspectFit"></image>
+        </view>
+        <view class="user-info">
+          <view class="user-name">{{currentProfile.displayName}}</view>
+        </view>
+        <view class="message-btn" bindtap="openMessage" aria-role="button" aria-label="消息中心">
+          <image class="message-icon-img" src="/static/home/message.png" mode="aspectFit"></image>
+          <text wx:if="{{messageUnreadCount > 0}}" class="message-unread-badge">{{messageUnreadCount > 99 ? '99+' : messageUnreadCount}}</text>
+        </view>
+      </view>
+
+      <view wx:if="{{currentProfile.organizationNames.length}}" class="organization-tags">
+        <view class="organization-tag" wx:for="{{currentProfile.organizationNames}}" wx:key="*this">{{item}}</view>
+      </view>
+
+      <view wx:if="{{hasInfoCards}}" class="info-grid">
+        <view class="info-card" wx:for="{{infoCards}}" wx:key="title" data-id="{{item.id}}" data-type="{{item.type}}" bindtap="openModule">
+          <view class="info-icon" style="background: {{item.color}};">
+            <t-icon name="{{item.icon}}" color="#ffffff" size="38rpx" />
+          </view>
+          <view class="info-copy">
+            <view class="info-title">{{item.title}}</view>
+            <view class="info-desc">{{item.desc}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="top-area-spacer" style="height: calc({{statusBarHeight}}px + {{navigationBarHeight}}px + {{profileAreaHeightRpx}}rpx);"></view>
+
+  <view class="home-body">
+    <view class="notice-card {{hasInfoCards ? '' : 'notice-card--compact'}}">
+      <view class="notice-title">平安班组微应用(班组数:{{teamCount}})</view>
+      <view class="notice-tabs">
+        <view class="notice-tab" wx:for="{{noticeTabs}}" wx:key="id" data-id="{{item.id}}" data-type="{{item.type}}" bindtap="openModule">{{item.title}}</view>
+      </view>
+      <view class="green-grid">
+        <view class="green-action {{item.hasPending ? 'green-action--pending' : ''}}" wx:for="{{greenActions}}" wx:key="title" data-id="{{item.id}}" data-type="{{item.type}}" bindtap="openModule">
+          <view class="green-title">{{item.title}}</view>
+          <view class="green-sub">{{item.sub}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{hasModuleEntries}}" class="module-stage">
+      <swiper class="module-swiper" style="height: {{moduleSwiperHeightRpx}}rpx;" duration="260" bindchange="handleModuleSwiperChange">
+        <swiper-item wx:for="{{modulePages}}" wx:for-item="modulePage" wx:key="key">
+          <view class="circle-grid {{modulePage.layoutClass}}">
+            <view class="circle-item" wx:for="{{modulePage.actions}}" wx:key="title" data-id="{{item.id}}" data-type="{{item.type}}" bindtap="openModule">
+              <view class="icon-box">
+                <image class="home-icon-img" src="{{item.iconPath}}" mode="aspectFit"></image>
+                <view wx:if="{{item.badge && item.badge !== '0' && item.badge !== 0}}" class="circle-badge">{{item.badge}}</view>
+              </view>
+              <view class="circle-title">{{item.title}}</view>
+            </view>
+          </view>
+        </swiper-item>
+      </swiper>
+      <view wx:if="{{modulePages.length > 1}}" class="module-dots">
+        <view class="module-dot {{moduleSwiperCurrent === index ? 'module-dot--active' : ''}}" wx:for="{{modulePages}}" wx:key="key"></view>
+      </view>
+    </view>
+
+    <swiper class="banner-carousel" autoplay circular interval="4000" duration="450" indicator-dots indicator-color="rgba(255,255,255,.5)" indicator-active-color="#ffffff">
+      <swiper-item wx:for="{{homeBanners}}" wx:key="src">
+        <image class="banner-image" src="{{item.src}}" mode="aspectFit" aria-label="{{item.alt}}"></image>
+      </swiper-item>
+    </swiper>
+  </view>
+</view>

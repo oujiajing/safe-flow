@@ -1,0 +1,54 @@
+<view class="ks-page">
+  <green-header title="单据明细" bind:back="goBack" />
+  <view class="ks-page-content">
+    <view wx:if="{{loading}}" class="ks-empty">正在加载单据…</view>
+    <view wx:elif="{{errorText}}" class="ks-error">{{errorText}}</view>
+    <block wx:elif="{{record}}">
+    <view class="ks-document-head"><text class="ks-record-no">{{record.recordNo}}</text><text class="ks-document-status">{{viewStatus}}</text></view>
+    <view class="ks-progress">
+      <view class="ks-step done" data-step="1" catchtap="openWorkflow"><text>1</text><label>登记</label></view>
+      <view class="ks-step {{record.status === 'OPENED' || record.status === 'ARCHIVED' ? 'done' : ''}}" data-step="2" catchtap="openWorkflow"><text>2</text><label>检查</label></view>
+      <view class="ks-step {{order ? 'current' : ''}}" data-step="3" catchtap="openWorkflow"><text>3</text><label>整改</label></view>
+      <view class="ks-step {{viewStatus === '已闭环' ? 'done' : ''}}" data-step="4" catchtap="openWorkflow"><text>4</text><label>验收</label></view>
+    </view>
+    <view class="ks-card">
+      <view class="ks-section-title">基础信息</view>
+      <view class="ks-detail-row"><text>场所类型</text><text>{{record.payload.siteType || '-'}}</text></view>
+      <view class="ks-detail-row"><text>检查部门</text><text>{{record.payload.inspectionDepartment || record.department || '-'}}</text></view>
+      <view class="ks-detail-row"><text>责任部门</text><text>{{record.payload.responsibleDepartment || '-'}}</text></view>
+      <view class="ks-detail-row"><text>责任人</text><text>{{record.payload.responsiblePerson || record.owner || '-'}}</text></view>
+      <view class="ks-detail-row"><text>验收人</text><text>{{record.payload.acceptancePerson || '-'}}</text></view>
+      <view class="ks-detail-row"><text>检查日期</text><text>{{record.businessDate || record.date}}</text></view>
+    </view>
+    <view class="ks-card">
+      <view class="ks-section-title">检查结果</view>
+      <view wx:if="{{!record.payload.checkItems || record.payload.checkItems.length === 0}}" class="ks-muted">尚未执行现场检查</view>
+      <view wx:for="{{record.payload.checkItems}}" wx:key="lineId" class="ks-check-summary"><text>{{index + 1}}. {{item.checkItem}}</text><text class="{{item.checkResult === '有隐患' ? 'danger' : 'safe'}}">{{item.checkResult || '待检查'}}</text></view>
+    </view>
+    <view wx:if="{{order}}" class="ks-card ks-order-card" bindtap="openOrder"><view><text class="ks-section-title">关联整改工单</text><text class="ks-order-no">{{order.orderNo}}</text></view><view class="ks-order-link"><text class="ks-order-status">{{order.status}}</text><t-icon name="chevron-right" size="30rpx" color="#8a95a3" /></view></view>
+    <view class="ks-card ks-link-card" bindtap="openWorkflow"><view class="ks-link-title"><view class="ks-section-title">单据流</view><text>{{workflow.length}} 条记录</text></view><t-icon name="chevron-right" size="32rpx" color="#8a95a3" /></view>
+    <view class="ks-card ks-detail-attachments">
+      <view class="ks-link-title"><view class="ks-section-title">附件</view><text>{{attachmentCount ? attachmentCount + ' 个附件' : '暂无附件'}}</text></view>
+      <view wx:if="{{attachments.length}}" class="ks-detail-media-grid">
+        <view wx:for="{{attachments}}" wx:key="id" class="ks-detail-media" data-index="{{index}}" bindtap="previewAttachment">
+          <image wx:if="{{item.fileKind === 'IMAGE'}}" src="{{item.previewUrl}}" mode="aspectFill" />
+          <view wx:else class="ks-detail-video">
+            <video src="{{item.previewUrl}}" controls="{{false}}" muted show-center-play-btn="{{false}}" object-fit="cover" />
+            <view class="ks-detail-video-play"><t-icon name="play-circle" size="46rpx" color="#ffffff" /></view>
+          </view>
+          <text class="ks-detail-media-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+      <view class="ks-bottom {{order ? '' : 'ks-bottom-one'}}">
+        <button wx:if="{{record.status !== 'OPENED' && record.status !== 'ARCHIVED'}}" class="ks-primary" bindtap="openInspection">去检查</button>
+        <block wx:elif="{{order}}"><button class="ks-outline" bindtap="remind" loading="{{reminding}}">催办</button><button class="ks-primary" bindtap="openOrder">前往隐患整改</button></block>
+        <button wx:else class="ks-outline" bindtap="openWorkflow">查看单据流</button>
+      </view>
+    </block>
+  </view>
+  <view wx:if="{{previewVideoUrl}}" class="ks-media-viewer" catchtouchmove="noop">
+    <view class="ks-media-viewer-close" bindtap="closeVideoPreview"><t-icon name="close" size="42rpx" color="#ffffff" /></view>
+    <video src="{{previewVideoUrl}}" autoplay controls direction="90" enable-play-gesture show-fullscreen-btn class="ks-media-viewer-video" />
+  </view>
+</view>

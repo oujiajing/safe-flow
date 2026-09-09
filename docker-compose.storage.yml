@@ -1,0 +1,63 @@
+name: safeteam-portfolio-storage
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-registry-1.docker.io/pgvector/pgvector:pg16}
+    container_name: safeteam-portfolio-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-demo_safeteam}
+      POSTGRES_USER: ${POSTGRES_USER:-pingan}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-YOUR_DB_PASSWORD_HERE}
+      TZ: Asia/Shanghai
+    ports:
+      - "${POSTGRES_PORT:-15433}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: ${MINIO_IMAGE:-quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e}
+    container_name: safeteam-portfolio-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-YOUR_MINIO_ACCESS_KEY_HERE}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-YOUR_MINIO_SECRET_KEY_HERE}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio-data:/data
+
+  minio-init:
+    image: ${MINIO_MC_IMAGE:-quay.io/minio/mc@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727}
+    container_name: safeteam-portfolio-minio-init
+    profiles:
+      - init
+    depends_on:
+      - minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-YOUR_MINIO_ACCESS_KEY_HERE}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-YOUR_MINIO_SECRET_KEY_HERE}
+      PINGAN_MINIO_BUCKET: ${PINGAN_MINIO_BUCKET:-demo-safeteam}
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      until mc alias set local http://minio:9000 \"$${MINIO_ROOT_USER}\" \"$${MINIO_ROOT_PASSWORD}\"; do
+        sleep 2;
+      done;
+      mc mb --ignore-existing local/\"$${PINGAN_MINIO_BUCKET}\";
+      mc anonymous set none local/\"$${PINGAN_MINIO_BUCKET}\";
+      mc version enable local/\"$${PINGAN_MINIO_BUCKET}\";
+      "
+    restart: "no"
+
+volumes:
+  postgres-data:
+  minio-data:
+
+

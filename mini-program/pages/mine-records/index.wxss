@@ -1,0 +1,120 @@
+page {
+  background: #f4f6f5;
+}
+
+.records-page {
+  min-height: 100vh;
+  padding: 22rpx 24rpx calc(36rpx + env(safe-area-inset-bottom));
+  color: #172033;
+  background: #f4f6f5;
+  box-sizing: border-box;
+}
+
+.record-list {
+  display: grid;
+  gap: 16rpx;
+}
+
+.record-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20rpx;
+  align-items: center;
+  min-height: 124rpx;
+  padding: 22rpx 22rpx 20rpx 24rpx;
+  border: 1rpx solid #e3e9e6;
+  border-radius: 18rpx;
+  background: #ffffff;
+  box-shadow: 0 6rpx 18rpx rgba(19, 54, 42, 0.05);
+}
+
+.record-card--pressed {
+  background: #f1f8f4;
+}
+
+.record-main {
+  min-width: 0;
+}
+
+.record-title {
+  overflow: hidden;
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 900;
+  line-height: 40rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-meta {
+  display: flex;
+  gap: 16rpx;
+  min-width: 0;
+  margin-top: 10rpx;
+  color: #7a8491;
+  font-size: 22rpx;
+  line-height: 32rpx;
+}
+
+.record-meta text:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-side {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.record-points {
+  color: #078c59;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 78rpx;
+  height: 40rpx;
+  padding: 0 12rpx;
+  border: 1rpx solid #a9d9c2;
+  border-radius: 999rpx;
+  color: #078c59;
+  background: #eff9f4;
+  font-size: 21rpx;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-pill.warning {
+  border-color: #f0c078;
+  color: #d67600;
+  background: #fff7e9;
+}
+
+.state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18rpx;
+  padding: 80rpx 30rpx;
+  border-radius: 18rpx;
+  color: #7a8491;
+  background: #ffffff;
+}
+
+.retry {
+  color: #078c59;
+  font-weight: 800;
+}
+
+.list-tip {
+  padding: 22rpx;
+  color: #98a2a9;
+  text-align: center;
+  font-size: 22rpx;
+}

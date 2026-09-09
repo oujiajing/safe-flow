@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "派班记录表",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "green-header": "/components/ui/green-header/index",
+    "safe-card": "/components/ui/safe-card/index",
+    "state-view": "/components/ui/state-view/index",
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}

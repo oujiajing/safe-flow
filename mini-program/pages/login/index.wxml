@@ -1,0 +1,84 @@
+<view class="login-page">
+  <view class="login-content">
+    <view class="brand-section">
+      <view class="brand-logo brand-logo--text" aria-label="SafeTeam Demo">SafeTeam</view>
+      <view class="brand-welcome">欢迎登录 SafeTeam Demo</view>
+      <view class="brand-tagline">
+        <text>安全生产</text>
+        <text class="brand-tagline__dot">·</text>
+        <text>智慧管理</text>
+        <text class="brand-tagline__dot">·</text>
+        <text>共创价值</text>
+      </view>
+    </view>
+
+    <view class="login-form">
+      <view class="login-field">
+        <t-icon name="mobile" size="44rpx" color="#dd0716" />
+        <input
+          class="login-input"
+          value="{{username}}"
+          placeholder="请输入手机号或账号"
+          placeholder-class="login-placeholder"
+          confirm-type="next"
+          bindinput="onUsernameInput"
+        />
+      </view>
+      <view class="login-field">
+        <t-icon name="lock-on" size="44rpx" color="#dd0716" />
+        <input
+          class="login-input"
+          value="{{password}}"
+          password="{{!passwordVisible}}"
+          placeholder="请输入密码"
+          placeholder-class="login-placeholder"
+          confirm-type="done"
+          bindinput="onPasswordInput"
+          bindconfirm="submitLogin"
+        />
+        <t-icon
+          class="password-toggle"
+          name="{{passwordVisible ? 'browse' : 'browse-off'}}"
+          size="42rpx"
+          color="#8b8d92"
+          bindtap="togglePassword"
+        />
+      </view>
+
+      <button class="login-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitLogin">
+        {{submitting ? '正在登录' : '登录'}}
+      </button>
+
+      <view class="login-links">
+        <view class="login-link" bindtap="showComingSoon">验证码登录</view>
+        <view class="login-link login-link--middle" bindtap="showComingSoon">忘记密码</view>
+        <view class="login-link login-link--accent" bindtap="showComingSoon">立即注册</view>
+      </view>
+
+      <view class="more-login">
+        <view class="more-login__line"></view>
+        <view class="more-login__label">
+          <text>更多登录方式</text>
+          <t-icon name="chevron-down" size="30rpx" color="#8c8f94" />
+        </view>
+        <view class="more-login__line"></view>
+      </view>
+
+      <view class="agreement-row" bindtap="toggleAgreement">
+        <view class="agreement-check {{agreementChecked ? 'agreement-check--checked' : ''}}">
+          <t-icon wx:if="{{agreementChecked}}" name="check" size="24rpx" color="#ffffff" />
+        </view>
+        <text>我已阅读并同意</text>
+        <text class="agreement-link">《用户协议》</text>
+        <text class="agreement-link">《隐私政策》</text>
+      </view>
+    </view>
+
+    <view class="login-footer">
+      <view class="login-footer__line"></view>
+      <text>安全生产 · 智慧管理</text>
+      <view class="login-footer__line"></view>
+    </view>
+  </view>
+</view>
+

@@ -1,0 +1,54 @@
+<green-header title="安全学习" bind:back="goBack" />
+<view class="page">
+  <scroll-view class="learning-status-tabs" scroll-x enable-flex>
+    <view class="learning-status-tab-list">
+      <view class="learning-status-tab {{activeCategory === '应急管理' ? 'active' : ''}}" data-category="应急管理" bindtap="changeCategory">应急管理</view>
+      <view class="learning-status-tab {{activeCategory === '安全设施' ? 'active' : ''}}" data-category="安全设施" bindtap="changeCategory">安全设施</view>
+      <view class="learning-status-tab {{activeCategory === '隐患知识' ? 'active' : ''}}" data-category="隐患知识" bindtap="changeCategory">隐患知识</view>
+      <view class="learning-status-tab {{activeCategory === '法律知识' ? 'active' : ''}}" data-category="法律知识" bindtap="changeCategory">法律知识</view>
+      <view class="learning-status-tab {{activeCategory === '设备操作规程' ? 'active' : ''}}" data-category="设备操作规程" bindtap="changeCategory">设备操作规程</view>
+    </view>
+  </scroll-view>
+
+  <view class="learning-filter-row">
+    <view class="learning-search-box">
+      <t-icon t-class="learning-search-icon" name="search" size="36rpx" color="#6f7a88" />
+      <input class="learning-search-input" placeholder="搜索课程" value="{{keyword}}" bindinput="updateKeyword" confirm-type="search" bindconfirm="search" />
+      <t-button t-class="learning-search-submit" size="small" shape="round" theme="primary" bind:tap="search">搜索</t-button>
+    </view>
+  </view>
+
+  <t-loading wx:if="{{loading}}" text="加载中" />
+  <block wx:else>
+    <view wx:if="{{contents.length}}" class="learning-list">
+      <view wx:for="{{contents}}" wx:key="id" class="learning-card" data-id="{{item.id}}" bindtap="openDetail">
+        <view class="learning-cover">
+          <image wx:if="{{item.coverUrl}}" class="learning-cover-image" src="{{item.coverUrl}}" mode="aspectFill" />
+          <view wx:else class="learning-cover-placeholder">
+            <text>2026</text>
+            <text>安全培训</text>
+            <t-icon name="image" size="44rpx" color="#ffffff" />
+          </view>
+        </view>
+        <view class="learning-card-main">
+          <view class="learning-card-top">
+            <view class="learning-title">{{item.title}}</view>
+            <view class="learning-status-pill {{item.statusClass}}">{{item.statusLabel}}</view>
+          </view>
+          <view class="learning-meta">
+            <view class="learning-meta-item">
+              <t-icon name="tag" size="27rpx" color="#4b7cff" />
+              <text>{{item.categoryLabel}}</text>
+            </view>
+            <view class="learning-meta-divider"></view>
+            <view class="learning-meta-item learning-point-item">
+              <t-icon t-class="learning-point-icon" name="star-filled" size="28rpx" color="#f6bd16" />
+              <text>{{item.pointText}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <t-empty wx:else description="暂无学习内容" />
+  </block>
+</view>

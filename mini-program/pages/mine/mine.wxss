@@ -1,0 +1,236 @@
+page {
+  background: #f4f6f5;
+}
+
+.mine-page {
+  min-height: 100vh;
+  padding-bottom: var(--pingan-tabbar-content-bottom);
+  color: #172033;
+  background: #f4f6f5;
+  box-sizing: border-box;
+}
+
+.mine-hero {
+  position: relative;
+  overflow: hidden;
+  padding-right: 30rpx;
+  padding-bottom: 42rpx;
+  padding-left: 30rpx;
+  background:
+    radial-gradient(circle at 82% 56%, rgba(174, 226, 203, 0.28) 0, rgba(174, 226, 203, 0) 36%),
+    linear-gradient(145deg, #fbfdfc 8%, #eff9f5 52%, #e5f5ee 100%);
+}
+
+.mine-settings-row {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: flex-end;
+  min-height: 60rpx;
+}
+
+.mine-settings-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 78rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
+}
+
+.mine-settings-button--pressed {
+  background: rgba(0, 140, 98, 0.08);
+}
+
+.identity-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  min-height: 150rpx;
+  margin-top: -10rpx;
+  padding: 10rpx 10rpx 10rpx 18rpx;
+  border-radius: 26rpx;
+}
+
+.identity-card--pressed {
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.identity-watermark {
+  position: absolute;
+  z-index: -1;
+  right: 42rpx;
+  top: -24rpx;
+  opacity: 0.72;
+  transform: rotate(-8deg);
+}
+
+.identity-avatar {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 128rpx;
+  height: 128rpx;
+  border: 6rpx solid rgba(255, 255, 255, 0.94);
+  border-radius: 30rpx;
+  color: #ffffff;
+  background: linear-gradient(145deg, #13ae70 0%, #008c62 100%);
+  box-shadow: 0 8rpx 18rpx rgba(0, 140, 98, 0.12);
+  font-size: 62rpx;
+  font-weight: 800;
+  flex: 0 0 128rpx;
+}
+
+.identity-avatar-image {
+  width: 100%;
+  height: 100%;
+}
+
+.identity-copy {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-width: 0;
+  margin-left: 30rpx;
+}
+
+.identity-heading {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  min-width: 0;
+}
+
+.identity-name {
+  overflow: hidden;
+  color: #20262d;
+  font-size: 40rpx;
+  font-weight: 800;
+  line-height: 54rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identity-position {
+  flex: 0 0 auto;
+  padding: 4rpx 16rpx;
+  border: 2rpx solid rgba(19, 166, 107, 0.62);
+  border-radius: 8rpx;
+  color: #07935f;
+  background: rgba(255, 255, 255, 0.38);
+  font-size: 24rpx;
+  line-height: 34rpx;
+}
+
+.identity-org {
+  margin-top: 10rpx;
+  overflow: hidden;
+  color: #5f686f;
+  font-size: 25rpx;
+  line-height: 36rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identity-chevron {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42rpx;
+  height: 72rpx;
+  margin-left: 8rpx;
+  flex: 0 0 42rpx;
+}
+
+.mine-content {
+  padding: 28rpx 28rpx 36rpx;
+}
+
+.mine-card {
+  overflow: hidden;
+  border: 1rpx solid rgba(224, 231, 228, 0.82);
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 12rpx 30rpx rgba(23, 32, 51, 0.055);
+}
+
+.growth-card {
+  margin-top: 28rpx;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 34rpx 12rpx;
+  color: #20262d;
+  font-size: 32rpx;
+  font-weight: 800;
+  line-height: 46rpx;
+}
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 10rpx 34rpx 26rpx;
+}
+
+.work-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rpx;
+  min-height: 204rpx;
+  color: #252b32;
+  font-size: 27rpx;
+  line-height: 38rpx;
+}
+
+.growth-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 18rpx 24rpx 30rpx;
+}
+
+.growth-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rpx;
+  min-height: 178rpx;
+  color: #252b32;
+  font-size: 25rpx;
+  line-height: 36rpx;
+}
+
+.record-icon {
+  display: block;
+  width: 132rpx;
+  height: 132rpx;
+}
+
+.entry-pressed {
+  background: #f1f8f4;
+}
+
+.error-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 20rpx 8rpx 0;
+  color: #7a8491;
+  font-size: 23rpx;
+}
+
+.retry {
+  color: #008c62;
+  font-weight: 800;
+  white-space: nowrap;
+}

@@ -1,0 +1,81 @@
+<view class="analysis-page overview-page">
+  <green-header title="数据分析" showBack="{{false}}" />
+  <view class="analysis-content analysis-content--tab overview-content">
+    <scope-filter compact="{{true}}" tabBarInset="{{true}}" context="{{context}}" scopeTree="{{scopeTree}}" scopeAccess="{{scopeAccess}}" rangeText="{{rangeText}}" updatedAt="{{updatedAt}}" bind:apply="handleFilterApply" />
+
+    <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在汇总分析数据" />
+    <state-view wx:elif="{{errorMessage}}" errorText="{{errorMessage}}" bind:retry="retryLoad" />
+    <view wx:elif="{{noPermission}}" class="permission-card">
+      <t-icon name="lock-on" size="66rpx" color="#94a3b8" />
+      <view class="permission-title">暂无数据分析权限</view>
+      <view class="permission-copy">请联系管理员开通监控中心查看权限</view>
+    </view>
+    <block wx:else>
+      <view class="overview-total-card">
+        <view class="overview-section-title">总览</view>
+        <view class="overview-kpi-grid">
+          <view wx:for="{{model.overviewKpis}}" wx:key="key" class="overview-kpi-item">
+            <view class="overview-kpi-label">{{item.label}}</view>
+            <view class="overview-kpi-value">{{item.value}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="overview-card-grid">
+        <view class="overview-summary-card overview-dispatch" data-type="dispatch" bindtap="openDetail">
+          <view class="overview-card-head">
+            <view class="overview-title">班组派班</view>
+            <view class="overview-detail">明细</view>
+          </view>
+          <view class="overview-horizontal-title">派班数（个）</view>
+          <scroll-view class="overview-horizontal-chart" scroll-y enhanced show-scrollbar="{{false}}">
+            <view wx:for="{{model.dispatch.scopeRows}}" wx:key="name" class="overview-horizontal-row">
+              <view class="overview-horizontal-label">{{item.name}}</view>
+              <view class="overview-horizontal-plot">
+                <view class="overview-horizontal-bar" style="width:{{item.width}}"></view>
+                <text class="overview-horizontal-value">{{item.value}}</text>
+              </view>
+            </view>
+            <view wx:if="{{!model.dispatch.scopeRows.length}}" class="overview-chart-empty">暂无派班数据</view>
+          </scroll-view>
+        </view>
+
+        <view class="overview-summary-card overview-three" data-type="threeCheck" bindtap="openDetail">
+          <view class="overview-card-head">
+            <view class="overview-title">一班三查</view>
+            <view class="overview-detail">明细</view>
+          </view>
+          <view class="overview-donut-wrap">
+            <canvas class="overview-donut" canvas-id="overviewThreeCheckDonut"></canvas>
+            <view class="overview-donut-value">{{model.threeCheck.overviewRate}}</view>
+          </view>
+          <view class="overview-legend">
+            <view><text class="overview-legend-dot blue"></text>完成 {{model.threeCheck.overviewRate}}</view>
+            <view><text class="overview-legend-dot gray"></text>未完成 {{model.threeCheck.overviewRemainingRate}}</view>
+          </view>
+        </view>
+
+        <view class="overview-summary-card overview-hazard" data-type="hazard" bindtap="openDetail">
+          <view class="overview-card-head">
+            <view class="overview-title">隐患整改</view>
+            <view class="overview-detail">明细</view>
+          </view>
+          <canvas class="overview-funnel-chart" canvas-id="overviewHazardFunnel"></canvas>
+        </view>
+
+        <view class="overview-summary-card overview-learning" data-type="learning" bindtap="openDetail">
+          <view class="overview-card-head">
+            <view class="overview-title">安全学习</view>
+            <view class="overview-detail">明细</view>
+          </view>
+          <view class="overview-learning-value">{{model.learning.overviewCompletionRate}}</view>
+          <view class="overview-learning-caption">完成人次/应学人次</view>
+          <view class="overview-learning-progress">
+            <view class="overview-learning-progress-fill" style="width:{{model.learning.completionWidth}}"></view>
+          </view>
+          <view class="overview-learning-count"><text>{{model.learning.completionCount}}</text> / {{model.learning.expectedCount}} 人</view>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

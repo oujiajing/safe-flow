@@ -1,0 +1,31 @@
+{
+  "moduleKey": "pre-shift-meeting",
+  "bizType": "PRE_SHIFT_MEETING",
+  "entityName": "PreShiftMeeting",
+  "tableName": "pre_shift_meeting",
+  "routePath": "/pingan/pre-shift-meeting",
+  "apiBase": "/pingan/pre-shift-meetings",
+  "title": "班前会",
+  "primaryNoField": "meetingNo",
+  "businessDateField": "meetingDate",
+  "sync": {
+    "sourceChannels": ["PC", "WECHAT_MINI_PROGRAM", "API_IMPORT"],
+    "idempotencyField": "clientRequestId",
+    "clientRecordField": "sourceRecordId",
+    "miniApiBase": "/mini/pingan/pre-shift-meetings"
+  },
+  "extraFields": [
+    {
+      "name": "meetingContent",
+      "javaType": "String",
+      "tsType": "string",
+      "label": "会议内容"
+    },
+    {
+      "name": "attendees",
+      "javaType": "List<String>",
+      "tsType": "string[]",
+      "label": "参会人"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+<view wx:if="{{compact}}" class="scope-card scope-card--compact" bindtap="open">
+  <text class="scope-compact-label">数据范围</text>
+  <view class="scope-compact-value">
+    <text>{{rangeText}}</text>
+    <t-icon name="chevron-down" size="30rpx" color="#8992a3" />
+  </view>
+</view>
+
+<view wx:else class="scope-card" bindtap="open">
+  <view class="scope-icon"><image class="scope-company-icon" src="/assets/页面图标/公司.svg" mode="aspectFit" /></view>
+  <view class="scope-copy">
+    <view class="scope-org">{{context.orgName || '全部可见组织'}}</view>
+    <view class="scope-range">{{rangeText}}　更新于 {{updatedAt}}</view>
+  </view>
+  <view class="scope-action">
+    <t-icon name="filter" size="34rpx" color="#087a4e" />
+    <text>筛选</text>
+  </view>
+</view>
+
+<block wx:if="{{visible}}">
+  <view class="filter-mask" bindtap="close"></view>
+  <view class="filter-drawer {{tabBarInset ? 'filter-drawer--tabbar' : ''}}" catchtap="stop">
+    <view class="filter-head">
+      <text>分析范围</text>
+      <t-icon name="close" size="36rpx" color="#475569" bindtap="close" />
+    </view>
+    <view class="filter-field filter-org-field">
+      <text class="filter-label">组织范围</text>
+      <view wx:if="{{scopeState.fixedOrgName}}" class="filter-input filter-input--fixed">
+        <text>{{scopeState.fixedOrgName}}</text>
+        <text class="filter-fixed-tag">当前班组</text>
+      </view>
+      <picker wx:if="{{scopeState.showCompany}}" mode="selector" range="{{scopeState.companyOptions}}" range-key="label" value="{{scopeState.companyIndex}}" data-level="company" bindchange="changeScope">
+        <view class="filter-input"><text class="filter-level">公司</text><text class="filter-value">{{scopeState.companyOptions[scopeState.companyIndex].label}}</text><t-icon name="chevron-down" size="30rpx" color="#64748b" /></view>
+      </picker>
+      <picker wx:if="{{scopeState.showDepartment}}" mode="selector" range="{{scopeState.departmentOptions}}" range-key="label" value="{{scopeState.departmentIndex}}" data-level="department" bindchange="changeScope">
+        <view class="filter-input"><text class="filter-level">部门</text><text class="filter-value">{{scopeState.departmentOptions[scopeState.departmentIndex].label}}</text><t-icon name="chevron-down" size="30rpx" color="#64748b" /></view>
+      </picker>
+      <picker wx:if="{{scopeState.showTeam}}" mode="selector" range="{{scopeState.teamOptions}}" range-key="label" value="{{scopeState.teamIndex}}" data-level="team" bindchange="changeScope">
+        <view class="filter-input"><text class="filter-level">班组</text><text class="filter-value">{{scopeState.teamOptions[scopeState.teamIndex].label}}</text><t-icon name="chevron-down" size="30rpx" color="#64748b" /></view>
+      </picker>
+    </view>
+    <view class="filter-field">
+      <text class="filter-label">统计周期</text>
+      <view class="quick-list">
+        <view class="quick-item {{draft.rangeLabel === '今日' ? 'active' : ''}}" data-days="1" data-label="今日" bindtap="chooseQuick">今日</view>
+        <view class="quick-item {{draft.rangeLabel === '近7天' ? 'active' : ''}}" data-days="7" data-label="近7天" bindtap="chooseQuick">近7天</view>
+        <view class="quick-item {{draft.rangeLabel === '近30天' ? 'active' : ''}}" data-days="30" data-label="近30天" bindtap="chooseQuick">近30天</view>
+      </view>
+    </view>
+    <view class="date-row">
+      <picker mode="date" value="{{draft.dateStart}}" data-field="dateStart" bindchange="changeDate"><view class="date-input">{{draft.dateStart}}</view></picker>
+      <text>至</text>
+      <picker mode="date" value="{{draft.dateEnd}}" data-field="dateEnd" bindchange="changeDate"><view class="date-input">{{draft.dateEnd}}</view></picker>
+    </view>
+    <view class="filter-actions">
+      <button class="filter-reset" bindtap="reset">重置</button>
+      <button class="filter-apply" bindtap="apply">应用</button>
+    </view>
+  </view>
+</block>

@@ -1,0 +1,52 @@
+<view class="analysis-page">
+  <green-header title="一班三查分析" bind:back="goBack" />
+  <view class="analysis-content three-analysis">
+    <scope-filter compact="{{true}}" context="{{context}}" scopeTree="{{scopeTree}}" scopeAccess="{{scopeAccess}}" rangeText="{{rangeText}}" updatedAt="{{updatedAt}}" bind:apply="handleFilterApply" />
+    <state-view wx:if="{{loading}}" loading="{{true}}" loadingText="正在加载三查分析" />
+    <state-view wx:elif="{{errorMessage}}" errorText="{{errorMessage}}" bind:retry="retryLoad" />
+    <view wx:elif="{{noPermission}}" class="permission-card"><t-icon name="lock-on" size="66rpx" color="#94a3b8" /><view class="permission-title">暂无查看权限</view></view>
+    <block wx:else>
+      <view class="analysis-kpi-strip">
+        <view class="strip-metric"><text class="strip-label">班组数</text><text class="strip-value blue">{{model.threeCheck.teamCount}}<text class="strip-unit">个</text></text></view>
+        <view class="strip-metric"><text class="strip-label">班前会完成率</text><text class="strip-value">{{model.threeCheck.preMeetingRate}}</text></view>
+        <view class="strip-metric"><text class="strip-label">三查整体完成率</text><text class="strip-value">{{model.threeCheck.overallRate}}</text></view>
+        <view class="strip-metric"><text class="strip-label">未完成项</text><text class="strip-value red">{{model.threeCheck.unfinished}}<text class="strip-unit">项</text></text></view>
+      </view>
+
+      <view class="analysis-section three-rate-card">
+        <view class="section-head"><view class="section-title">一班三查完成情况</view><view class="section-detail-action {{detailCards.threeRates ? 'active' : ''}}" data-card="threeRates" bindtap="toggleCardDetail">{{detailCards.threeRates ? '图表' : '明细'}}</view></view>
+        <block wx:if="{{!detailCards.threeRates}}">
+          <view class="three-rate-donut-grid">
+            <view wx:for="{{model.threeCheck.completionRates}}" wx:key="key" class="three-rate-donut-item">
+              <view class="three-rate-donut-wrap">
+                <canvas class="three-rate-donut" canvas-id="threeRateDonut{{index}}"></canvas>
+                <text class="three-rate-donut-value {{item.tone}}">{{item.value}}</text>
+              </view>
+              <text class="three-rate-donut-label">{{item.label}}</text>
+            </view>
+          </view>
+        </block>
+        <view wx:else class="analysis-detail-table">
+          <view class="analysis-detail-head three-rate-detail-grid"><text>检查环节</text><text>完成率</text></view>
+          <view wx:for="{{model.threeCheck.completionRates}}" wx:key="key" class="analysis-detail-row three-rate-detail-grid"><text>{{item.label}}</text><text class="{{item.tone}}">{{item.value}}</text></view>
+        </view>
+      </view>
+
+      <view class="analysis-section three-detail-card">
+        <view class="section-head"><view class="section-title">班组完成明细</view></view>
+        <view>
+          <view class="three-table-head"><text>班组</text><text>班前检查</text><text>班中检查</text><text>班后检查</text><text>未完成项</text></view>
+          <view wx:for="{{model.threeCheck.teamRows}}" wx:key="id" class="three-table-row">
+            <view class="team-cell"><text class="emphasis">{{item.name}}</text><text>{{item.company}}</text></view>
+            <view><view class="mini-track"><view class="bar-fill" style="width:{{item.preWidth}}"></view></view><text>{{item.pre}}</text></view>
+            <view><view class="mini-track"><view class="bar-fill blue" style="width:{{item.midWidth}}"></view></view><text>{{item.mid}}</text></view>
+            <view><view class="mini-track"><view class="bar-fill orange" style="width:{{item.postWidth}}"></view></view><text>{{item.post}}</text></view>
+            <text class="unfinished-count">{{item.unfinished}}</text>
+          </view>
+        </view>
+        <view wx:if="{{!model.threeCheck.teamRows.length}}" class="empty-inline">暂无班组对比数据</view>
+        <view class="unfinished-link three-unfinished-link" data-type="threeCheck" bindtap="openBusiness">查看未完成记录 {{model.threeCheck.unfinished}}<t-icon name="chevron-right" size="28rpx" color="#ff7100" /></view>
+      </view>
+    </block>
+  </view>
+</view>
