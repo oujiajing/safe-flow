@@ -7,8 +7,12 @@ import com.pingan.banzu.dto.QuickShotAgentCandidateDecisionRequest;
 import com.pingan.banzu.dto.QuickShotAgentReviewDraftRequest;
 import com.pingan.banzu.dto.QuickShotAgentRunRequest;
 import com.pingan.banzu.dto.QuickShotAgentRunResponse;
+import com.pingan.banzu.dto.QuickShotAgentRectificationPreviewResponse;
+import com.pingan.banzu.dto.QuickShotAgentRectificationApplyResponse;
 import com.pingan.banzu.service.QuickShotAgentAssistService;
 import com.pingan.banzu.service.QuickShotAgentRunService;
+import com.pingan.banzu.service.QuickShotAgentRectificationPreviewService;
+import com.pingan.banzu.service.QuickShotAgentRectificationApplyService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuickShotAgentAssistController {
   private final QuickShotAgentAssistService service;
   private final QuickShotAgentRunService runService;
+  private final QuickShotAgentRectificationPreviewService previewService;
+  private final QuickShotAgentRectificationApplyService applyService;
 
-  public QuickShotAgentAssistController(QuickShotAgentAssistService service, QuickShotAgentRunService runService) {
-    this.service = service;
-    this.runService = runService;
+  public QuickShotAgentAssistController(QuickShotAgentAssistService service, QuickShotAgentRunService runService,
+      QuickShotAgentRectificationPreviewService previewService, QuickShotAgentRectificationApplyService applyService) {
+    this.service = service; this.runService = runService; this.previewService = previewService; this.applyService = applyService;
   }
 
   @PostMapping("/{id}/agent-assist")
@@ -71,6 +77,21 @@ public class QuickShotAgentAssistController {
       @PathVariable Long id, @PathVariable String runId,
       @RequestBody QuickShotAgentReviewDraftRequest request) {
     return ApiResponse.ok(runService.saveReviewDraft(id, runId, request));
+  }
+
+  @GetMapping("/{id}/agent-runs/{runId}/rectification-preview")
+  public ApiResponse<QuickShotAgentRectificationPreviewResponse> rectificationPreview(
+      @PathVariable Long id, @PathVariable String runId) {
+    return ApiResponse.ok(previewService.preview(id, runId));
+  }
+
+  @GetMapping("/{id}/agent-runs/{runId}/rectification-apply")
+  public ApiResponse<QuickShotAgentRectificationApplyResponse> rectificationApply(
+      @PathVariable Long id, @PathVariable String runId,
+      @org.springframework.web.bind.annotation.RequestHeader(value = "Idempotency-Key", required = false) String key) {
+    var value = applyService.find(id, runId, key);
+    return ApiResponse.ok(value == null ? null : new QuickShotAgentRectificationApplyResponse(value.runId, value.status,
+        value.orderId == null ? null : String.valueOf(value.orderId), value.errorCode, value.errorMessage, value.appliedAt));
   }
 
   public record AgentAssistRequest(String extraDescription) {}

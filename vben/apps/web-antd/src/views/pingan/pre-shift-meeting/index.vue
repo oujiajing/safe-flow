@@ -49,6 +49,7 @@ import {
   getHazardInspectionChangeHistoryApi,
   getHazardInspectionDocumentFlowApi,
   getLatestQuickShotAgentRunApi,
+  getQuickShotAgentRectificationPreviewApi,
   getThreeCheckRecordDetailApi,
   getThreeCheckRecordsApi,
   openThreeCheckRectificationOrderApi,
@@ -310,6 +311,11 @@ const quickShotAgentSectionRef = ref<HTMLElement>();
 const quickShotAgentOpen = ref(false);
 const quickShotEvidenceExpanded = reactive<Record<string, boolean>>({});
 const quickShotAgentAssistError = ref('');
+const quickShotAgentRectificationPreview = ref<PinganThreeCheckRecordApi.AgentRectificationPreview>();
+const quickShotAgentRectificationPreviewOpen = ref(false);
+const quickShotAgentRectificationConfirmed = ref(false);
+const quickShotAgentRectificationApplying = ref(false);
+const quickShotAgentIdempotencyKey = ref('');
 const { dataMapToggleLabel, isDataMapCollapsed, toggleDataMap } =
   createDataMapCollapseState();
 const {
@@ -3284,6 +3290,46 @@ async function handleQuickShotWorkflowAction() {
   }
 }
 
+async function openQuickShotAgentRectificationPreview() {
+  const record = currentThreeCheckDetail.value;
+  const run = quickShotAgentRun.value;
+  if (!record || !run || run.status !== 'REVIEW_DRAFTED') {
+    message.warning('请先保存 Agent 审核草稿后再生成整改预览');
+    return;
+  }
+  quickShotAgentRunLoading.value = true;
+  try {
+    quickShotAgentRectificationPreview.value = await getQuickShotAgentRectificationPreviewApi(record.id, run.runId);
+    quickShotAgentRectificationConfirmed.value = false;
+    quickShotAgentIdempotencyKey.value = globalThis.crypto?.randomUUID?.() ?? `agent-apply-${Date.now()}`;
+    quickShotAgentRectificationPreviewOpen.value = true;
+  } finally {
+    quickShotAgentRunLoading.value = false;
+  }
+}
+
+async function applyQuickShotAgentRectification() {
+  const record = currentThreeCheckDetail.value;
+  const preview = quickShotAgentRectificationPreview.value;
+  if (!record || !preview || !quickShotAgentRectificationConfirmed.value) {
+    message.warning('请明确确认预览内容后再提交');
+    return;
+  }
+  quickShotAgentRectificationApplying.value = true;
+  try {
+    await workflowActionThreeCheckRecordApi('quick-shot', record.id, {
+      action: 'APPROVE', version: record.version,
+      agentConfirmation: { runId: preview.runId, assessmentId: preview.assessmentId ?? '', decisionSetVersion: preview.decisionSetVersion, previewDigest: preview.previewDigest, confirmation: true },
+    }, quickShotAgentIdempotencyKey.value);
+    message.success(preview.existingOrderId ? '已复用已有整改工单' : '已确认并生成整改工单');
+    quickShotAgentRectificationPreviewOpen.value = false;
+    await loadMeetings();
+    await refreshCurrentDetail();
+  } finally {
+    quickShotAgentRectificationApplying.value = false;
+  }
+}
+
 async function handleWithdraw(record: Record<string, any>) {
   if (!moduleApiReady.value) {
     updateLocalRecord(record, 'WITHDRAW');
@@ -5147,6 +5193,25 @@ watch(
     </Modal>
 
     <Modal
+      v-model:open="quickShotAgentRectificationPreviewOpen"
+      :confirm-loading="quickShotAgentRectificationApplying"
+      :ok-button-props="{ disabled: !quickShotAgentRectificationConfirmed || Boolean(quickShotAgentRectificationPreview?.missingFields.length) }"
+      title="确认 Agent 整改工单预览"
+      width="720px"
+      @ok="applyQuickShotAgentRectification"
+    >
+      <template v-if="quickShotAgentRectificationPreview">
+        <p v-if="quickShotAgentRectificationPreview.existingOrderId" class="quick-shot-agent-assist__warning">该来源已有整改工单，将直接复用工单 #{{ quickShotAgentRectificationPreview.existingOrderId }}。</p>
+        <p v-if="quickShotAgentRectificationPreview.missingFields.length" class="quick-shot-agent-assist__error">缺少必填信息：{{ quickShotAgentRectificationPreview.missingFields.join('；') }}</p>
+        <article v-for="(item, index) in quickShotAgentRectificationPreview.items" :key="item.candidateId" class="quick-shot-agent-assist__assessment">
+          <strong>隐患 {{ index + 1 }}：{{ item.checkItem || '未命名隐患' }}</strong>
+          <p>{{ item.hazardDescription }}</p><p>风险等级：{{ item.riskType || '待核实' }}</p><p>整改措施：{{ item.rectificationMeasures.join('；') || '待补充' }}</p>
+        </article>
+        <label class="quick-shot-agent-apply-confirm"><input v-model="quickShotAgentRectificationConfirmed" type="checkbox"> 我已核对上述 Agent 整改预览，确认按此内容审批并创建/复用整改工单。</label>
+      </template>
+    </Modal>
+
+    <Modal
       v-model:open="detailOpen"
       :centered="detailModalCentered"
       :footer="null"
@@ -6031,6 +6096,7 @@ watch(
             </article>
             <div class="quick-shot-agent-assist__section-title"><h4>审核备注</h4><Button size="small" :disabled="quickShotAgentRun.status === 'STALE'" @click="saveQuickShotReviewDraft">保存审核草稿</Button></div>
             <Input v-model:value="quickShotAgentReviewerNote" placeholder="填写审核备注；不会审批记录或创建工单" />
+            <div class="quick-shot-agent-assist__section-title"><h4>整改工单</h4><Button size="small" type="primary" :disabled="quickShotAgentRun.status !== 'REVIEW_DRAFTED'" @click="openQuickShotAgentRectificationPreview">预览并确认整改工单</Button></div>
           </div>
           <div v-else class="quick-shot-agent-assist__empty">上传图片后可补充现场说明，再开始研判。</div>
         </section>

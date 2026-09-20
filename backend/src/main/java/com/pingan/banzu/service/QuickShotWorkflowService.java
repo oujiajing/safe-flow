@@ -27,6 +27,7 @@ class QuickShotWorkflowService {
   private final ThreeCheckWorkflowSupport workflowSupport;
   private final HazardPermissionPolicy permissionPolicy;
   private final HazardRectificationOrderService rectificationOrderService;
+  private final QuickShotAgentRectificationApplyService agentApplyService;
 
   QuickShotWorkflowService(
       ThreeCheckRecordConcurrentUpdater concurrentUpdater,
@@ -34,17 +35,23 @@ class QuickShotWorkflowService {
       ThreeCheckRecordHistoryService historyService,
       ThreeCheckWorkflowSupport workflowSupport,
       HazardPermissionPolicy permissionPolicy,
-      HazardRectificationOrderService rectificationOrderService) {
+      HazardRectificationOrderService rectificationOrderService, QuickShotAgentRectificationApplyService agentApplyService) {
     this.concurrentUpdater = concurrentUpdater;
     this.payloadCodec = payloadCodec;
     this.historyService = historyService;
     this.workflowSupport = workflowSupport;
     this.permissionPolicy = permissionPolicy;
     this.rectificationOrderService = rectificationOrderService;
+    this.agentApplyService = agentApplyService;
   }
 
   void execute(
       ThreeCheckRecord record, QuickShotWorkflowActionRequest request, CurrentUser operator) {
+    execute(record, request, operator, null);
+  }
+
+  void execute(
+      ThreeCheckRecord record, QuickShotWorkflowActionRequest request, CurrentUser operator, String idempotencyKey) {
     String action = normalizeAction(request == null ? null : request.action());
     assertPermission(action);
     requireVersionMatch(record, request == null ? null : request.version());
@@ -53,6 +60,12 @@ class QuickShotWorkflowService {
           "该随手拍已迁入统一隐患整改工单，请在统一隐患整改工单中处理整改流程");
     }
 
+    QuickShotAgentRectificationApplyService.ApplyContext agentApply = "APPROVE".equals(action) && request != null && request.agentConfirmation() != null
+        ? agentApplyService.begin(record, request.agentConfirmation(), idempotencyKey, operator) : null;
+    // A response-loss retry must return the original business result without replaying the state machine.
+    if (agentApply != null && agentApply.reused()) {
+      return;
+    }
     String from = record.status;
     String to = nextStatus(from, action);
     Map<String, Object> payload =
@@ -95,7 +108,13 @@ class QuickShotWorkflowService {
         operator.userId(),
         remark);
     if ("APPROVE".equals(action)) {
-      rectificationOrderService.createOrUpdateFromQuickShot(record.id, operator.userId());
+      if (agentApply == null) {
+        rectificationOrderService.createOrUpdateFromQuickShot(record.id, operator.userId());
+      } else {
+        rectificationOrderService.createOrUpdateFromQuickShotAgent(
+            record.id, operator.userId(), agentApply.preview().items());
+      }
+      if (agentApply != null) agentApplyService.complete(agentApply, record.id);
     }
   }
 

@@ -733,6 +733,12 @@ public class ThreeCheckRecordService {
   @Transactional
   public ThreeCheckRecordDetailResponse quickShotWorkflowAction(
       String moduleKey, Long id, QuickShotWorkflowActionRequest request) {
+    return quickShotWorkflowAction(moduleKey, id, request, null);
+  }
+
+  @Transactional
+  public ThreeCheckRecordDetailResponse quickShotWorkflowAction(
+      String moduleKey, Long id, QuickShotWorkflowActionRequest request, String idempotencyKey) {
     ModuleSpec module = requireModule(moduleKey);
     if (!"quick-shot".equals(module.moduleKey())) {
       throw new BusinessException("随手拍流程动作仅支持随手拍模块");
@@ -744,7 +750,7 @@ public class ThreeCheckRecordService {
     if (!canAccess(record, user, orgs)) {
       throw new SecurityException("无权修改该一班三查记录");
     }
-    quickShotWorkflowService.execute(record, request, user);
+    quickShotWorkflowService.execute(record, request, user, idempotencyKey);
     return detailForCurrentUser(module, id);
   }
 

@@ -82,5 +82,7 @@ pingan:
     review-draft-enabled: ${PINGAN_SAFEGUARD_AGENT_REVIEW_DRAFT_ENABLED:false}
     company-allowlist: ${PINGAN_SAFEGUARD_AGENT_COMPANY_ALLOWLIST:}
     writeback-enabled: ${PINGAN_SAFEGUARD_AGENT_WRITEBACK_ENABLED:false}
+    rectification-preview-enabled: ${PINGAN_SAFEGUARD_AGENT_RECTIFICATION_PREVIEW_ENABLED:false}
+    rectification-apply-enabled: ${PINGAN_SAFEGUARD_AGENT_RECTIFICATION_APPLY_ENABLED:false}
 
 

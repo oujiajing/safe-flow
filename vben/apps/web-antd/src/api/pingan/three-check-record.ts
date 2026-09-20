@@ -146,6 +146,35 @@ export namespace PinganThreeCheckRecordApi {
     runId: string;
     status: string;
   }
+  export interface AgentRectificationPreview {
+    assessmentId?: string;
+    canApply: boolean;
+    decisionSetVersion: number;
+    existingOrderId?: string;
+    items: Array<{
+      acceptanceCriteria: string[];
+      candidateId: string;
+      checkItem?: string;
+      hazardDescription?: string;
+      legalEvidence: unknown;
+      rectificationMeasures: string[];
+      riskType?: string;
+      sourceAttachmentIds: string[];
+    }>;
+    missingFields: string[];
+    previewDigest: string;
+    recordId: string;
+    recordVersion: number;
+    runId: string;
+  }
+  export interface AgentRectificationApplyResult {
+    appliedAt?: string;
+    errorCode?: string;
+    errorMessage?: string;
+    orderId?: string;
+    runId: string;
+    status: 'APPLIED' | 'APPLYING' | 'FAILED' | 'REUSED_EXISTING' | string;
+  }
 
   export interface DocumentFlowStatusLog {
     action: string;
@@ -211,6 +240,13 @@ export namespace PinganThreeCheckRecordApi {
     payload?: Record<string, unknown>;
     remark?: string;
     version?: number;
+    agentConfirmation?: {
+      assessmentId: string;
+      confirmation: true;
+      decisionSetVersion: number;
+      previewDigest: string;
+      runId: string;
+    };
   }
 
   export interface RecordPayload {
@@ -371,6 +407,23 @@ export async function saveQuickShotAgentReviewDraftApi(
   );
 }
 
+export async function getQuickShotAgentRectificationPreviewApi(id: string, runId: string) {
+  return requestClient.get<PinganThreeCheckRecordApi.AgentRectificationPreview>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/rectification-preview`,
+  );
+}
+
+export async function getQuickShotAgentRectificationApplyApi(
+  id: string,
+  runId: string,
+  idempotencyKey?: string,
+) {
+  return requestClient.get<PinganThreeCheckRecordApi.AgentRectificationApplyResult | null>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/rectification-apply`,
+    idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
+  );
+}
+
 export async function getHazardInspectionDocumentFlowApi(
   moduleKey: string,
   id: string,
@@ -485,10 +538,12 @@ export async function workflowActionThreeCheckRecordApi(
   moduleKey: string,
   id: string,
   data: PinganThreeCheckRecordApi.WorkflowActionRequest,
+  idempotencyKey?: string,
 ) {
   return requestClient.post<PinganThreeCheckRecordApi.RecordDetail>(
     `${recordsPath(moduleKey)}/${id}/workflow-actions`,
     data,
+    idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
   );
 }
 

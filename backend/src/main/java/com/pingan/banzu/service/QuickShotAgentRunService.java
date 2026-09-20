@@ -125,6 +125,15 @@ public class QuickShotAgentRunService {
     return response(run);
   }
 
+  /** Rechecks both source version and attachment hashes before a downstream business action. */
+  public void assertCurrent(Long recordId, String runId) {
+    HazardAgentRun run = requireRun(recordId, runId);
+    if (isStale(run, recordId)) {
+      markStale(run);
+      throw new BusinessException("来源记录或图片已更新，请重新运行 AI 研判");
+    }
+  }
+
   /** Returns the most recent durable run for restoring the detail workbench after navigation. */
   public QuickShotAgentRunResponse latest(Long recordId) {
     recordService.detail(MODULE_KEY, recordId);

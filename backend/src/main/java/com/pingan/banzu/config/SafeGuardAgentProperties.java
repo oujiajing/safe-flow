@@ -12,7 +12,9 @@ public record SafeGuardAgentProperties(
     boolean assessmentEnabled,
     boolean reviewDraftEnabled,
     String companyAllowlist,
-    boolean writebackEnabled) {
+    boolean writebackEnabled,
+    boolean rectificationPreviewEnabled,
+    boolean rectificationApplyEnabled) {
 
   public SafeGuardAgentProperties {
     baseUrl = baseUrl == null || baseUrl.isBlank()
