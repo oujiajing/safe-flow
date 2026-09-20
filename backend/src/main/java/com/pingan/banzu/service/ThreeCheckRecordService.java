@@ -42,6 +42,7 @@ import com.pingan.banzu.system.security.SystemDataScopeService;
 import com.pingan.banzu.system.dto.SystemTeamCheckTemplateItemResponse;
 import com.pingan.banzu.system.dto.SystemTeamCheckTemplateResponse;
 import com.pingan.banzu.system.service.SystemTeamCheckTemplateService;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -199,6 +200,7 @@ public class ThreeCheckRecordService {
   private final SystemTeamCheckTemplateService teamCheckTemplateService;
   private final HazardRectificationOrderService hazardRectificationOrderService;
   private final NotificationEventPublisher notificationEventPublisher;
+  private final Clock businessClock;
   private final TransactionTemplate createTransaction;
 
   public ThreeCheckRecordService(
@@ -221,6 +223,7 @@ public class ThreeCheckRecordService {
       SystemTeamCheckTemplateService teamCheckTemplateService,
       HazardRectificationOrderService hazardRectificationOrderService,
       NotificationEventPublisher notificationEventPublisher,
+      Clock businessClock,
       PlatformTransactionManager transactionManager) {
     this.statusLogMapper = statusLogMapper;
     this.shiftTaskMapper = shiftTaskMapper;
@@ -241,6 +244,7 @@ public class ThreeCheckRecordService {
     this.teamCheckTemplateService = teamCheckTemplateService;
     this.hazardRectificationOrderService = hazardRectificationOrderService;
     this.notificationEventPublisher = notificationEventPublisher;
+    this.businessClock = businessClock;
     this.createTransaction = new TransactionTemplate(transactionManager);
     this.createTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
   }
@@ -2059,12 +2063,16 @@ public class ThreeCheckRecordService {
         visibleOwnerUserIds,
         curtainWallOnly,
         overdue,
-        overdue == null ? null : ThreeCheckOverdueSupport.today());
+        overdue == null ? null : businessToday());
   }
 
   private boolean isOverdue(ModuleSpec module, ThreeCheckRecord record) {
     return OVERDUE_MODULES.contains(module.moduleKey())
-        && ThreeCheckOverdueSupport.isOverdue(record.businessDate, record.status);
+        && ThreeCheckOverdueSupport.isOverdue(record.businessDate, record.status, businessToday());
+  }
+
+  private LocalDate businessToday() {
+    return LocalDate.now(businessClock);
   }
 
   private List<String> normalizedQueryStatuses(ModuleSpec module, String status) {
@@ -2302,7 +2310,7 @@ public class ThreeCheckRecordService {
     String status = record.status;
     if (ONE_SHIFT_SUBMIT_OWNER_MODULES.contains(module.moduleKey())
         && (ThreeCheckStatus.ARCHIVED.equals(status)
-            || ThreeCheckOverdueSupport.isPastBusinessDate(record.businessDate))) {
+            || ThreeCheckOverdueSupport.isPastBusinessDate(record.businessDate, businessToday()))) {
       return false;
     }
     if ("quick-shot".equals(module.moduleKey())) {
@@ -2333,7 +2341,7 @@ public class ThreeCheckRecordService {
     if (ThreeCheckStatus.ARCHIVED.equals(record.status)) {
       throw new BusinessException("已归档的一班三查记录不能撤回");
     }
-    if (ThreeCheckOverdueSupport.isPastBusinessDate(record.businessDate)) {
+    if (ThreeCheckOverdueSupport.isPastBusinessDate(record.businessDate, businessToday())) {
       throw new BusinessException("已过业务日期的一班三查记录不能撤回");
     }
   }
@@ -2341,7 +2349,7 @@ public class ThreeCheckRecordService {
   private void ensureHistoricalBusinessDateUnchanged(
       ModuleSpec module, ThreeCheckRecord record, LocalDate requestedBusinessDate) {
     if (ONE_SHIFT_SUBMIT_OWNER_MODULES.contains(module.moduleKey())
-        && ThreeCheckOverdueSupport.isPastBusinessDate(record.businessDate)
+        && ThreeCheckOverdueSupport.isPastBusinessDate(record.businessDate, businessToday())
         && !record.businessDate.equals(requestedBusinessDate)) {
       throw new BusinessException("历史一班三查记录不能修改业务日期");
     }
