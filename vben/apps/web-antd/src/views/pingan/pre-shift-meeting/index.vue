@@ -2,7 +2,7 @@
 import type { CSSProperties } from 'vue';
 import type { TableColumnsType, TableProps } from 'ant-design-vue';
 
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 
 import { Page, VbenScrollbar } from '@vben/common-ui';
 import { IconifyIcon } from '@vben/icons';
@@ -18,6 +18,7 @@ import {
   Modal,
   Select,
   Space,
+  Tag,
   Table,
   Tree,
 } from 'ant-design-vue';
@@ -39,16 +40,21 @@ import {
 } from '#/api/pingan/pre-shift-meeting';
 import type { PinganPreShiftMeetingApi } from '#/api/pingan/pre-shift-meeting';
 import {
+  assessQuickShotAgentRunApi,
   batchThreeCheckRecordsApi,
+  createQuickShotAgentRunApi,
   createThreeCheckRecordApi,
   deleteThreeCheckRecordAttachmentApi,
   deleteThreeCheckRecordApi,
   getHazardInspectionChangeHistoryApi,
   getHazardInspectionDocumentFlowApi,
+  getLatestQuickShotAgentRunApi,
   getThreeCheckRecordDetailApi,
   getThreeCheckRecordsApi,
   openThreeCheckRectificationOrderApi,
   remindThreeCheckRecordApi,
+  saveQuickShotAgentCandidateDecisionsApi,
+  saveQuickShotAgentReviewDraftApi,
   submitThreeCheckRecordApi,
   uploadThreeCheckRecordAttachmentApi,
   updateThreeCheckRecordApi,
@@ -295,6 +301,15 @@ const currentDocumentFlow =
   ref<PinganThreeCheckRecordApi.DocumentFlowResponse>();
 const currentChangeHistory =
   ref<PinganThreeCheckRecordApi.ChangeHistoryResponse>();
+const quickShotAgentRun = ref<PinganThreeCheckRecordApi.AgentRunResponse>();
+const quickShotAgentCandidateDecisions = reactive<Record<string, PinganThreeCheckRecordApi.AgentCandidateDecision>>({});
+const quickShotAgentReviewerNote = ref('');
+const quickShotAgentInputText = ref('');
+const quickShotAgentRunLoading = ref(false);
+const quickShotAgentSectionRef = ref<HTMLElement>();
+const quickShotAgentOpen = ref(false);
+const quickShotEvidenceExpanded = reactive<Record<string, boolean>>({});
+const quickShotAgentAssistError = ref('');
 const { dataMapToggleLabel, isDataMapCollapsed, toggleDataMap } =
   createDataMapCollapseState();
 const {
@@ -2615,6 +2630,11 @@ async function openDetail(record: Record<string, any>) {
   changeHistoryOpen.value = false;
   changeHistorySelectedGroupId.value = '';
   currentChangeHistory.value = undefined;
+  quickShotAgentRun.value = undefined;
+  quickShotAgentOpen.value = false;
+  quickShotAgentReviewerNote.value = '';
+  Object.keys(quickShotAgentCandidateDecisions).forEach((key) => delete quickShotAgentCandidateDecisions[key]);
+  quickShotAgentAssistError.value = '';
   seedThreeCheckDetailEditForm();
 
   if (!canUseWorkbench.value) {
@@ -2637,6 +2657,9 @@ async function openDetail(record: Record<string, any>) {
         threeCheckModuleKey.value,
         meeting.id,
       );
+      quickShotAgentInputText.value = isQuickShotModule.value
+        ? String(currentThreeCheckDetail.value.payload?.hazardDescription ?? '')
+        : '';
       seedThreeCheckDetailEditForm();
       await loadTeamCheckInspectionLinesFromDetail();
     } else {
@@ -2645,6 +2668,212 @@ async function openDetail(record: Record<string, any>) {
   } finally {
     detailLoading.value = false;
   }
+}
+
+const canRunQuickShotAgentAssist = computed(
+  () =>
+    isQuickShotModule.value &&
+    Boolean(currentThreeCheckDetail.value?.attachments?.some((item) => item.fileKind === 'IMAGE')) &&
+    !quickShotAgentRunLoading.value,
+);
+
+const quickShotRunCandidates = computed(
+  () => quickShotAgentRun.value?.modelOutput?.hazardCandidates ?? [],
+);
+
+function quickShotCandidateAssessment(candidateId: string) {
+  return quickShotAgentRun.value?.assessment?.assessments?.find(
+    (item) => item.candidateId === candidateId,
+  )?.assessment;
+}
+
+function quickShotVisibleEvidence(candidate: { description: string; visibleEvidence?: string[] }) {
+  const description = candidate.description.replaceAll(/[。；，、\s]/g, '');
+  return (candidate.visibleEvidence ?? []).filter((item) => {
+    const normalized = item.replaceAll(/[。；，、\s]/g, '');
+    return normalized && normalized !== description && !description.includes(normalized);
+  });
+}
+
+function quickShotRiskLabel(value?: string) {
+  return ({ HIGH: '高风险', MEDIUM: '中风险', LOW: '低风险', UNVERIFIED: '待核实' } as Record<string, string>)[value ?? ''] ?? '待核实';
+}
+
+function quickShotStatusLabel(value?: string) {
+  return ({ CANDIDATES_READY: '候选待确认', CANDIDATES_CONFIRMED: '候选已确认', ASSESSED: '已完成评估', REVIEW_DRAFTED: '审核草稿已保存', NO_RELEVANT_EVIDENCE: '暂无相关依据', STALE: '结果已失效' } as Record<string, string>)[value ?? ''] ?? '处理中';
+}
+
+function quickShotMeasures(value?: unknown) {
+  return normalizeListText(value).filter((item) => !item.startsWith('验收标准：'));
+}
+
+function normalizeListText(value?: string | string[] | unknown) {
+  const values = Array.isArray(value) ? value : typeof value === 'string' ? value.split(/[\n；]/) : [];
+  return values
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.replace(/^\s*(?:[-•·]|\d+[.、])\s*/, '').trim())
+    .filter(Boolean);
+}
+
+function quickShotAcceptanceCriteria(value?: string | string[]) {
+  return normalizeListText(value);
+}
+
+function quickShotRiskTagClass(value?: string) {
+  return `quick-shot-agent-assist__risk-tag--${(value ?? 'UNVERIFIED').toLowerCase()}`;
+}
+
+function quickShotReviewLabel(candidate: { needsManualVerification: boolean }) {
+  return candidate.needsManualVerification ? '需要人工确认' : '无需人工确认';
+}
+
+function quickShotFinding(candidate: { description: string; judgement: string }) {
+  const description = candidate.description.trim();
+  return description.startsWith('疑似') || description.startsWith('未检测到')
+    ? description
+    : `疑似${description}`;
+}
+
+function quickShotCitationGroups(candidateId: string, expanded = false) {
+  const evidence = quickShotCandidateAssessment(candidateId)?.legalEvidence ?? [];
+  const groups = new Map<string, { documentTitle: string; standardNo?: string; entries: PinganThreeCheckRecordApi.AgentLegalEvidence[] }>();
+  for (const item of evidence) {
+    const key = `${item.documentTitle}\u0000${item.standardNo ?? ''}`;
+    const group = groups.get(key) ?? { documentTitle: item.documentTitle, standardNo: item.standardNo, entries: [] };
+    if (!group.entries.some((entry) => entry.clauseNo === item.clauseNo && entry.content === item.content)) group.entries.push(item);
+    groups.set(key, group);
+  }
+  if (expanded) return [...groups.values()];
+  let remaining = 2;
+  return [...groups.values()].map((group) => {
+    const entries = group.entries.slice(0, remaining);
+    remaining -= entries.length;
+    return { ...group, entries };
+  }).filter((group) => group.entries.length);
+}
+
+function quickShotCitationCount(candidateId: string) {
+  return quickShotCandidateAssessment(candidateId)?.legalEvidence?.length ?? 0;
+}
+
+function quickShotCitationContent(evidence: PinganThreeCheckRecordApi.AgentLegalEvidence) {
+  let content = evidence.content?.trim() ?? '';
+  const title = evidence.documentTitle?.trim();
+  if (title) {
+    content = content.replace(new RegExp(`^《?${escapeRegExp(title)}》?\\s*`), '');
+  }
+  const clause = evidence.clauseNo?.trim();
+  if (clause) {
+    const clauseIndex = content.indexOf(clause);
+    if (clauseIndex >= 0) {
+      const afterClause = content.slice(clauseIndex + clause.length).replace(/^[\s:：/]+/, '');
+      if (afterClause) content = afterClause;
+    }
+  }
+  return content.replace(/^\d+(?:\s+[^/\n]+)?\s*\/\s*/, '').trim();
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+async function openQuickShotAgent() {
+  const record = currentThreeCheckDetail.value;
+  if (!record || !isQuickShotModule.value) return;
+  quickShotAgentOpen.value = true;
+  if (!quickShotAgentRun.value) {
+    quickShotAgentRunLoading.value = true;
+    try {
+      const restoredRun = await getLatestQuickShotAgentRunApi(record.id);
+      if (restoredRun) {
+        quickShotAgentRun.value = restoredRun;
+        quickShotAgentInputText.value = restoredRun.inputText ?? quickShotAgentInputText.value;
+        restoredRun.decisions.forEach((decision) => {
+          quickShotAgentCandidateDecisions[decision.candidateId] = decision.decision;
+        });
+        quickShotAgentReviewerNote.value = restoredRun.decisions
+          .map((decision) => decision.reviewerNote)
+          .find((note): note is string => Boolean(note)) ?? '';
+      }
+    } catch (error) {
+      quickShotAgentAssistError.value = error instanceof Error ? error.message : '研判记录加载失败';
+    } finally {
+      quickShotAgentRunLoading.value = false;
+    }
+  }
+  await nextTick();
+  quickShotAgentSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openQuickShotBasicInfo() {
+  quickShotAgentOpen.value = false;
+  quickShotAgentAssistError.value = '';
+}
+
+async function handleQuickShotImageUpload(event: Event) {
+  await handleAttachmentChange('IMAGE', event);
+  quickShotAgentRun.value = undefined;
+  Object.keys(quickShotAgentCandidateDecisions).forEach((key) => delete quickShotAgentCandidateDecisions[key]);
+  message.info('隐患图片已更新，请重新进行 AI 研判');
+}
+
+async function runQuickShotFullAssessment() {
+  const record = currentThreeCheckDetail.value;
+  if (!record || !canRunQuickShotAgentAssist.value) return;
+  quickShotAgentRunLoading.value = true;
+  quickShotAgentAssistError.value = '';
+  try {
+    const run = await createQuickShotAgentRunApi(record.id, quickShotAgentInputText.value);
+    quickShotAgentRun.value = run;
+    Object.keys(quickShotAgentCandidateDecisions).forEach((key) => delete quickShotAgentCandidateDecisions[key]);
+    quickShotRunCandidates.value.forEach((candidate) => { quickShotAgentCandidateDecisions[candidate.candidateId] = candidate.judgement === 'UNKNOWN' ? 'REJECTED' : 'ACCEPTED'; });
+    if (quickShotRunCandidates.value.some((candidate) => quickShotAgentCandidateDecisions[candidate.candidateId] === 'ACCEPTED')) {
+      quickShotAgentRun.value = await saveQuickShotAgentCandidateDecisionsApi(record.id, run.runId, quickShotRunCandidates.value.map((candidate) => ({ candidateId: candidate.candidateId, decision: quickShotAgentCandidateDecisions[candidate.candidateId] ?? 'REJECTED' })));
+      quickShotAgentRun.value = await assessQuickShotAgentRunApi(record.id, run.runId);
+    }
+  } catch (error) {
+    quickShotAgentAssistError.value = error instanceof Error ? error.message : 'AI 研判失败，请稍后重试';
+  } finally {
+    quickShotAgentRunLoading.value = false;
+  }
+}
+
+async function saveQuickShotCandidateDecisions() {
+  const record = currentThreeCheckDetail.value;
+  const run = quickShotAgentRun.value;
+  if (!record || !run) return;
+  quickShotAgentRunLoading.value = true;
+  try {
+    quickShotAgentRun.value = await saveQuickShotAgentCandidateDecisionsApi(
+      record.id, run.runId, quickShotRunCandidates.value.map((candidate) => ({ candidateId: candidate.candidateId, decision: quickShotAgentCandidateDecisions[candidate.candidateId] ?? 'REJECTED' })),
+    );
+    message.success('候选决定已保存');
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : '保存候选决定失败');
+  } finally { quickShotAgentRunLoading.value = false; }
+}
+
+async function assessQuickShotAgentRun() {
+  const record = currentThreeCheckDetail.value;
+  const run = quickShotAgentRun.value;
+  if (!record || !run) return;
+  await saveQuickShotCandidateDecisions();
+  quickShotAgentRunLoading.value = true;
+  try { quickShotAgentRun.value = await assessQuickShotAgentRunApi(record.id, run.runId); }
+  catch (error) { message.error(error instanceof Error ? error.message : '法规评估失败'); }
+  finally { quickShotAgentRunLoading.value = false; }
+}
+
+async function saveQuickShotReviewDraft() {
+  const record = currentThreeCheckDetail.value;
+  const run = quickShotAgentRun.value;
+  if (!record || !run) return;
+  quickShotAgentRunLoading.value = true;
+  try {
+    quickShotAgentRun.value = await saveQuickShotAgentReviewDraftApi(record.id, run.runId, { reviewerNote: quickShotAgentReviewerNote.value });
+    message.success('审核草稿已保存；随手拍状态未改变');
+  } catch (error) { message.error(error instanceof Error ? error.message : '保存审核草稿失败'); }
+  finally { quickShotAgentRunLoading.value = false; }
 }
 
 async function refreshCurrentDetail() {
@@ -5091,6 +5320,26 @@ watch(
               {{ detailActionLabel('changeHistory') }}
             </Button>
             <Button
+              v-if="isQuickShotModule"
+              :type="quickShotAgentOpen ? 'primary' : 'default'"
+              class="detail-action-button"
+              size="small"
+              @click="openQuickShotBasicInfo"
+            >
+              <IconifyIcon icon="lucide:info" class="detail-action-icon" />
+              基本信息
+            </Button>
+            <Button
+              v-if="isQuickShotModule"
+              class="detail-action-button"
+              size="small"
+              :type="quickShotAgentOpen ? 'default' : 'primary'"
+              @click="openQuickShotAgent"
+            >
+              <IconifyIcon icon="lucide:sparkles" class="detail-action-icon" />
+              AI研判
+            </Button>
+            <Button
               :disabled="!canEditCurrentThreeCheckDetail || detailEditing"
               class="detail-action-button"
               size="small"
@@ -5185,7 +5434,8 @@ watch(
         <div
           v-else-if="
             moduleRuntime.routeName !== 'PinganSafetyCheck' &&
-            !isPointsFlowModule
+            !isPointsFlowModule &&
+            !quickShotAgentOpen
           "
           class="detail-meta-strip"
         >
@@ -5203,7 +5453,81 @@ watch(
           </div>
         </div>
 
-        <div class="detail-field-sections">
+        <!-- Legacy top-of-detail AI card retained in source temporarily; the active card is below detail fields. -->
+        <!--
+        <section v-if="isQuickShotModule" ref="quickShotAgentSectionRef" class="quick-shot-agent-assist">
+          <div class="quick-shot-agent-assist__header">
+            <div>
+              <h3>AI 辅助研判</h3>
+              <p>仅生成现场隐患研判草稿，不会修改记录或创建整改工单。</p>
+            </div>
+            <Button
+              :disabled="!canRunQuickShotAgentAssist"
+              :loading="quickShotAgentRunLoading"
+              size="small"
+              type="primary"
+              @click="runQuickShotFullAssessment"
+            >
+              {{ quickShotAgentRun ? '重新研判' : '开始研判' }}
+            </Button>
+          </div>
+          <div v-if="quickShotAgentRunLoading" class="quick-shot-agent-assist__empty">
+            正在分析现场图片，请稍候…
+          </div>
+          <div v-else-if="quickShotAgentAssistError" class="quick-shot-agent-assist__error">
+            {{ quickShotAgentAssistError }}
+          </div>
+          <div v-else-if="quickShotAgentRun" class="quick-shot-agent-assist__body">
+            <div class="quick-shot-agent-assist__meta">
+              <span>记录版本：{{ quickShotAgentRun.recordVersion }}</span>
+              <span>模型：{{ quickShotAgentRun.model || '未返回' }}</span>
+              <span>状态：{{ quickShotAgentRun.status }}</span>
+              <span>AI 结果仅供辅助判断，最终结论由审核人负责。</span>
+            </div>
+            <section class="quick-shot-agent-assist__section">
+              <h4>1. 输入摘要</h4>
+              <p>已冻结 {{ quickShotAgentRun.attachments.length }} 张图片；现场说明：{{ quickShotAgentRun.inputText || '未填写' }}</p>
+            </section>
+            <section class="quick-shot-agent-assist__section">
+              <div class="quick-shot-agent-assist__section-title">
+                <h4>2. 视觉候选</h4>
+                <Button size="small" :disabled="!quickShotRunCandidates.length" @click="saveQuickShotCandidateDecisions">保存候选决定</Button>
+              </div>
+              <div v-if="quickShotRunCandidates.length" class="quick-shot-agent-assist__candidates">
+                <article v-for="candidate in quickShotRunCandidates" :key="candidate.candidateId" class="quick-shot-agent-assist__candidate">
+                  <div class="quick-shot-agent-assist__candidate-title"><strong>{{ candidate.hazardType }}</strong><span>图片 {{ Number(candidate.sourceImageIndex ?? 0) + 1 }} · {{ candidate.judgement }} · {{ Math.round(candidate.confidence * 100) }}%</span></div>
+                  <p>{{ candidate.description }}</p>
+                  <ul v-if="candidate.visibleEvidence?.length"><li v-for="evidence in candidate.visibleEvidence" :key="evidence">{{ evidence }}</li></ul>
+                  <Select v-model:value="quickShotAgentCandidateDecisions[candidate.candidateId]" :options="[{ label: '采纳', value: 'ACCEPTED' }, { label: '编辑后采纳', value: 'EDITED' }, { label: '排除', value: 'REJECTED' }]" style="width: 140px" />
+                </article>
+              </div>
+              <p v-else class="quick-shot-agent-assist__empty">未识别到可确认隐患；可继续按人工流程处理。</p>
+            </section>
+            <section class="quick-shot-agent-assist__section">
+              <div class="quick-shot-agent-assist__section-title"><h4>3. 法规评估</h4><Button size="small" type="primary" :disabled="!quickShotRunCandidates.length" @click="assessQuickShotAgentRun">生成只读评估</Button></div>
+              <template v-if="quickShotAgentRun.assessment?.assessments?.length">
+                <article v-for="item in quickShotAgentRun.assessment.assessments" :key="item.candidateId" class="quick-shot-agent-assist__assessment">
+                  <strong>候选：{{ item.candidateId }}</strong>
+                  <p>风险等级：{{ item.assessment.riskLevel || '待核实' }}；{{ item.assessment.riskExplanation || item.assessment.riskSummary || '当前无可展示的风险依据' }}</p>
+                  <p>知识库：{{ quickShotAgentRun.knowledgeStatus || '未使用' }}；证据数：{{ item.assessment.evidence?.length || 0 }}</p>
+                  <ul v-if="item.assessment.evidence?.length"><li v-for="evidence in item.assessment.evidence" :key="evidence.evidenceId">{{ evidence.standardNo }} {{ evidence.clauseNo }}：{{ evidence.content }}</li></ul>
+                  <p v-else class="quick-shot-agent-assist__warning">未命中相关 Evidence，不生成确定性条款或整改结论。</p>
+                </article>
+              </template>
+              <p v-else class="quick-shot-agent-assist__empty">候选确认后才会检索知识库和生成证据约束的评估。</p>
+            </section>
+            <section class="quick-shot-agent-assist__section">
+              <div class="quick-shot-agent-assist__section-title"><h4>4. 人工审核</h4><Button size="small" :disabled="quickShotAgentRun.status === 'STALE'" @click="saveQuickShotReviewDraft">保存审核草稿</Button></div>
+              <Input v-model:value="quickShotAgentReviewerNote" placeholder="填写审核备注；此操作不会审批记录或创建工单" />
+            </section>
+          </div>
+          <div v-else class="quick-shot-agent-assist__empty">
+            点击“开始研判”建立可追溯的图片候选和人工审核草稿。
+          </div>
+        </section>
+        -->
+
+        <div v-show="!quickShotAgentOpen" class="detail-field-sections">
           <section
             v-for="group in detailFieldGroups"
             :key="group.key"
@@ -5661,6 +5985,55 @@ watch(
             </div>
           </section>
         </div>
+        <section v-if="isQuickShotModule && quickShotAgentOpen" class="quick-shot-agent-media-only">
+          <h3>隐患图片</h3>
+          <div v-if="currentThreeCheckDetail.attachments.some((attachment) => attachment.fileKind === 'IMAGE')" class="attachment-grid">
+            <div v-for="attachment in currentThreeCheckDetail.attachments.filter((item) => item.fileKind === 'IMAGE')" :key="attachment.id" class="attachment-preview">
+              <Image :src="attachmentPreviewUrl(attachment)" class="attachment-image" />
+              <div class="attachment-name">{{ attachment.originalName }}</div>
+            </div>
+            <label class="detail-attachment-upload-card quick-shot-agent-media-only__upload">
+              <IconifyIcon icon="lucide:plus" />
+              上传隐患图片
+              <input :disabled="!canUploadAttachment" accept="image/*" type="file" @change="handleQuickShotImageUpload" />
+            </label>
+          </div>
+          <label v-else class="detail-attachment-upload-card quick-shot-agent-media-only__upload">
+            <IconifyIcon icon="lucide:plus" />
+            上传隐患图片
+            <input :disabled="!canUploadAttachment" accept="image/*" type="file" @change="handleQuickShotImageUpload" />
+          </label>
+        </section>
+        <section v-if="isQuickShotModule && quickShotAgentOpen" ref="quickShotAgentSectionRef" class="quick-shot-agent-assist">
+          <div class="quick-shot-agent-assist__header">
+            <div><h3>AI 辅助研判</h3><p>基于图片和现场说明生成候选与法规依据；不审批记录、不创建整改工单。</p></div>
+            <Button :disabled="!canRunQuickShotAgentAssist" :loading="quickShotAgentRunLoading" size="small" type="primary" @click="runQuickShotFullAssessment">{{ quickShotAgentRun ? '重新研判' : '开始研判' }}</Button>
+          </div>
+          <Input v-model:value="quickShotAgentInputText" class="quick-shot-agent-assist__context" placeholder="补充现场位置、作业内容或问题说明（可选）" />
+          <div v-if="quickShotAgentRunLoading" class="quick-shot-agent-assist__empty">正在分析图片和匹配法规依据，请稍候…</div>
+          <div v-else-if="quickShotAgentAssistError" class="quick-shot-agent-assist__error">{{ quickShotAgentAssistError }}</div>
+          <div v-else-if="quickShotAgentRun" class="quick-shot-agent-assist__body">
+            <div class="quick-shot-agent-assist__meta"><span>图片：{{ quickShotAgentRun.attachments.length }} 张</span><span>研判状态：{{ quickShotStatusLabel(quickShotAgentRun.status) }}</span><span>模型：{{ quickShotAgentRun.model || '未返回' }}</span></div>
+            <article v-for="candidate in quickShotRunCandidates" :key="candidate.candidateId" class="quick-shot-agent-assist__candidate">
+              <div class="quick-shot-agent-assist__candidate-kicker">隐患类型</div>
+              <div class="quick-shot-agent-assist__candidate-title"><strong>{{ candidate.hazardType }}</strong><Tag :class="['quick-shot-agent-assist__status-tag', quickShotRiskTagClass(quickShotCandidateAssessment(candidate.candidateId)?.riskLevel?.value)]">{{ quickShotRiskLabel(quickShotCandidateAssessment(candidate.candidateId)?.riskLevel?.value) }}</Tag></div>
+              <div class="quick-shot-agent-assist__candidate-meta">图片 {{ Number(candidate.sourceImageIndex ?? 0) + 1 }} · AI置信度 {{ Math.round(candidate.confidence * 100) }}%</div>
+              <div class="quick-shot-agent-assist__block quick-shot-agent-assist__finding"><h4>现场发现</h4><dl><dt>检测结果</dt><dd>{{ quickShotFinding(candidate) }}</dd><dt v-if="quickShotVisibleEvidence(candidate).length">画面证据</dt><dd v-if="quickShotVisibleEvidence(candidate).length">{{ quickShotVisibleEvidence(candidate).join('；') }}</dd><dt>人工核实</dt><dd><Tag :class="['quick-shot-agent-assist__status-tag', candidate.needsManualVerification ? 'quick-shot-agent-assist__review-tag--required' : 'quick-shot-agent-assist__review-tag--optional']">{{ quickShotReviewLabel(candidate) }}</Tag></dd></dl></div>
+              <div class="quick-shot-agent-assist__block"><h4>人工复核</h4><div class="quick-shot-agent-assist__candidate-actions"><Select v-model:value="quickShotAgentCandidateDecisions[candidate.candidateId]" :options="[{ label: '采纳', value: 'ACCEPTED' }, { label: '编辑后采纳', value: 'EDITED' }, { label: '排除', value: 'REJECTED' }]" style="width: 160px" /><Button size="small" type="primary" @click="saveQuickShotCandidateDecisions">保存结果</Button></div></div>
+              <div v-if="quickShotCandidateAssessment(candidate.candidateId)" class="quick-shot-agent-assist__assessment">
+                <div class="quick-shot-agent-assist__block"><h4>风险评估</h4><p><strong>风险等级：</strong><span class="quick-shot-agent-assist__risk-inline">{{ quickShotRiskLabel(quickShotCandidateAssessment(candidate.candidateId)?.riskLevel?.value) }}</span></p><p><strong>风险说明：</strong>{{ quickShotCandidateAssessment(candidate.candidateId)?.riskLevel?.basis || '待人工核实' }}</p></div>
+                <div v-if="quickShotMeasures(quickShotCandidateAssessment(candidate.candidateId)?.rectificationMeasures).length" class="quick-shot-agent-assist__block"><h4>整改建议</h4><ol class="quick-shot-agent-assist__numbered"><li v-for="(item, index) in quickShotMeasures(quickShotCandidateAssessment(candidate.candidateId)?.rectificationMeasures)" :key="item"><span>{{ index + 1 }}.</span>{{ item }}</li></ol></div>
+                <div v-if="quickShotAcceptanceCriteria(quickShotCandidateAssessment(candidate.candidateId)?.acceptanceCriteria).length" class="quick-shot-agent-assist__block"><h4>验收要点</h4><ul class="quick-shot-agent-assist__checklist"><li v-for="item in quickShotAcceptanceCriteria(quickShotCandidateAssessment(candidate.candidateId)?.acceptanceCriteria)" :key="item">{{ item }}</li></ul></div>
+                <div v-if="quickShotCitationCount(candidate.candidateId)" class="quick-shot-agent-assist__evidence"><div class="quick-shot-agent-assist__evidence-header"><h4>法规依据（{{ quickShotCitationCount(candidate.candidateId) }}）</h4><Button v-if="quickShotCitationCount(candidate.candidateId) > 2" size="small" type="link" @click="quickShotEvidenceExpanded[candidate.candidateId] = !quickShotEvidenceExpanded[candidate.candidateId]">{{ quickShotEvidenceExpanded[candidate.candidateId] ? '收起' : `展开全部（${quickShotCitationCount(candidate.candidateId)}）` }}</Button></div><div v-for="group in quickShotCitationGroups(candidate.candidateId, Boolean(quickShotEvidenceExpanded[candidate.candidateId]))" :key="`${group.documentTitle}-${group.standardNo}`" class="quick-shot-agent-assist__citation-group"><article v-for="evidence in group.entries" :key="evidence.evidenceId"><strong>《{{ group.documentTitle }}》{{ evidence.clauseNo ? ` · ${evidence.clauseNo}` : '' }}</strong><p>{{ quickShotCitationContent(evidence) }}</p></article></div></div>
+                <p v-else class="quick-shot-agent-assist__warning">当前未检索到可支撑该候选的明确依据，需人工核实。</p>
+              </div>
+              <div v-else class="quick-shot-agent-assist__assessment"><Button size="small" type="primary" @click="assessQuickShotAgentRun">生成该候选的法规评估</Button></div>
+            </article>
+            <div class="quick-shot-agent-assist__section-title"><h4>审核备注</h4><Button size="small" :disabled="quickShotAgentRun.status === 'STALE'" @click="saveQuickShotReviewDraft">保存审核草稿</Button></div>
+            <Input v-model:value="quickShotAgentReviewerNote" placeholder="填写审核备注；不会审批记录或创建工单" />
+          </div>
+          <div v-else class="quick-shot-agent-assist__empty">上传图片后可补充现场说明，再开始研判。</div>
+        </section>
         <section v-if="isSafetyCheckDetail" class="safety-check-lines hazard-detail-lines">
           <div class="hazard-lines-header">
             <h3>隐患明细</h3>
@@ -9282,5 +9655,250 @@ watch(
   .filter-item {
     flex-basis: calc(50% - 5px);
   }
+}
+.quick-shot-agent-assist {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.quick-shot-agent-media-only {
+  margin: 16px 0 10px;
+  padding: 14px 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.quick-shot-agent-media-only h3 {
+  margin: 0 0 10px;
+  color: #334155;
+  font-size: 14px;
+}
+
+.quick-shot-agent-assist__header,
+.quick-shot-agent-assist__candidate-title,
+.quick-shot-agent-assist__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quick-shot-agent-assist__header h3 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.quick-shot-agent-assist__header p,
+.quick-shot-agent-assist__candidate p {
+  margin: 4px 0 0;
+  color: #475569;
+}
+
+.quick-shot-agent-assist__meta {
+  flex-wrap: wrap;
+  margin: 12px 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.quick-shot-agent-assist__candidates {
+  display: grid;
+  gap: 10px;
+}
+
+.quick-shot-agent-assist__section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #dbeafe;
+}
+
+.quick-shot-agent-assist__section h4 {
+  margin: 0;
+  color: #1e3a5f;
+}
+
+.quick-shot-agent-assist__section > p,
+.quick-shot-agent-assist__assessment p {
+  margin: 8px 0;
+  color: #475569;
+  font-size: 13px;
+}
+
+.quick-shot-agent-assist__section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quick-shot-agent-assist__assessment {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.quick-shot-agent-assist__assessment ul {
+  margin: 6px 0;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 12px;
+}
+
+.quick-shot-agent-assist__warning {
+  color: #b45309 !important;
+}
+
+.quick-shot-agent-assist__candidate {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.quick-shot-agent-assist__block {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #edf2f7;
+}
+
+.quick-shot-agent-assist__candidate > .quick-shot-agent-assist__block:first-of-type {
+  margin-top: 12px;
+}
+
+.quick-shot-agent-assist__block h4 {
+  margin: 0 0 6px;
+  color: #334155;
+  font-size: 13px;
+}
+
+.quick-shot-agent-assist__block p,
+.quick-shot-agent-assist__block li {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.quick-shot-agent-assist__block ol,
+.quick-shot-agent-assist__block ul {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.quick-shot-agent-assist__evidence {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #dbeafe;
+}
+
+.quick-shot-agent-assist__evidence summary {
+  cursor: pointer;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.quick-shot-agent-assist__evidence ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.quick-shot-agent-assist__evidence li {
+  margin-bottom: 10px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.quick-shot-agent-assist__evidence p {
+  margin: 4px 0 0;
+}
+
+.quick-shot-agent-assist__candidate-title span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.quick-shot-agent-assist__candidate-kicker,
+.quick-shot-agent-assist__candidate-meta {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.quick-shot-agent-assist__candidate-kicker { margin-bottom: 4px; }
+.quick-shot-agent-assist__candidate-meta { margin-top: 6px; }
+
+.quick-shot-agent-assist__finding dl {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 6px 12px;
+  margin: 0;
+}
+
+.quick-shot-agent-assist__finding dt { color: #64748b; font-size: 13px; }
+.quick-shot-agent-assist__finding dd { margin: 0; color: #334155; font-size: 13px; line-height: 1.7; }
+
+.quick-shot-agent-assist__evidence-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.quick-shot-agent-assist__evidence-header h4 { margin: 0; color: #334155; font-size: 13px; }
+
+.quick-shot-agent-assist__citation-group {
+  margin-top: 6px;
+  padding: 7px 10px;
+  border-left: 3px solid #bfdbfe;
+  background: #f8fafc;
+}
+.quick-shot-agent-assist__citation-group article + article { margin-top: 10px; }
+.quick-shot-agent-assist__citation-group article strong { color: #1e3a5f; font-size: 13px; }
+.quick-shot-agent-assist__citation-group article p { display: -webkit-box; margin: 3px 0 0; overflow: hidden; color: #475569; font-size: 12px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+.quick-shot-agent-assist__risk-inline { color: #a16207; font-size: 13px; font-weight: 600; }
+
+.quick-shot-agent-assist__status-tag {
+  margin-inline-end: 0;
+  border: 0;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.quick-shot-agent-assist__risk-tag--high { background: #b91c1c; }
+.quick-shot-agent-assist__risk-tag--medium { background: #b45309; }
+.quick-shot-agent-assist__risk-tag--low { background: #15803d; }
+.quick-shot-agent-assist__risk-tag--unverified { background: #475569; }
+.quick-shot-agent-assist__review-tag--required { background: #b45309; }
+.quick-shot-agent-assist__review-tag--optional { background: #475569; }
+
+.quick-shot-agent-assist__checklist { list-style: none; padding-left: 0 !important; }
+.quick-shot-agent-assist__checklist li { position: relative; padding-left: 24px; }
+.quick-shot-agent-assist__checklist li::before { position: absolute; top: 4px; left: 0; width: 13px; height: 13px; border: 1px solid #94a3b8; border-radius: 3px; content: ''; }
+
+.quick-shot-agent-assist__numbered { list-style: none; padding-left: 0 !important; }
+.quick-shot-agent-assist__numbered li { display: flex; gap: 6px; }
+.quick-shot-agent-assist__numbered li > span { flex: 0 0 auto; color: #2563eb; font-weight: 600; }
+
+.quick-shot-agent-assist__candidate ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 13px;
+}
+
+.quick-shot-agent-assist__candidate small {
+  display: block;
+  margin-top: 8px;
+  color: #b45309;
+}
+
+.quick-shot-agent-assist__empty,
+.quick-shot-agent-assist__error {
+  padding: 12px 0 2px;
+  color: #64748b;
+}
+
+.quick-shot-agent-assist__error {
+  color: #b91c1c;
 }
 </style>
