@@ -34,6 +34,7 @@ class ThreeCheckRecordApiTest {
   private static final long SOURCE_COMPANY_ID = 4L;
   private static final long SOURCE_DEPARTMENT_ID = 101109L;
   private static final long SOURCE_TEAM_ID = 1011001L;
+  private static final LocalDate TEST_BUSINESS_TODAY = LocalDate.of(2026, 9, 10);
   private static final String SOURCE_COMPANY_NAME = "Demo Works Company";
   private static final List<String> MODULE_KEYS =
       List.of(
@@ -1530,11 +1531,8 @@ class ThreeCheckRecordApiTest {
   void derivesAndFiltersOverdueWithoutChangingOriginalStatusAcrossPcAndMiniProgram()
       throws Exception {
     String token = login("admin", "SAFE_TEST_PASSWORD");
-    String yesterday = LocalDate.now(com.pingan.banzu.service.ThreeCheckOverdueSupport.BUSINESS_ZONE)
-        .minusDays(1)
-        .toString();
-    String today = LocalDate.now(com.pingan.banzu.service.ThreeCheckOverdueSupport.BUSINESS_ZONE)
-        .toString();
+    String yesterday = TEST_BUSINESS_TODAY.minusDays(1).toString();
+    String today = TEST_BUSINESS_TODAY.toString();
     String prefix = "TCR-OVERDUE-" + System.nanoTime();
     long draftId =
         insertRecordForEnterpriseQueryAndReturnId(
