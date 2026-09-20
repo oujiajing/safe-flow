@@ -10,6 +10,11 @@ export default defineConfig(async ({ mode }) => {
   return {
     application: {},
     vite: {
+      optimizeDeps: {
+        // vue-i18n 11's esm-bundler initializer is mis-emitted by the
+        // current Vite/Rolldown optimizer; keep it as a native dependency.
+        exclude: ['vue-i18n', '@vueuse/motion'],
+      },
       server: {
         proxy: {
           '/api': {

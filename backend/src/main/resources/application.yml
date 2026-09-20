@@ -72,5 +72,15 @@ pingan:
     lock-minutes: 30
     two-factor-enabled: false
     test-verification-code: ${PINGAN_TEST_VERIFICATION_CODE:}
+  safeguard-agent:
+    enabled: ${PINGAN_SAFEGUARD_AGENT_ENABLED:false}
+    base-url: ${SAFEGUARD_AGENT_BASE_URL:http://127.0.0.1:9090/api/safeguard-agent}
+    service-token: ${SAFEGUARD_SERVICE_TOKEN:}
+    request-timeout-ms: ${SAFEGUARD_AGENT_REQUEST_TIMEOUT_MS:120000}
+    max-image-bytes: ${SAFEGUARD_AGENT_MAX_IMAGE_BYTES:8388608}
+    assessment-enabled: ${PINGAN_SAFEGUARD_AGENT_ASSESSMENT_ENABLED:false}
+    review-draft-enabled: ${PINGAN_SAFEGUARD_AGENT_REVIEW_DRAFT_ENABLED:false}
+    company-allowlist: ${PINGAN_SAFEGUARD_AGENT_COMPANY_ALLOWLIST:}
+    writeback-enabled: ${PINGAN_SAFEGUARD_AGENT_WRITEBACK_ENABLED:false}
 
 

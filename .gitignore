@@ -93,6 +93,7 @@ package-lock.json
 *-dist.war
 
 # Project runtime data
+uploads-local/
 **/backend-mock/data/
 backend/uploads/
 backend/uploads-local/
