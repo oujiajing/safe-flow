@@ -94,6 +94,59 @@ export namespace PinganThreeCheckRecordApi {
     sourceRecordId?: string;
   }
 
+  export interface AgentAssistResponse {
+    analysisId: string;
+    analyzedAt?: string;
+    hazardCandidates: Array<{
+      candidateId: string;
+      confidence: number;
+      description: string;
+      hazardType: string;
+      judgement: 'CONFIRMED' | 'SUSPECTED' | 'UNKNOWN' | string;
+      needsManualVerification: boolean;
+      operationObject: string;
+      potentialRisk: string;
+      visibleEvidence: string[];
+    }>;
+    model?: string;
+    recordId: string;
+    recordVersion: number;
+    scene: string;
+  }
+
+  export type AgentCandidateDecision = 'ACCEPTED' | 'EDITED' | 'REJECTED';
+  export interface AgentLegalEvidence {
+    clauseNo?: string;
+    content: string;
+    documentTitle: string;
+    evidenceId: string;
+    rerankScore?: number;
+    standardNo?: string;
+  }
+  export interface AgentAssessment {
+    acceptanceCriteria?: string[] | string;
+    legalEvidence?: AgentLegalEvidence[];
+    rectificationMeasures?: string[] | string;
+    riskLevel?: { basis?: string; value?: string };
+  }
+  export interface AgentRunResponse {
+    analysisId?: string;
+    assessment?: { assessments?: Array<{ candidateId: string; assessment: AgentAssessment }>; knowledgeUsed?: boolean };
+    assessmentId?: string;
+    attachments: Array<{ attachmentId: string; imageIndex: number; mimeType?: string; sha256: string }>;
+    decisions: Array<{ candidateId: string; decision: AgentCandidateDecision; editedDescription?: string; editedHazardType?: string; reviewerNote?: string }>;
+    errorCode?: string;
+    errorMessage?: string;
+    inputText?: string;
+    knowledgeStatus?: string;
+    model?: string;
+    modelOutput?: { hazardCandidates?: Array<AgentAssistResponse['hazardCandidates'][number] & { sourceAttachmentId?: string; sourceImageIndex?: number }> };
+    recordId: string;
+    recordVersion: number;
+    runId: string;
+    status: string;
+  }
+
   export interface DocumentFlowStatusLog {
     action: string;
     createdAt: string;
@@ -263,6 +316,58 @@ export async function getThreeCheckRecordDetailApi(
 ) {
   return requestClient.get<PinganThreeCheckRecordApi.RecordDetail>(
     `${recordsPath(moduleKey)}/${id}`,
+  );
+}
+
+export async function runQuickShotAgentAssistApi(
+  id: string,
+  extraDescription?: string,
+) {
+  return requestClient.post<PinganThreeCheckRecordApi.AgentAssistResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-assist`,
+    extraDescription?.trim() ? { extraDescription: extraDescription.trim() } : undefined,
+  );
+}
+
+export async function createQuickShotAgentRunApi(id: string, extraDescription?: string) {
+  return requestClient.post<PinganThreeCheckRecordApi.AgentRunResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs`,
+    extraDescription?.trim() ? { extraDescription: extraDescription.trim() } : undefined,
+    { timeout: 180_000 },
+  );
+}
+
+export async function getLatestQuickShotAgentRunApi(id: string) {
+  return requestClient.get<PinganThreeCheckRecordApi.AgentRunResponse | null>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs`,
+  );
+}
+
+export async function saveQuickShotAgentCandidateDecisionsApi(
+  id: string,
+  runId: string,
+  decisions: Array<{ candidateId: string; decision: PinganThreeCheckRecordApi.AgentCandidateDecision; editedDescription?: string; editedHazardType?: string; reviewerNote?: string }>,
+) {
+  return requestClient.post<PinganThreeCheckRecordApi.AgentRunResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/candidate-decisions`, { decisions },
+  );
+}
+
+export async function assessQuickShotAgentRunApi(id: string, runId: string) {
+  return requestClient.post<PinganThreeCheckRecordApi.AgentRunResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/assess`,
+    undefined,
+    { timeout: 180_000 },
+  );
+}
+
+export async function saveQuickShotAgentReviewDraftApi(
+  id: string,
+  runId: string,
+  data: { reviewerNote?: string; items?: Array<Record<string, unknown>> },
+) {
+  return requestClient.put<PinganThreeCheckRecordApi.AgentRunResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/review-draft`, data,
   );
 }
 

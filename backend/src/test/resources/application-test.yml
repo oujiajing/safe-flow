@@ -9,6 +9,8 @@ spring:
     locations: classpath:db/migration,classpath:db/vendor/{vendor}
 
 pingan:
+  business-clock:
+    fixed-instant: 2026-09-10T04:00:00Z
   jwt:
     issuer: safeteam-portfolio-test
     secret: safeteam-portfolio-test-secret-at-least-32-bytes
