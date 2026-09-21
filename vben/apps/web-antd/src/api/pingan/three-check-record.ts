@@ -559,9 +559,7 @@ export async function uploadThreeCheckRecordAttachmentApi(
 
   return requestClient.post<
     PinganThreeCheckRecordApi.RecordDetail['attachments'][number]
-  >(`${recordsPath(moduleKey)}/${id}/attachments`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  >(`${recordsPath(moduleKey)}/${id}/attachments`, formData);
 }
 
 export async function deleteThreeCheckRecordAttachmentApi(

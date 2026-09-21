@@ -1663,6 +1663,9 @@ function attachmentKind(column: unknown) {
 
 function attachmentCellValue(record: Record<string, any>, column: unknown) {
   const fieldName = columnDataIndexFieldName(column);
+  if (isQuickShotHazardMediaColumn(column)) {
+    return record.videoPreviewUrl || record.imagePreviewUrl ? '已上传' : '';
+  }
   return fieldName ? String(record[fieldName] ?? '') : '';
 }
 
@@ -1697,13 +1700,6 @@ function attachmentPreviewFor(record: Record<string, any>, column: unknown) {
   const fieldName = columnDataIndexFieldName(column);
   const fieldValue = attachmentCellValue(record, column);
   if (isQuickShotHazardMediaColumn(column)) {
-    if (
-      fieldValue &&
-      !isThreeCheckAttachmentMissing(fieldValue) &&
-      shouldUseDirectAttachmentPreviewValue(fieldValue)
-    ) {
-      return resolveAttachmentPreviewUrl(fieldValue);
-    }
     return resolveAttachmentPreviewUrl(
       record.videoPreviewUrl || record.imagePreviewUrl,
     );
@@ -1759,14 +1755,6 @@ function shouldResolveAttachmentValue(value: string) {
   );
 }
 
-function shouldUseDirectAttachmentPreviewValue(value: string) {
-  return (
-    /^https?:\/\//i.test(value) ||
-    value.startsWith('/uploads/') ||
-    /^[A-Z_]+\|/.test(value) ||
-    /[\\/]/.test(value)
-  );
-}
 
 function detailAttachmentColumnsByKind(fileKind: 'IMAGE' | 'VIDEO') {
   return localDetailColumns.value.filter(
@@ -2325,6 +2313,14 @@ function createThreeCheckRecordPayload() {
   delete payload.department;
   delete payload.serialNo;
   delete payload.team;
+  if (
+    moduleRuntime.value.routeName === 'PinganQuickShot' &&
+    pendingCreateAttachments.hazardImage
+  ) {
+    // A browser-selected filename is not a persisted attachment. The actual
+    // attachment URL and status are populated only after the upload succeeds.
+    delete payload.hazardImage;
+  }
   if (isPointsFlowModule.value) {
     payload.pointsQuantity = Number(payload.pointsQuantity);
     payload.statusLabel = String(payload.pointsChange || '加分');
@@ -2505,7 +2501,15 @@ async function handleCreateMeeting() {
         status: resolveThreeCheckRecordStatus(),
         teamId,
       });
-      await uploadPendingCreateAttachments(createdRecord.id);
+      try {
+        await uploadPendingCreateAttachments(createdRecord.id);
+      } catch (error) {
+        message.error(
+          '记录已创建，但附件上传失败。请在详情中重新上传附件后再提交审核。',
+        );
+        await loadMeetings();
+        throw error;
+      }
       message.success(workbenchText.value.createSuccessText);
       createOpen.value = false;
       await loadMeetings();
