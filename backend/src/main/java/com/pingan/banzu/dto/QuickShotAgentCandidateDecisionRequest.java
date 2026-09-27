@@ -8,5 +8,7 @@ public record QuickShotAgentCandidateDecisionRequest(List<Item> decisions) {
       String decision,
       String editedHazardType,
       String editedDescription,
+      String editedRiskLevel,
+      List<String> editedMeasures,
       String reviewerNote) {}
 }

@@ -158,7 +158,7 @@ public class QuickShotAgentRunService {
     for (QuickShotAgentCandidateDecisionRequest.Item item : request.decisions()) {
       if (item == null || item.candidateId() == null || !candidates.containsKey(item.candidateId())) throw new BusinessException("候选不存在");
       saveDecision(run.runId, item.candidateId(), normalizeDecision(item.decision()), candidates.get(item.candidateId()),
-          item.editedHazardType(), item.editedDescription(), null, null, item.reviewerNote(), actor.userId());
+          item.editedHazardType(), item.editedDescription(), item.editedRiskLevel(), write(item.editedMeasures()), item.reviewerNote(), actor.userId());
     }
     run.status = "CANDIDATES_CONFIRMED";
     run.updatedAt = LocalDateTime.now();

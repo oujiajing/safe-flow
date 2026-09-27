@@ -134,7 +134,7 @@ export namespace PinganThreeCheckRecordApi {
     assessment?: { assessments?: Array<{ candidateId: string; assessment: AgentAssessment }>; knowledgeUsed?: boolean };
     assessmentId?: string;
     attachments: Array<{ attachmentId: string; imageIndex: number; mimeType?: string; sha256: string }>;
-    decisions: Array<{ candidateId: string; decision: AgentCandidateDecision; editedDescription?: string; editedHazardType?: string; reviewerNote?: string }>;
+    decisions: Array<{ candidateId: string; decision: AgentCandidateDecision; editedDescription?: string; editedHazardType?: string; editedRiskLevel?: string; editedMeasures?: string[]; reviewerNote?: string }>;
     errorCode?: string;
     errorMessage?: string;
     inputText?: string;
@@ -382,7 +382,7 @@ export async function getLatestQuickShotAgentRunApi(id: string) {
 export async function saveQuickShotAgentCandidateDecisionsApi(
   id: string,
   runId: string,
-  decisions: Array<{ candidateId: string; decision: PinganThreeCheckRecordApi.AgentCandidateDecision; editedDescription?: string; editedHazardType?: string; reviewerNote?: string }>,
+  decisions: Array<{ candidateId: string; decision: PinganThreeCheckRecordApi.AgentCandidateDecision; editedDescription?: string; editedHazardType?: string; editedRiskLevel?: string; editedMeasures?: string[]; reviewerNote?: string }>,
 ) {
   return requestClient.post<PinganThreeCheckRecordApi.AgentRunResponse>(
     `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/candidate-decisions`, { decisions },
@@ -559,7 +559,9 @@ export async function uploadThreeCheckRecordAttachmentApi(
 
   return requestClient.post<
     PinganThreeCheckRecordApi.RecordDetail['attachments'][number]
-  >(`${recordsPath(moduleKey)}/${id}/attachments`, formData);
+  >(`${recordsPath(moduleKey)}/${id}/attachments`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 }
 
 export async function deleteThreeCheckRecordAttachmentApi(

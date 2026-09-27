@@ -7,6 +7,8 @@ $ErrorActionPreference = 'Stop'
 $safeFlowRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $agentRoot = 'D:\1-project\safeguard-agent'
 $runtimeFile = Join-Path $safeFlowRoot '.env.agent-pilot.local'
+$logRoot = Join-Path $safeFlowRoot '.codex-run-logs'
+New-Item -ItemType Directory -Force -Path $logRoot | Out-Null
 $java = (Get-Command java.exe -ErrorAction Stop).Source
 $node = (Get-Command node.exe -ErrorAction Stop).Source
 
@@ -36,6 +38,18 @@ function Read-EnvFile([string]$Path) {
     }
   }
   return $values
+}
+
+function Wait-HostedAgent([string]$Token) {
+  $deadline = [DateTime]::UtcNow.AddSeconds(75)
+  do {
+    try {
+      $response = Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:9090/api/safeguard-agent/agent/v1/hosted/health' -Headers @{ 'X-Safeguard-Service-Token' = $Token } -TimeoutSec 5
+      if ($response.StatusCode -eq 200) { return }
+    } catch { }
+    Start-Sleep -Seconds 2
+  } while ([DateTime]::UtcNow -lt $deadline)
+  throw 'SafeGuard Agent hosted service did not become ready with the configured SAFEGUARD_SERVICE_TOKEN.'
 }
 
 $dbContainer = 'safeteam-portfolio-postgres'
@@ -88,10 +102,11 @@ $agentEnv = @{ SAFEGUARD_SERVICE_TOKEN=$runtime['SAFEGUARD_SERVICE_TOKEN']; SAFE
 $safeFlowEnv = @{ PINGAN_DB_USERNAME=$runtime['PINGAN_DB_USERNAME']; PINGAN_DB_PASSWORD=$runtime['PINGAN_DB_PASSWORD']; PINGAN_DB_URL=$runtime['PINGAN_DB_URL']; PINGAN_JWT_SECRET=$runtime['PINGAN_JWT_SECRET']; SAFEGUARD_SERVICE_TOKEN=$runtime['SAFEGUARD_SERVICE_TOKEN']; PINGAN_SAFEGUARD_AGENT_ENABLED='true'; PINGAN_SAFEGUARD_AGENT_ASSESSMENT_ENABLED='true'; PINGAN_SAFEGUARD_AGENT_REVIEW_DRAFT_ENABLED='true'; PINGAN_SAFEGUARD_AGENT_WRITEBACK_ENABLED='false' }
 
 foreach ($key in $agentEnv.Keys) { [Environment]::SetEnvironmentVariable($key, $agentEnv[$key], 'Process') }
-Start-Process -FilePath $java -ArgumentList '-jar',(Join-Path $agentRoot 'bootstrap\target\bootstrap-0.0.1-SNAPSHOT.jar'),'--spring.profiles.active=local','--server.port=9090' -WorkingDirectory $agentRoot -WindowStyle Hidden | Out-Null
+Start-Process -FilePath $java -ArgumentList '-jar',(Join-Path $agentRoot 'bootstrap\target\bootstrap-0.0.1-SNAPSHOT.jar'),'--spring.profiles.active=local','--server.port=9090' -WorkingDirectory $agentRoot -RedirectStandardOutput (Join-Path $logRoot 'safeguard-agent.out.log') -RedirectStandardError (Join-Path $logRoot 'safeguard-agent.err.log') -WindowStyle Hidden | Out-Null
+Wait-HostedAgent $runtime['SAFEGUARD_SERVICE_TOKEN']
 foreach ($key in $safeFlowEnv.Keys) { [Environment]::SetEnvironmentVariable($key, $safeFlowEnv[$key], 'Process') }
-Start-Process -FilePath $java -ArgumentList '-jar',(Join-Path $safeFlowRoot 'backend\target\banzu-backend-0.1.0-SNAPSHOT.jar'),'--spring.profiles.active=local','--server.port=28080' -WorkingDirectory (Join-Path $safeFlowRoot 'backend') -WindowStyle Hidden | Out-Null
-Start-Process -FilePath $node -ArgumentList (Join-Path $agentRoot 'frontend\node_modules\vite\bin\vite.js'),'--host','127.0.0.1','--port','5173','--strictPort' -WorkingDirectory (Join-Path $agentRoot 'frontend') -WindowStyle Hidden | Out-Null
-Start-Process -FilePath $node -ArgumentList (Join-Path $safeFlowRoot 'vben\node_modules\vite\bin\vite.js'),'--host','127.0.0.1','--port','15666','--strictPort' -WorkingDirectory (Join-Path $safeFlowRoot 'vben\apps\web-antd') -WindowStyle Hidden | Out-Null
+Start-Process -FilePath $java -ArgumentList '-jar',(Join-Path $safeFlowRoot 'backend\target\banzu-backend-0.1.0-SNAPSHOT.jar'),'--spring.profiles.active=local','--server.port=28080' -WorkingDirectory (Join-Path $safeFlowRoot 'backend') -RedirectStandardOutput (Join-Path $logRoot 'safe-flow-backend.out.log') -RedirectStandardError (Join-Path $logRoot 'safe-flow-backend.err.log') -WindowStyle Hidden | Out-Null
+Start-Process -FilePath $node -ArgumentList (Join-Path $agentRoot 'frontend\node_modules\vite\bin\vite.js'),'--host','127.0.0.1','--port','5173','--strictPort' -WorkingDirectory (Join-Path $agentRoot 'frontend') -RedirectStandardOutput (Join-Path $logRoot 'safeguard-frontend.out.log') -RedirectStandardError (Join-Path $logRoot 'safeguard-frontend.err.log') -WindowStyle Hidden | Out-Null
+Start-Process -FilePath $node -ArgumentList (Join-Path $safeFlowRoot 'vben\node_modules\vite\bin\vite.js'),'--host','127.0.0.1','--port','15666','--strictPort' -WorkingDirectory (Join-Path $safeFlowRoot 'vben\apps\web-antd') -RedirectStandardOutput (Join-Path $logRoot 'safe-flow-frontend.out.log') -RedirectStandardError (Join-Path $logRoot 'safe-flow-frontend.err.log') -WindowStyle Hidden | Out-Null
 
 Write-Host '已启动：safeguard-agent 9090/5173，safe-flow 28080/15666；AI 写回保持关闭。'

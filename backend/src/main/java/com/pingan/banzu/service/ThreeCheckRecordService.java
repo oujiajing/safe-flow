@@ -1158,6 +1158,10 @@ public class ThreeCheckRecordService {
     if (!canAccess(record, user, orgs)) {
       throw new SecurityException("无权修改该一班三查记录");
     }
+    if ("quick-shot".equals(module.moduleKey())
+        && ThreeCheckStatus.REVIEWED.equals(normalizeQuickShotLegacyStatus(record.status))) {
+      throw new BusinessException("审核通过的随手拍不可直接修改，请先撤回后再修改");
+    }
     requireVersionMatch(record, request.version(), true);
     validateOrganizationRequest(module, request);
     ensureHistoricalBusinessDateUnchanged(module, record, request.businessDate());
