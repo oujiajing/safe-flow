@@ -2862,6 +2862,18 @@ function quickShotAgentSuggestedMeasures() {
     .join('\n');
 }
 
+function quickShotAgentSuggestedAcceptanceCriteria() {
+  return quickShotRunCandidates.value
+    .filter((candidate) => quickShotAgentCandidateDecisions[candidate.candidateId] !== 'REJECTED')
+    .flatMap((candidate) =>
+      quickShotAcceptanceCriteria(
+        quickShotCandidateAssessment(candidate.candidateId)?.acceptanceCriteria,
+      ),
+    )
+    .filter((item, index, values) => values.indexOf(item) === index)
+    .join('\n');
+}
+
 function quickShotAiRectificationMeasures() {
   const savedMeasures = quickShotMeasures(
     currentThreeCheckDetail.value?.payload?.rectificationMeasures,
@@ -2995,7 +3007,7 @@ function escapeRegExp(value: string) {
 }
 
 async function restoreQuickShotAgentRun(recordId: string | number) {
-  const restoredRun = await getLatestQuickShotAgentRunApi(recordId);
+  const restoredRun = await getLatestQuickShotAgentRunApi(String(recordId));
   if (!restoredRun) return false;
   quickShotAgentRun.value = restoredRun;
   quickShotAgentInputText.value = restoredRun.inputText ?? quickShotAgentInputText.value;
@@ -3082,13 +3094,17 @@ async function saveQuickShotCandidateDecisions() {
 
 async function syncQuickShotMeasuresToBasicInfo(record: PinganThreeCheckRecordApi.RecordDetail) {
   const reviewedMeasures = quickShotAgentSuggestedMeasures();
-  if (!reviewedMeasures) return false;
+  const reviewedDescription = quickShotAgentSuggestedDescription();
+  const acceptanceCriteria = quickShotAgentSuggestedAcceptanceCriteria();
+  if (!reviewedMeasures && !reviewedDescription && !acceptanceCriteria) return false;
+  const updates: Record<string, unknown> = {};
+  if (reviewedMeasures) updates.rectificationMeasures = reviewedMeasures;
+  if (reviewedDescription) updates.hazardDescription = reviewedDescription;
+  if (acceptanceCriteria) updates.acceptanceCriteria = acceptanceCriteria;
   currentThreeCheckDetail.value = await updateThreeCheckRecordApi(
     threeCheckModuleKey.value,
     record.id,
-    createThreeCheckRecordUpdatePayloadFromDetail(record, {
-      rectificationMeasures: reviewedMeasures,
-    }) as PinganThreeCheckRecordApi.RecordPayload,
+    createThreeCheckRecordUpdatePayloadFromDetail(record, updates) as PinganThreeCheckRecordApi.RecordPayload,
   );
   seedThreeCheckDetailEditForm();
   return true;
@@ -3122,7 +3138,7 @@ async function saveQuickShotReviewDraft() {
   try {
     quickShotAgentRun.value = await saveQuickShotAgentReviewDraftApi(record.id, run.runId, { reviewerNote: quickShotAgentReviewerNote.value, items: quickShotAgentDecisionPayload() });
     await syncQuickShotMeasuresToBasicInfo(record);
-    message.success('审核草稿已保存，整改措施已同步到基本信息；随手拍状态未改变');
+    message.success('审核草稿已保存，隐患描述、整改措施和验收要求已同步到基本信息；随手拍状态未改变');
   } catch (error) { message.error(error instanceof Error ? error.message : '保存审核草稿失败'); }
   finally { quickShotAgentRunLoading.value = false; }
 }
@@ -3437,19 +3453,48 @@ function seedQuickShotWorkflowActionForm(
   });
   const payload = (record.payload ?? {}) as Record<string, unknown>;
   for (const field of quickShotWorkflowFieldGroups[action] ?? []) {
+    let value = payload[field.dataIndex];
+    if (action === 'APPROVE' && field.dataIndex === 'hazardDescription' && !String(value ?? '').trim()) {
+      value = record.hazardDescription ?? record.hazardTitle ?? record.description;
+      if (!String(value ?? '').trim() && currentThreeCheckDetail.value?.id === String(record.id)) {
+        value = currentThreeCheckDetail.value.payload?.hazardDescription;
+      }
+      if (!String(value ?? '').trim() && currentThreeCheckDetail.value?.id === String(record.id)) {
+        value = quickShotAgentSuggestedDescription();
+      }
+    }
+    if (action === 'APPROVE' && field.dataIndex === 'rectificationMeasures' && !String(value ?? '').trim()) {
+      value = record.rectificationMeasures;
+      if (!String(value ?? '').trim() && currentThreeCheckDetail.value?.id === String(record.id)) {
+        value = quickShotAgentSuggestedMeasures();
+      }
+    }
     quickShotWorkflowActionForm[field.dataIndex] = String(
-      payload[field.dataIndex] ?? '',
+      value ?? '',
     );
   }
 }
 
-function openQuickShotWorkflowAction(
+async function openQuickShotWorkflowAction(
   record: Record<string, any>,
   action: PinganThreeCheckRecordApi.QuickShotWorkflowAction,
 ) {
-  quickShotWorkflowActionRecord.value = record;
+  let actionRecord = record;
+  try {
+    const detail = await getThreeCheckRecordDetailApi(
+      threeCheckModuleKey.value,
+      String(record.id),
+    );
+    actionRecord = { ...record, ...detail } as unknown as Record<string, any>;
+    if (currentThreeCheckDetail.value?.id === String(record.id)) {
+      currentThreeCheckDetail.value = detail;
+    }
+  } catch {
+    // 列表快照仍可继续打开，表单初始化会使用当前详情和 Agent 结果兜底。
+  }
+  quickShotWorkflowActionRecord.value = actionRecord;
   quickShotWorkflowAction.value = action;
-  seedQuickShotWorkflowActionForm(record, action);
+  seedQuickShotWorkflowActionForm(actionRecord, action);
   quickShotWorkflowActionOpen.value = true;
 }
 

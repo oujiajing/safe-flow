@@ -31,6 +31,7 @@ public record HazardRectificationOrderDetailResponse(
     String rectifiedAt,
     String rectificationDescription,
     String rectificationAfterPhoto,
+    String acceptanceRequirement,
     Long acceptanceUserId,
     String acceptanceUserName,
     Long acceptanceDepartmentId,

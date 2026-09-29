@@ -30,6 +30,7 @@ public class HazardRectificationOrder {
   public LocalDateTime rectifiedAt;
   public String rectificationDescription;
   public String rectificationAfterPhoto;
+  public String acceptanceRequirement;
   public Long acceptanceUserId;
   public Long acceptanceDepartmentId;
   public LocalDateTime acceptanceAt;

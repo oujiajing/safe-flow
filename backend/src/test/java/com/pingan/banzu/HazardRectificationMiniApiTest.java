@@ -102,6 +102,22 @@ class HazardRectificationMiniApiTest {
   }
 
   @Test
+  void rectificationAgentEndpointsRequireAuthenticatedBusinessUser() throws Exception {
+    mockMvc.perform(post("/api/pingan/hazard-rectification/orders/1/agent-review")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"orderVersion\":1,\"criteria\":[\"护栏连续\"]}"))
+        .andExpect(status().isUnauthorized());
+    mockMvc.perform(post("/api/pingan/hazard-rectification/orders/1/agent-summary")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"orderVersion\":1}"))
+        .andExpect(status().isUnauthorized());
+    mockMvc.perform(post("/api/pingan/hazard-rectification/orders/1/agent-summary/edit")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"summaryVersion\":1,\"orderVersion\":1,\"editedJson\":\"{}\"}"))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
   void miniSafetyCheckSubmitCreatesUnifiedRectificationOrderVisibleToPcEndpoint()
       throws Exception {
     String token = login("admin", "SAFE_TEST_PASSWORD");
@@ -295,9 +311,15 @@ class HazardRectificationMiniApiTest {
                 Map.of(
                     "action", "REQUEST_ACCEPTANCE",
                     "version", rectified.path("version").asInt(),
-                    "payload", Map.of("acceptanceUserId", 3, "acceptanceRemark", "申请验收")))
+                    "payload",
+                        Map.of(
+                            "acceptanceUserId", 3,
+                            "acceptanceRequirement", "警示标识完整、清晰且固定牢靠",
+                            "acceptanceRemark", "申请验收")))
             .path("data");
     assertThat(pendingAcceptance.path("status").asText()).isEqualTo("PENDING_ACCEPTANCE");
+    assertThat(pendingAcceptance.path("acceptanceRequirement").asText())
+        .isEqualTo("警示标识完整、清晰且固定牢靠");
 
     JsonNode closed =
         postJson(
@@ -306,9 +328,15 @@ class HazardRectificationMiniApiTest {
                 Map.of(
                     "action", "ACCEPT",
                     "version", pendingAcceptance.path("version").asInt(),
-                    "payload", Map.of("acceptanceUserId", 3, "acceptanceRemark", "验收通过")))
+                    "payload",
+                        Map.of(
+                            "acceptanceUserId", 3,
+                            "acceptanceRequirement", "警示标识完整、清晰且固定牢靠",
+                            "acceptanceRemark", "验收通过")))
             .path("data");
     assertThat(closed.path("status").asText()).isEqualTo("CLOSED");
+    assertThat(closed.path("acceptanceRequirement").asText())
+        .isEqualTo("警示标识完整、清晰且固定牢靠");
     assertThat(closed.path("flowLogs")).hasSize(5);
   }
 

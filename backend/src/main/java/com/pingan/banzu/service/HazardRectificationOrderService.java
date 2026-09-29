@@ -491,7 +491,7 @@ public class HazardRectificationOrderService {
             "image",
             "imageUpload");
     item.beforeVideo = sourceMediaValue(record, line.item(), "VIDEO", "beforeVideo", "video", "videoUpload");
-    item.defaultFollowUpPlan = text(line.item().get("defaultFollowUpPlan"));
+    item.defaultFollowUpPlan = firstText(line.item(), "rectificationMeasures", "defaultFollowUpPlan");
     item.sourceSnapshotJson = writePayload(line.item());
     item.rectificationStatus = order.status;
     item.sortOrder = integerValue(line.item().get("sortOrder"), line.index());
@@ -567,7 +567,7 @@ public class HazardRectificationOrderService {
             : isVideoMedia(hazardMedia)
             ? Objects.requireNonNullElse(hazardMedia, firstText(payload, "beforeVideo", "video", "videoUpload"))
             : firstText(payload, "beforeVideo", "video", "videoUpload");
-    item.defaultFollowUpPlan = text(payload.get("defaultFollowUpPlan"));
+    item.defaultFollowUpPlan = firstText(payload, "rectificationMeasures", "defaultFollowUpPlan");
     item.sourceSnapshotJson = writePayload(payload);
     item.rectificationStatus = order.status;
     item.sortOrder = 0;
@@ -901,6 +901,7 @@ public class HazardRectificationOrderService {
         formatDateTime(order.rectifiedAt),
         order.rectificationDescription,
         rectificationAfterPhotoUrl(order),
+        order.acceptanceRequirement,
         order.acceptanceUserId,
         userName(users, order.acceptanceUserId),
         order.acceptanceDepartmentId,
@@ -1070,6 +1071,7 @@ public class HazardRectificationOrderService {
         }
         validateAcceptanceUser(order, acceptanceUserId);
         order.acceptanceUserId = acceptanceUserId;
+        order.acceptanceRequirement = firstText(payload, "acceptanceRequirement");
       }
       case "ACCEPT" -> {
         Long selectedAcceptanceUserId = longValue(payload.get("acceptanceUserId"));
@@ -1084,6 +1086,10 @@ public class HazardRectificationOrderService {
         }
         order.acceptanceAt = LocalDateTime.now();
         order.acceptanceResult = "PASS";
+        String acceptanceRequirement = firstText(payload, "acceptanceRequirement");
+        if (!isBlank(acceptanceRequirement)) {
+          order.acceptanceRequirement = acceptanceRequirement;
+        }
         order.acceptanceRemark = firstText(payload, "acceptanceRemark", "remark");
       }
       case "REJECT_ACCEPTANCE" -> {
