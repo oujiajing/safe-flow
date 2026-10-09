@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TableColumnsType } from 'ant-design-vue';
+
 import type { PinganHazardRectificationOrderApi } from '#/api/pingan/hazard-rectification-order';
 import type { PinganPreShiftMeetingApi } from '#/api/pingan/pre-shift-meeting';
 import type { SystemManagementApi } from '#/api/system-management/types';
@@ -20,15 +21,14 @@ import {
   Select,
   Table,
   Tag,
-  Timeline,
 } from 'ant-design-vue';
 
 import {
   actionHazardRectificationOrderApi,
   batchDeleteHazardRectificationOrdersApi,
   confirmHazardRectificationSummaryApi,
-  editHazardRectificationSummaryApi,
   createHazardRectificationOrderApi,
+  editHazardRectificationSummaryApi,
   getHazardRectificationOrderDetailApi,
   getHazardRectificationOrdersApi,
   reviewHazardRectificationOrderWithAgentApi,
@@ -40,7 +40,7 @@ import {
   getPinganUsersApi,
 } from '#/api/pingan/pre-shift-meeting';
 import { getLatestQuickShotAgentRunApi } from '#/api/pingan/three-check-record';
-import StatusFilterActions from '#/views/pingan/shared/StatusFilterActions.vue';
+import { resolveAttachmentPreviewUrl } from '#/views/pingan/pre-shift-meeting/pre-shift-meeting.data';
 import {
   canAcceptHazardRectificationOrder,
   canCreateThreeCheckRecord,
@@ -48,12 +48,12 @@ import {
   canRectifyHazardRectificationOrder,
   canVoidHazardRectificationOrder,
 } from '#/views/pingan/pre-shift-meeting/pre-shift-meeting.view-state';
-import { resolveAttachmentPreviewUrl } from '#/views/pingan/pre-shift-meeting/pre-shift-meeting.data';
 import {
   getVisiblePinganOrganizationFilterKeys,
   isPinganOrganizationFilterLocked,
   resolveScopedPinganOrganizationDefaults,
 } from '#/views/pingan/shared/organization-filter-permission';
+import StatusFilterActions from '#/views/pingan/shared/StatusFilterActions.vue';
 
 type OrgNode = SystemManagementApi.OrganizationNode;
 
@@ -111,10 +111,10 @@ const statusTone: Record<string, string> = {
 };
 
 const actionLabels: Record<PinganHazardRectificationOrderApi.Action, string> = {
-  ACCEPT: '验收通过',
+  ACCEPT: '审核验收',
   CANCEL: '作废',
   ISSUE_RECTIFICATION: '下发整改',
-  MARK_RECTIFIED: '整改完成',
+  MARK_RECTIFIED: '提交整改结果',
   REJECT_ACCEPTANCE: '验收驳回',
   REQUEST_ACCEPTANCE: '提交验收',
 };
@@ -153,6 +153,10 @@ const rows = ref<PinganHazardRectificationOrderApi.OrderRow[]>([]);
 const selectedOrderRowKeys = ref<PinganHazardRectificationOrderApi.Id[]>([]);
 const total = ref(0);
 const detailOpen = ref(false);
+const activeDetailTab = ref('hazard');
+const historyActionFilter = ref('all');
+const historyOperatorFilter = ref('all');
+const historyKeyword = ref('');
 const currentOrder = ref<PinganHazardRectificationOrderApi.OrderDetail>();
 const agentReviewLoading = ref(false);
 const agentRectificationDescriptionLoading = ref(false);
@@ -160,9 +164,12 @@ const agentSummaryLoading = ref(false);
 const agentSummaryConfirming = ref(false);
 const agentSummaryEditing = ref(false);
 const agentSummaryEditJson = ref('');
-const agentReview = ref<PinganHazardRectificationOrderApi.AgentReviewResponse>();
-const agentSummary = ref<PinganHazardRectificationOrderApi.AgentSummaryResponse>();
+const agentReview =
+  ref<PinganHazardRectificationOrderApi.AgentReviewResponse>();
+const agentSummary =
+  ref<PinganHazardRectificationOrderApi.AgentSummaryResponse>();
 const actionOpen = ref(false);
+const actionReturnToDetail = ref(false);
 const currentAction = ref<PinganHazardRectificationOrderApi.Action>();
 const rectifiedPhotoInputRef = ref<HTMLInputElement>();
 const actionForm = reactive({
@@ -252,19 +259,180 @@ const itemColumns: TableColumnsType<PinganHazardRectificationOrderApi.OrderItem>
 
 const availableActions = computed(() => {
   const status = currentOrder.value?.status;
-  const actions =
-    status === 'PENDING_ASSIGN'
-      ? ['ISSUE_RECTIFICATION', 'CANCEL']
-      : status === 'PENDING_RECTIFY'
-        ? ['MARK_RECTIFIED', 'CANCEL']
-        : status === 'RECTIFIED'
-          ? ['REQUEST_ACCEPTANCE', 'CANCEL']
-          : status === 'PENDING_ACCEPTANCE'
-            ? ['ACCEPT', 'REJECT_ACCEPTANCE', 'CANCEL']
-            : [];
+  let actions: string[] = [];
+  switch (status) {
+    case 'PENDING_ACCEPTANCE': {
+      actions = ['ACCEPT', 'CANCEL'];
+
+      break;
+    }
+    case 'PENDING_ASSIGN': {
+      actions = ['ISSUE_RECTIFICATION', 'CANCEL'];
+
+      break;
+    }
+    case 'PENDING_RECTIFY': {
+      actions = ['MARK_RECTIFIED', 'CANCEL'];
+
+      break;
+    }
+    case 'RECTIFIED': {
+      actions = ['REQUEST_ACCEPTANCE', 'CANCEL'];
+
+      break;
+    }
+    // No default
+  }
   return actions.filter((action) =>
     canPerformOrderAction(action as PinganHazardRectificationOrderApi.Action),
   );
+});
+const primaryHazardItem = computed(() => currentOrder.value?.items?.[0]);
+const rectificationSubmitLog = computed(() =>
+  currentOrder.value?.flowLogs.find((log) => log.action === 'MARK_RECTIFIED'),
+);
+const acceptanceSubmitLog = computed(() =>
+  currentOrder.value?.flowLogs.find(
+    (log) => log.action === 'REQUEST_ACCEPTANCE',
+  ),
+);
+const rectificationSubmitStatusLabel = computed(() => {
+  const status = currentOrder.value?.status;
+  if (!currentOrder.value?.rectifiedAt) return '待提交';
+  if (status === 'RECTIFIED') return '待验收时提交';
+  if (status === 'PENDING_ACCEPTANCE') return '已提交验收';
+  if (status === 'CLOSED') return '已提交 / 已完成';
+  return '已完成';
+});
+const historyActionOptions = computed(() => {
+  const options = new Map<string, string>();
+  for (const log of currentOrder.value?.flowLogs ?? [])
+    options.set(log.action, log.actionLabel);
+  return [
+    { label: '全部类型', value: 'all' },
+    ...Array.from(options, ([value, label]) => ({ label, value })),
+  ];
+});
+const historyOperatorOptions = computed(() => [
+  { label: '全部操作人', value: 'all' },
+  ...Array.from(
+    new Set(
+      (currentOrder.value?.flowLogs ?? [])
+        .map((log) => log.operatorName || '系统')
+        .filter(Boolean),
+    ),
+    (value) => ({ label: value, value }),
+  ),
+]);
+const filteredFlowLogs = computed(() => {
+  const keyword = historyKeyword.value.trim().toLocaleLowerCase();
+  return (currentOrder.value?.flowLogs ?? []).filter((log) => {
+    if (
+      historyActionFilter.value !== 'all' &&
+      log.action !== historyActionFilter.value
+    )
+      return false;
+    if (
+      historyOperatorFilter.value !== 'all' &&
+      (log.operatorName || '系统') !== historyOperatorFilter.value
+    )
+      return false;
+    if (!keyword) return true;
+    return [
+      log.actionLabel,
+      log.remark,
+      log.operatorName,
+      log.toStatusLabel,
+      historyLogDescription(log),
+    ].some((value) => value?.toLocaleLowerCase().includes(keyword));
+  });
+});
+const detailTabs = [
+  { key: 'hazard', label: '隐患与证据' },
+  { key: 'result', label: '整改结果' },
+  { key: 'acceptance', label: '验收结论' },
+  { key: 'history', label: '处理记录' },
+  { key: 'basic', label: '基础信息' },
+];
+const detailStatusMeta = computed(() => {
+  const status = currentOrder.value?.status;
+  const map: Record<string, { icon: string; subtitle: string; tone: string }> =
+    {
+      CANCELLED: {
+        icon: 'lucide:circle-slash-2',
+        subtitle: '流程已终止',
+        tone: 'neutral',
+      },
+      CLOSED: {
+        icon: 'lucide:badge-check',
+        subtitle: '按期完成',
+        tone: 'success',
+      },
+      PENDING_ACCEPTANCE: {
+        icon: 'lucide:shield-check',
+        subtitle: '等待人工验收',
+        tone: 'blue',
+      },
+      PENDING_ASSIGN: {
+        icon: 'lucide:clipboard-list',
+        subtitle: '待明确整改任务',
+        tone: 'warning',
+      },
+      PENDING_RECTIFY: {
+        icon: 'lucide:hard-hat',
+        subtitle: '整改任务执行中',
+        tone: 'danger',
+      },
+      RECTIFIED: {
+        icon: 'lucide:image-check',
+        subtitle: '整改结果待提交验收',
+        tone: 'blue',
+      },
+    };
+  return (
+    map[status ?? ''] ?? {
+      icon: 'lucide:clipboard-list',
+      subtitle: '待明确整改任务',
+      tone: 'warning',
+    }
+  );
+});
+const actionCardMeta = computed(() => {
+  const action = currentAction.value;
+  if (action === 'ISSUE_RECTIFICATION') {
+    return {
+      icon: 'lucide:clipboard-check',
+      title: '下发整改',
+      badge: '待下发',
+      description: '明确责任人、整改期限与验收标准',
+      submit: '下发整改',
+    };
+  }
+  if (action === 'MARK_RECTIFIED') {
+    return {
+      icon: 'lucide:cloud-upload',
+      title: '提交整改结果',
+      badge: '整改中',
+      description: '提交整改事实与现场证据',
+      submit: '提交整改结果',
+    };
+  }
+  if (action === 'ACCEPT' || action === 'REJECT_ACCEPTANCE') {
+    return {
+      icon: 'lucide:shield-check',
+      title: '审核验收',
+      badge: '待验收',
+      description: '核对整改证据并作出人工验收结论',
+      submit: action === 'ACCEPT' ? '验收通过' : '退回整改',
+    };
+  }
+  return {
+    icon: 'lucide:send',
+    title: action ? actionLabels[action] : '工单操作',
+    badge: '',
+    description: '完成当前流程操作',
+    submit: action ? actionLabels[action] : '确定',
+  };
 });
 const hideSourceSequenceAndRiskColumns = computed(() =>
   ['QUICK_SHOT', 'SAFETY_INSPECTION'].includes(
@@ -389,7 +557,7 @@ function handleBatchDelete() {
   if (!canDeleteOrder.value) {
     return;
   }
-  if (!selectedOrderRowKeys.value.length) {
+  if (selectedOrderRowKeys.value.length === 0) {
     message.warning('请选择要删除的隐患整改工单');
     return;
   }
@@ -420,10 +588,92 @@ async function loadResponsibleUsers() {
 
 async function openDetail(id: string) {
   currentOrder.value = await getHazardRectificationOrderDetailApi(id);
+  activeDetailTab.value = 'hazard';
+  historyActionFilter.value = 'all';
+  historyOperatorFilter.value = 'all';
+  historyKeyword.value = '';
   agentReview.value = undefined;
   agentSummary.value = undefined;
   agentSummaryEditJson.value = '';
   detailOpen.value = true;
+}
+
+function historyLogDescription(log: PinganHazardRectificationOrderApi.FlowLog) {
+  if (log.remark?.trim()) return log.remark.trim();
+  const descriptions: Record<string, string> = {
+    ACCEPT: '现场确认整改到位，验收通过。',
+    ISSUE_RECTIFICATION: '下发整改任务，明确整改要求和期限。',
+    MARK_RECTIFIED: '上传整改结果并完成现场整改。',
+    REQUEST_ACCEPTANCE: '提交整改结果，申请验收。',
+  };
+  return (
+    descriptions[log.action] ||
+    `${log.fromStatusLabel || '开始'} → ${log.toStatusLabel}`
+  );
+}
+
+function exportHistoryRecords() {
+  if (!currentOrder.value) return;
+  const csvCell = (value: unknown) =>
+    `"${String(value ?? '').replaceAll('"', '""')}"`;
+  const rows = filteredFlowLogs.value.map((log) =>
+    [
+      log.createdAt,
+      log.actionLabel,
+      historyLogDescription(log),
+      log.operatorName || '系统',
+      log.toStatusLabel,
+    ]
+      .map((value) => csvCell(value))
+      .join(','),
+  );
+  const csv = [
+    ['时间', '处理内容', '说明', '操作人', '状态']
+      .map((value) => csvCell(value))
+      .join(','),
+    ...rows,
+  ].join('\n');
+  const url = URL.createObjectURL(
+    new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }),
+  );
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${currentOrder.value.orderNo}_处理记录.csv`;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  message.success('处理记录已导出');
+}
+
+async function copyCurrentOrderNo() {
+  const orderNo = currentOrder.value?.orderNo;
+  if (!orderNo) return;
+  try {
+    await navigator.clipboard.writeText(orderNo);
+  } catch {
+    const textarea = document.createElement('textarea');
+    textarea.value = orderNo;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.append(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    textarea.remove();
+  }
+  message.success('工单编号已复制');
+}
+
+function completedOnTime() {
+  const deadline = currentOrder.value?.rectificationDeadline;
+  const completedAt = currentOrder.value?.rectifiedAt;
+  if (!deadline || !completedAt) return false;
+  return completedAt <= deadline;
+}
+
+function internalOrderNumber(orderNo?: string) {
+  if (!orderNo) return '-';
+  return orderNo.replace(/^HR-/, 'IS-');
 }
 
 function resetActionForm() {
@@ -451,6 +701,9 @@ async function openAction(action: PinganHazardRectificationOrderApi.Action) {
       currentOrder.value?.rectificationDepartmentId ??
       currentOrder.value?.departmentId;
     actionForm.rectificationRequirement = sourceRectificationMeasures();
+    actionForm.acceptanceRequirement = numberedListText(
+      sourceAcceptanceCriteria(),
+    );
   }
   if (
     action === 'ACCEPT' ||
@@ -463,9 +716,12 @@ async function openAction(action: PinganHazardRectificationOrderApi.Action) {
     actionForm.acceptanceUserId = currentOrder.value?.acceptanceUserId
       ? String(currentOrder.value.acceptanceUserId)
       : undefined;
-    actionForm.acceptanceRequirement = currentOrder.value?.acceptanceRequirement?.trim()
-      ? numberedListText(splitListText(currentOrder.value.acceptanceRequirement))
-      : numberedListText(sourceAcceptanceCriteria());
+    actionForm.acceptanceRequirement =
+      currentOrder.value?.acceptanceRequirement?.trim()
+        ? numberedListText(
+            splitListText(currentOrder.value.acceptanceRequirement),
+          )
+        : numberedListText(sourceAcceptanceCriteria());
     if (
       !actionForm.acceptanceRequirement &&
       currentOrder.value?.sourceType === 'QUICK_SHOT' &&
@@ -480,15 +736,18 @@ async function openAction(action: PinganHazardRectificationOrderApi.Action) {
             .filter((decision) => decision.decision !== 'REJECTED')
             .map((decision) => decision.candidateId),
         );
-        const criteria = (run?.assessment?.assessments ?? []).flatMap((item) => {
-          if (acceptedIds.size && !acceptedIds.has(item.candidateId)) return [];
-          const value = item.assessment.acceptanceCriteria;
-          return Array.isArray(value)
-            ? value
-            : typeof value === 'string'
-              ? value.split(/[；;\n]/)
-              : [];
-        });
+        const criteria = (run?.assessment?.assessments ?? []).flatMap(
+          (item) => {
+            if (acceptedIds.size > 0 && !acceptedIds.has(item.candidateId))
+              return [];
+            const value = item.assessment.acceptanceCriteria;
+            return Array.isArray(value)
+              ? value
+              : (typeof value === 'string'
+                ? value.split(/[；;\n]/)
+                : []);
+          },
+        );
         actionForm.acceptanceRequirement = numberedListText(criteria);
       } catch {
         // Agent 历史不可用时保留人工填写入口，不阻塞原验收流程。
@@ -496,7 +755,15 @@ async function openAction(action: PinganHazardRectificationOrderApi.Action) {
     }
   }
   currentAction.value = action;
+  actionReturnToDetail.value = detailOpen.value;
+  detailOpen.value = false;
   actionOpen.value = true;
+}
+
+function closeActionCard() {
+  actionOpen.value = false;
+  if (actionReturnToDetail.value) detailOpen.value = true;
+  actionReturnToDetail.value = false;
 }
 
 function triggerRectifiedPhotoUpload() {
@@ -593,7 +860,7 @@ function findOrganizationPath(
   for (const node of nodes) {
     if (String(node.id) === String(id)) return [node];
     const childPath = findOrganizationPath(node.children ?? [], id);
-    if (childPath.length) return [node, ...childPath];
+    if (childPath.length > 0) return [node, ...childPath];
   }
   return [];
 }
@@ -833,8 +1100,21 @@ function actionRequiresAcceptanceUser() {
 
 function actionPayload() {
   switch (currentAction.value) {
-    case 'ISSUE_RECTIFICATION':
+    case 'ACCEPT': {
       return {
+        acceptanceRequirement: actionForm.acceptanceRequirement,
+        acceptanceRemark: actionForm.acceptanceRemark,
+        acceptanceUserId: selectedAcceptanceUserId(),
+      };
+    }
+    case 'CANCEL': {
+      return {
+        cancelReason: actionForm.cancelReason,
+      };
+    }
+    case 'ISSUE_RECTIFICATION': {
+      return {
+        acceptanceRequirement: actionForm.acceptanceRequirement,
         acceptanceUserId: selectedAcceptanceUserId(),
         rectificationDepartmentId: actionForm.rectificationDepartmentId,
         rectificationDeadline: actionForm.rectificationDeadline,
@@ -842,35 +1122,30 @@ function actionPayload() {
         rectificationResponsibleUserId:
           selectedRectificationResponsibleUserId(),
       };
-    case 'MARK_RECTIFIED':
+    }
+    case 'MARK_RECTIFIED': {
       return {
         afterPhoto: actionForm.afterPhoto,
         rectificationDescription: actionForm.rectificationDescription,
       };
-    case 'REQUEST_ACCEPTANCE':
+    }
+    case 'REJECT_ACCEPTANCE': {
+      return {
+        acceptanceUserId: selectedAcceptanceUserId(),
+        rejectReason: actionForm.rejectReason,
+      };
+    }
+    case 'REQUEST_ACCEPTANCE': {
       return {
         acceptanceDepartmentId: actionForm.acceptanceDepartmentId,
         acceptanceRequirement: actionForm.acceptanceRequirement,
         acceptanceRemark: actionForm.acceptanceRemark,
         acceptanceUserId: selectedAcceptanceUserId(),
       };
-    case 'ACCEPT':
-      return {
-        acceptanceRequirement: actionForm.acceptanceRequirement,
-        acceptanceRemark: actionForm.acceptanceRemark,
-        acceptanceUserId: selectedAcceptanceUserId(),
-      };
-    case 'REJECT_ACCEPTANCE':
-      return {
-        acceptanceUserId: selectedAcceptanceUserId(),
-        rejectReason: actionForm.rejectReason,
-      };
-    case 'CANCEL':
-      return {
-        cancelReason: actionForm.cancelReason,
-      };
-    default:
+    }
+    default: {
       return {};
+    }
   }
 }
 
@@ -890,14 +1165,26 @@ function cleanNumberedItem(value: string) {
     .trim();
 }
 
+function compactStrings(values: Array<string | undefined>): string[] {
+  return values.filter(
+    (value): value is string =>
+      typeof value === 'string' && value.length > 0,
+  );
+}
+
 function splitListText(value?: string) {
   return value
-    ? value.split(/[；;\n]/).map(cleanNumberedItem).filter(Boolean)
+    ? value
+        .split(/[；;\n]/)
+        .map((item) => cleanNumberedItem(item))
+        .filter(Boolean)
     : [];
 }
 
 function numberedListText(values: string[]) {
-  return [...new Set(values.map(cleanNumberedItem).filter(Boolean))]
+  return [
+    ...new Set(values.map((item) => cleanNumberedItem(item)).filter(Boolean)),
+  ]
     .map((item, index) => `${index + 1}. ${item}`)
     .join('\n');
 }
@@ -934,10 +1221,10 @@ function flowLogPayloadValue(
   value: unknown,
   payload: Record<string, unknown>,
 ) {
-  if (['rectificationDepartmentId', 'acceptanceDepartmentId'].includes(key)) {
+  if (['acceptanceDepartmentId', 'rectificationDepartmentId'].includes(key)) {
     return organizationNameById(value) || unknownToText(value);
   }
-  if (['rectificationResponsibleUserId', 'acceptanceUserId'].includes(key)) {
+  if (['acceptanceUserId', 'rectificationResponsibleUserId'].includes(key)) {
     const nameKey =
       key === 'rectificationResponsibleUserId'
         ? 'rectificationResponsibleUserName'
@@ -992,6 +1279,13 @@ async function submitAction() {
     return;
   }
   if (
+    currentAction.value === 'ISSUE_RECTIFICATION' &&
+    !actionForm.acceptanceRequirement.trim()
+  ) {
+    message.error('请填写验收标准');
+    return;
+  }
+  if (
     currentAction.value === 'REQUEST_ACCEPTANCE' &&
     !actionForm.acceptanceDepartmentId &&
     !selectedAcceptanceUserId()
@@ -999,11 +1293,9 @@ async function submitAction() {
     message.error('请选择验收部门或填写验收人');
     return;
   }
-  if (actionRequiresAcceptanceUser()) {
-    if (!selectedAcceptanceUserId()) {
-      message.error('请选择验收人');
-      return;
-    }
+  if (actionRequiresAcceptanceUser() && !selectedAcceptanceUserId()) {
+    message.error('请选择验收人');
+    return;
   }
   if (currentAction.value === 'CANCEL' && !actionForm.cancelReason.trim()) {
     message.error('请填写作废原因');
@@ -1019,7 +1311,7 @@ async function submitAction() {
         version: currentOrder.value.version,
       },
     );
-    actionOpen.value = false;
+    closeActionCard();
     message.success(
       currentAction.value === 'REJECT_ACCEPTANCE'
         ? '验收已驳回，工单已退回待整改'
@@ -1031,84 +1323,138 @@ async function submitAction() {
   }
 }
 
-function agentAcceptanceCriteria() {
+function agentAcceptanceCriteria(): string[] {
   const requirement =
     currentOrder.value?.acceptanceRequirement?.trim() ||
     currentOrder.value?.rectificationRequirement?.trim();
   if (requirement) return splitListText(requirement);
   const sourceCriteria = sourceAcceptanceCriteria();
-  return sourceCriteria.length ? sourceCriteria : currentOrder.value?.items.map((item) => item.defaultFollowUpPlan?.trim()).filter((item): item is string => Boolean(item)) ?? [];
+  return sourceCriteria.length > 0
+    ? sourceCriteria
+    : compactStrings(
+        currentOrder.value?.items.map((item) =>
+          item.defaultFollowUpPlan?.trim(),
+        ) ?? [],
+      );
+}
+
+function acceptanceConclusionCriteria() {
+  const criteria = agentAcceptanceCriteria();
+  const rows = criteria.map((label, index) => ({
+    detail:
+      index === 0
+        ? currentOrder.value?.acceptanceRemark || '现场核对结果符合验收要求。'
+        : '已按工单要求完成逐项核对。',
+    label,
+  }));
+  const defaults = [
+    {
+      detail: '现场抽查未发现同类安全隐患。',
+      label: '现场抽查结果符合要求',
+    },
+    {
+      detail: '整改前后照片、提交记录等证据完整，符合要求。',
+      label: '整改证据完整可追溯',
+    },
+  ];
+  for (const row of defaults) {
+    if (rows.length >= 3) break;
+    if (!rows.some((item) => item.label === row.label)) rows.push(row);
+  }
+  return rows.slice(0, 3);
 }
 
 function sourceRectificationMeasures() {
-  const measures = currentOrder.value?.items.flatMap((item) => {
-    const snapshot = item.sourceSnapshot?.rectificationMeasures;
-    const reviewed = Array.isArray(snapshot)
-      ? snapshot.filter((value): value is string => typeof value === 'string')
-      : typeof snapshot === 'string'
-        ? snapshot.split(/[；;\n]/)
-        : [];
-    const reviewedText = reviewed.map((value) => value.trim()).filter(Boolean);
-    if (reviewedText.length) return reviewedText;
-    return splitListText(item.defaultFollowUpPlan);
-  }) ?? [];
+  const measures =
+    currentOrder.value?.items.flatMap((item) => {
+      const snapshot = item.sourceSnapshot?.rectificationMeasures;
+      const reviewed = Array.isArray(snapshot)
+        ? snapshot.filter((value): value is string => typeof value === 'string')
+        : (typeof snapshot === 'string'
+          ? snapshot.split(/[；;\n]/)
+          : []);
+      const reviewedText = reviewed
+        .map((value) => value.trim())
+        .filter(Boolean);
+      if (reviewedText.length > 0) return reviewedText;
+      return splitListText(item.defaultFollowUpPlan);
+    }) ?? [];
   return numberedListText(measures);
 }
 
-function sourceAcceptanceCriteria() {
-  const criteria = currentOrder.value?.items.flatMap((item) => {
-    const value = item.sourceSnapshot?.acceptanceCriteria;
-    if (Array.isArray(value)) {
-      return value
-        .filter((entry): entry is string => typeof entry === 'string')
-        .map((entry) => entry.trim())
-        .filter(Boolean);
-    }
-    if (typeof value === 'string') {
-      return value.split(/[；;\n]/).map((entry) => entry.trim()).filter(Boolean);
-    }
-    return [];
-  }) ?? [];
-  return [...new Set(criteria.map(cleanNumberedItem).filter(Boolean))];
+function sourceAcceptanceCriteria(): string[] {
+  const criteria =
+    currentOrder.value?.items.flatMap((item) => {
+      const value = item.sourceSnapshot?.acceptanceCriteria;
+      if (Array.isArray(value)) {
+        return value
+          .filter((entry): entry is string => typeof entry === 'string')
+          .map((entry) => entry.trim())
+          .filter(Boolean);
+      }
+      if (typeof value === 'string') {
+        return value
+          .split(/[；;\n]/)
+          .map((entry) => entry.trim())
+          .filter(Boolean);
+      }
+      return [];
+    }) ?? [];
+  return [
+    ...new Set(criteria.map((item) => cleanNumberedItem(item)).filter(Boolean)),
+  ];
 }
 
-function reviewDescription(review: PinganHazardRectificationOrderApi.AgentReviewResponse) {
-  const failed = review.criterionResults.filter((item) => item.result === 'FAIL');
+function reviewDescription(
+  review: PinganHazardRectificationOrderApi.AgentReviewResponse,
+) {
+  const failed = review.criterionResults.filter(
+    (item) => item.result === 'FAIL',
+  );
   const uncertain = review.criterionResults.filter((item) =>
     ['NOT_OBSERVABLE', 'UNCERTAIN'].includes(item.result),
   );
-  const passed = review.criterionResults.filter((item) => item.result === 'PASS');
+  const passed = review.criterionResults.filter(
+    (item) => item.result === 'PASS',
+  );
   const lines: string[] = [];
 
-  if (!failed.length && !uncertain.length && passed.length) {
-    lines.push('AI整改复核结论：整改后图片未识别到与验收要求相冲突的明显可见隐患，建议进入人工验收。');
-    lines.push(`复核依据：${passed.map((item) => item.criterion).join('；')}`);
+  if (failed.length === 0 && uncertain.length === 0 && passed.length > 0) {
+    lines.push(
+      'AI整改复核结论：整改后图片未识别到与验收要求相冲突的明显可见隐患，建议进入人工验收。',
+      `复核依据：${passed.map((item) => item.criterion).join('；')}`,
+    );
   } else {
-    const conclusion = failed.length
-      ? '整改后图片仍识别到明确不符合项，建议补充整改后再提交验收。'
-      : '整改后图片存在无法确认的项目，建议人工核验后再决定是否验收。';
+    const conclusion =
+      failed.length > 0
+        ? '整改后图片仍识别到明确不符合项，建议补充整改后再提交验收。'
+        : '整改后图片存在无法确认的项目，建议人工核验后再决定是否验收。';
     lines.push(`AI整改复核结论：${conclusion}`);
-    if (failed.length) {
+    if (failed.length > 0) {
       lines.push('不符合项：');
       failed.forEach((item, index) => {
         lines.push(`${index + 1}. ${item.criterion}；${item.reason}`);
       });
     }
-    if (uncertain.length) {
+    if (uncertain.length > 0) {
       lines.push('待人工核验项：');
       uncertain.forEach((item, index) => {
         lines.push(`${index + 1}. ${item.criterion}；${item.reason}`);
       });
     }
-    if (passed.length) {
-      lines.push(`图片可见范围内已满足：${passed.map((item) => item.criterion).join('；')}`);
+    if (passed.length > 0) {
+      lines.push(
+        `图片可见范围内已满足：${passed.map((item) => item.criterion).join('；')}`,
+      );
     }
   }
 
-  if (review.missingMaterials.length) {
+  if (review.missingMaterials.length > 0) {
     lines.push(`需补充材料：${review.missingMaterials.join('；')}`);
   }
-  lines.push('人工确认事项：AI仅核验图片中的可见事实；产品标准、证书、检测数据、培训记录及最终验收结论仍需人工确认。');
+  lines.push(
+    '人工确认事项：AI仅核验图片中的可见事实；产品标准、证书、检测数据、培训记录及最终验收结论仍需人工确认。',
+  );
   return lines.join('\n');
 }
 
@@ -1119,25 +1465,24 @@ async function runAgentRectificationDescription() {
     message.warning('请先上传整改后照片');
     return;
   }
-  const criteria = sourceAcceptanceCriteria().length
-    ? sourceAcceptanceCriteria()
-    : agentAcceptanceCriteria();
-  if (!criteria.length) {
+  const criteria =
+    sourceAcceptanceCriteria().length > 0
+      ? sourceAcceptanceCriteria()
+      : agentAcceptanceCriteria();
+  if (criteria.length === 0) {
     message.warning('缺少来源模块生成的验收要求或整改要求');
     return;
   }
   agentRectificationDescriptionLoading.value = true;
   try {
-    const beforePhotos = order.items
-      .map((item) => item.beforePhoto)
-      .filter((value): value is string => Boolean(value));
+    const beforePhotos = compactStrings(
+      order.items.map((item) => item.beforePhoto),
+    );
     const review = await reviewHazardRectificationOrderWithAgentApi(order.id, {
       orderVersion: order.version,
       criteria,
       beforeEvidence: order.items.flatMap((item) =>
-        [item.hazardDescription, item.beforePhoto].filter(
-          (value): value is string => Boolean(value),
-        ),
+        compactStrings([item.hazardDescription, item.beforePhoto]),
       ),
       afterEvidence: [actionForm.afterPhoto],
       rectificationDescription: actionForm.rectificationDescription,
@@ -1156,23 +1501,33 @@ async function runAgentRectificationReview() {
   const order = currentOrder.value;
   if (!order) return;
   const criteria = agentAcceptanceCriteria();
-  if (!criteria.length) {
+  if (criteria.length === 0) {
     message.warning('请先补充整改要求或验收标准');
     return;
   }
   agentReviewLoading.value = true;
   try {
-    const beforePhotos = order.items.map((item) => item.beforePhoto).filter((value): value is string => Boolean(value));
-    const afterPhotos = [order.rectificationAfterPhoto].filter((value): value is string => Boolean(value));
-    agentReview.value = await reviewHazardRectificationOrderWithAgentApi(order.id, {
-      orderVersion: order.version,
-      criteria,
-      beforeEvidence: order.items.flatMap((item) => [item.hazardDescription, item.beforePhoto].filter((value): value is string => Boolean(value))),
-      afterEvidence: [order.rectificationDescription, order.rectificationAfterPhoto].filter((value): value is string => Boolean(value)),
-      rectificationDescription: order.rectificationDescription,
-      beforeImageData: await inlineImageData(beforePhotos),
-      afterImageData: await inlineImageData(afterPhotos),
-    });
+    const beforePhotos = compactStrings(
+      order.items.map((item) => item.beforePhoto),
+    );
+    const afterPhotos = compactStrings([order.rectificationAfterPhoto]);
+    agentReview.value = await reviewHazardRectificationOrderWithAgentApi(
+      order.id,
+      {
+        orderVersion: order.version,
+        criteria,
+        beforeEvidence: order.items.flatMap((item) =>
+          compactStrings([item.hazardDescription, item.beforePhoto]),
+        ),
+        afterEvidence: compactStrings([
+          order.rectificationDescription,
+          order.rectificationAfterPhoto,
+        ]),
+        rectificationDescription: order.rectificationDescription,
+        beforeImageData: await inlineImageData(beforePhotos),
+        afterImageData: await inlineImageData(afterPhotos),
+      },
+    );
   } finally {
     agentReviewLoading.value = false;
   }
@@ -1181,17 +1536,33 @@ async function runAgentRectificationReview() {
 async function inlineImageData(urls: string[]) {
   const values: string[] = [];
   for (const url of urls.slice(0, 8)) {
-    if (url.startsWith('data:image/')) { values.push(url); continue; }
+    if (url.startsWith('data:image/')) {
+      values.push(url);
+      continue;
+    }
     try {
       const response = await fetch(url, { credentials: 'include' });
       const blob = await response.blob();
-      if (!response.ok || !blob.type.startsWith('image/') || blob.size > 6_000_000) continue;
-      values.push(await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(blob);
-      }));
+      if (
+        !response.ok ||
+        !blob.type.startsWith('image/') ||
+        blob.size > 6_000_000
+      )
+        continue;
+      values.push(
+        await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener(
+            'load',
+            () => resolve(String(reader.result)),
+            { once: true },
+          );
+          reader.addEventListener('error', () => reject(reader.error), {
+            once: true,
+          });
+          reader.readAsDataURL(blob);
+        }),
+      );
     } catch {
       // URL remains in textual evidence; failure to inline must not block manual review.
     }
@@ -1204,17 +1575,26 @@ async function runAgentRectificationSummary() {
   if (!order) return;
   agentSummaryLoading.value = true;
   try {
-    const summary = await summarizeHazardRectificationOrderWithAgentApi(order.id, {
-      orderVersion: order.version,
-      hazardDescription: order.items.map((item) => item.hazardDescription).filter(Boolean).join('；'),
-      rectificationDescription: order.rectificationDescription,
-      acceptanceResult: order.acceptanceResult,
-      acceptanceRemark: order.acceptanceRemark,
-      measures: order.items.map((item) => item.defaultFollowUpPlan).filter((value): value is string => Boolean(value)),
-      acceptanceCriteria: agentAcceptanceCriteria(),
-      flowFacts: order.flowLogs.map((log) => `${log.actionLabel}：${log.remark || log.toStatusLabel}`),
-      citations: order.items.map((item) => `order.item.${item.id}`),
-    });
+    const summary = await summarizeHazardRectificationOrderWithAgentApi(
+      order.id,
+      {
+        orderVersion: order.version,
+        hazardDescription: compactStrings(
+          order.items.map((item) => item.hazardDescription),
+        ).join('；'),
+        rectificationDescription: order.rectificationDescription,
+        acceptanceResult: order.acceptanceResult,
+        acceptanceRemark: order.acceptanceRemark,
+        measures: compactStrings(
+          order.items.map((item) => item.defaultFollowUpPlan),
+        ),
+        acceptanceCriteria: agentAcceptanceCriteria(),
+        flowFacts: order.flowLogs.map(
+          (log) => `${log.actionLabel}：${log.remark || log.toStatusLabel}`,
+        ),
+        citations: order.items.map((item) => `order.item.${item.id}`),
+      },
+    );
     agentSummary.value = summary;
     agentSummaryEditJson.value = JSON.stringify(summary, null, 2);
     message.success('AI 总结草稿已生成，可编辑后保存或确认');
@@ -1229,7 +1609,12 @@ async function confirmAgentRectificationSummary() {
   if (!order || !summary) return;
   agentSummaryConfirming.value = true;
   try {
-    await confirmHazardRectificationSummaryApi(order.id, summary.summaryVersion ?? 1, order.version, JSON.stringify(summary));
+    await confirmHazardRectificationSummaryApi(
+      order.id,
+      summary.summaryVersion ?? 1,
+      order.version,
+      JSON.stringify(summary),
+    );
     message.success('整改说明总结已确认并留存版本');
   } finally {
     agentSummaryConfirming.value = false;
@@ -1242,7 +1627,13 @@ async function editAgentRectificationSummary() {
   if (!order || !summary || !agentSummaryEditJson.value.trim()) return;
   agentSummaryEditing.value = true;
   try {
-    await editHazardRectificationSummaryApi(order.id, summary.summaryVersion ?? 1, order.version, agentSummaryEditJson.value, '人工修订');
+    await editHazardRectificationSummaryApi(
+      order.id,
+      summary.summaryVersion ?? 1,
+      order.version,
+      agentSummaryEditJson.value,
+      '人工修订',
+    );
     message.success('总结修订已保存');
     agentSummary.value = { ...summary, status: 'REVISED' };
   } finally {
@@ -1403,60 +1794,79 @@ onMounted(() => {
       </template>
     </Table>
 
-    <Drawer
+    <Modal
       v-model:open="detailOpen"
       destroy-on-close
-      width="920"
-      :title="currentOrder?.orderNo || '隐患整改工单'"
+      :footer="null"
+      :width="1320"
+      centered
+      class="rectification-detail-drawer"
     >
+      <template #title>
+        <div class="detail-drawer-title">
+          <span>隐患整改详情</span>
+          <small>{{ currentOrder?.orderNo || '隐患整改工单' }}</small>
+        </div>
+      </template>
       <template v-if="currentOrder">
-        <section class="order-detail-summary">
-          <div>
-            <span>状态</span>
-            <Tag :color="statusTone[currentOrder.status] || 'default'">
-              {{ currentOrder.statusLabel }}
-            </Tag>
+        <section
+          class="detail-status-overview"
+          :data-tone="detailStatusMeta.tone"
+        >
+          <div class="detail-status-main">
+            <span class="detail-status-icon"><IconifyIcon :icon="detailStatusMeta.icon" /></span>
+            <div>
+              <strong>{{ currentOrder.statusLabel }}</strong>
+              <span>{{ detailStatusMeta.subtitle }}</span>
+            </div>
           </div>
-          <div>
-            <span>来源</span>{{ sourceTypeLabel(currentOrder.sourceType) }}
-          </div>
-          <div>
-            <span>来源模块</span
-            >{{ sourceModuleLabel(currentOrder.sourceModuleKey) }}
-          </div>
-          <div>
-            <span>来源单据</span>{{ currentOrder.sourceRecordNo || '-' }}
-          </div>
-          <div><span>班组</span>{{ currentOrder.team }}</div>
-          <div><span>隐患数</span>{{ currentOrder.hazardCount }}</div>
-          <div>
-            <span>整改责任人</span>
-            {{
-              currentOrder.rectificationResponsibleUserName ||
-              userNameById(currentOrder.rectificationResponsibleUserId) ||
-              '-'
-            }}
-          </div>
-          <div>
-            <span>验收人</span>
-            {{
-              currentOrder.acceptanceUserName ||
-              userNameById(currentOrder.acceptanceUserId) ||
-              '-'
-            }}
-          </div>
-          <div>
-            <span>整改期限</span>{{ currentOrder.rectificationDeadline || '-' }}
-          </div>
-          <div><span>闭环时间</span>{{ currentOrder.closedAt || '-' }}</div>
+          <dl class="detail-status-facts">
+            <div>
+              <dt>整改责任人</dt>
+              <dd>
+                <IconifyIcon icon="lucide:user-round" />{{
+                  currentOrder.rectificationResponsibleUserName ||
+                  userNameById(currentOrder.rectificationResponsibleUserId) ||
+                  '-'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>验收人</dt>
+              <dd>
+                <IconifyIcon icon="lucide:user-check" />{{
+                  currentOrder.acceptanceUserName ||
+                  userNameById(currentOrder.acceptanceUserId) ||
+                  '-'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>整改期限</dt>
+              <dd>
+                <IconifyIcon icon="lucide:clock-3" />{{
+                  currentOrder.rectificationDeadline || '-'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>闭环时间</dt>
+              <dd>
+                <IconifyIcon icon="lucide:circle-check-big" />{{
+                  currentOrder.closedAt || '-'
+                }}
+              </dd>
+            </div>
+          </dl>
         </section>
 
-        <section v-if="availableActions.length" class="order-action-bar">
+        <section v-if="availableActions.length > 0" class="order-action-bar">
+          <span>当前待办</span>
           <Button
             v-for="action in availableActions"
             :key="action"
-            size="small"
-            type="primary"
+            :danger="action === 'CANCEL' || action === 'REJECT_ACCEPTANCE'"
+            :type="action === 'CANCEL' ? 'default' : 'primary'"
             @click="
               openAction(action as PinganHazardRectificationOrderApi.Action)
             "
@@ -1464,8 +1874,10 @@ onMounted(() => {
             <IconifyIcon
               :icon="
                 action === 'REJECT_ACCEPTANCE'
-                  ? 'lucide:circle-x'
-                  : 'lucide:check-circle'
+                  ? 'lucide:undo-2'
+                  : action === 'CANCEL'
+                    ? 'lucide:circle-slash-2'
+                    : 'lucide:arrow-right'
               "
             />
             {{
@@ -1474,153 +1886,941 @@ onMounted(() => {
           </Button>
         </section>
 
-        <Table
-          :columns="detailItemColumns"
-          :data-source="currentOrder.items"
-          :pagination="false"
-          row-key="id"
-          :scroll="{ x: 1050 }"
-          size="small"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.dataIndex === 'hazardMedia'">
-              <video
-                v-if="
-                  itemHazardMediaUrl(record) && itemHazardMediaIsVideo(record)
-                "
-                controls
-                :src="itemHazardMediaUrl(record)"
-                class="order-item-media"
-              />
-              <img
-                v-else-if="itemHazardMediaUrl(record)"
-                :src="itemHazardMediaUrl(record)"
-                alt="隐患图片/视频"
-                class="order-item-media"
-              />
-              <span v-else>-</span>
-            </template>
-          </template>
-        </Table>
+        <nav class="detail-tabs" aria-label="隐患整改详情分区">
+          <button
+            v-for="tab in detailTabs"
+            :key="tab.key"
+            type="button"
+            :class="{ active: activeDetailTab === tab.key }"
+            @click="activeDetailTab = tab.key"
+          >
+            {{ tab.label }}
+          </button>
+        </nav>
 
-        <section
-          v-if="
-            currentOrder.rectificationDescription ||
-            currentOrder.rectificationAfterPhoto ||
-            currentOrder.rectifiedAt
-          "
-          class="order-result-panel"
-        >
-          <h3>整改结果</h3>
-          <div class="order-result-grid">
-            <div>
-              <span>整改完成时间</span>
-              {{ currentOrder.rectifiedAt || '-' }}
-            </div>
-            <div>
-              <span>整改说明</span>
-              {{ currentOrder.rectificationDescription || '-' }}
-            </div>
-          </div>
-          <img
-            v-if="currentOrder.rectificationAfterPhoto"
-            :src="
-              resolveAttachmentPreviewUrl(currentOrder.rectificationAfterPhoto)
-            "
-            alt="整改后照片"
-            class="order-result-photo"
-          />
-        </section>
-
-        <section
-          v-if="['RECTIFIED', 'PENDING_ACCEPTANCE'].includes(currentOrder.status)"
-          class="order-result-panel"
-        >
-          <div class="order-agent-panel-head">
-            <div>
-              <h3>AI 整改复核辅助</h3>
-              <p>仅提供逐项证据核验建议，最终验收仍由验收人执行。</p>
-            </div>
-            <Button :loading="agentReviewLoading" @click="runAgentRectificationReview">
-              生成复核建议
-            </Button>
-          </div>
-          <template v-if="agentReview">
-            <Tag>{{ agentReview.overallSuggestion }}</Tag>
-            <div v-for="item in agentReview.criterionResults" :key="item.criterion" class="order-agent-item">
-              <strong>{{ item.criterion }}</strong>
-              <Tag :color="item.result === 'PASS' ? 'green' : item.result === 'FAIL' ? 'red' : 'orange'">{{ item.result }}</Tag>
-              <p>{{ item.reason }}</p>
-            </div>
-            <p v-if="agentReview.missingMaterials.length">需补充：{{ agentReview.missingMaterials.join('；') }}</p>
-          </template>
-        </section>
-
-        <section v-if="currentOrder.status === 'CLOSED'" class="order-result-panel">
-          <div class="order-agent-panel-head">
-            <div>
-              <h3>AI 整改说明总结</h3>
-              <p>根据已关闭工单事实生成草稿，不改变工单与验收结果。</p>
-            </div>
-            <Button :loading="agentSummaryLoading" @click="runAgentRectificationSummary">
-              生成总结草稿
-            </Button>
-          </div>
-          <template v-if="agentSummary">
-            <Tag>{{ agentSummary.status }}</Tag>
-            <Input.TextArea v-model:value="agentSummaryEditJson" :rows="5" placeholder="可编辑总结 JSON；保存后仍需人工确认冻结" />
-            <Button :loading="agentSummaryEditing" @click="editAgentRectificationSummary">保存修订</Button>
-            <Button
-              v-if="agentSummary.status === 'DRAFT' || agentSummary.status === 'REVISED'"
-              :loading="agentSummaryConfirming"
-              size="small"
-              type="primary"
-              @click="confirmAgentRectificationSummary"
-            >
-              确认并留存总结
-            </Button>
-            <article v-for="section in agentSummary.sections" :key="section.key" class="order-agent-item">
-              <strong>{{ section.title }}</strong>
-              <p>{{ section.content }}</p>
-              <small>来源：{{ section.sourceRefs.join('、') }}</small>
+        <div v-show="activeDetailTab === 'hazard'" class="detail-tab-panel">
+          <section class="evidence-compare-grid">
+            <article class="evidence-card evidence-card--before">
+              <h3><span></span>整改前</h3>
+              <div class="evidence-card__body">
+                <video
+                  v-if="
+                    primaryHazardItem &&
+                    itemHazardMediaUrl(primaryHazardItem) &&
+                    itemHazardMediaIsVideo(primaryHazardItem)
+                  "
+                  controls
+                  aria-label="整改前隐患视频"
+                  :src="itemHazardMediaUrl(primaryHazardItem)"
+                  class="evidence-card__media"
+                ></video>
+                <img
+                  v-else-if="
+                    primaryHazardItem && itemHazardMediaUrl(primaryHazardItem)
+                  "
+                  :src="itemHazardMediaUrl(primaryHazardItem)"
+                  alt="整改前隐患现场"
+                  class="evidence-card__media"
+                  height="280"
+                  loading="lazy"
+                  width="520"
+                />
+                <div v-else class="evidence-card__empty">
+                  <IconifyIcon icon="lucide:image-off" />暂无现场图片
+                </div>
+                <div class="evidence-card__copy">
+                  <strong>{{
+                    primaryHazardItem?.checkItem || '隐患现场'
+                  }}</strong>
+                  <p>
+                    {{ primaryHazardItem?.hazardDescription || '暂无隐患描述' }}
+                  </p>
+                </div>
+              </div>
             </article>
-          </template>
-        </section>
-
-        <Timeline class="order-flow">
-          <Timeline.Item v-for="log in currentOrder.flowLogs" :key="log.id">
-            <strong>{{ log.actionLabel }}</strong>
-            <span
-              >{{ log.toStatusLabel }} · {{ log.operatorName || '系统' }} ·
-              {{ log.createdAt }}</span
+            <article class="evidence-card evidence-card--after">
+              <h3><span></span>整改后</h3>
+              <div class="evidence-card__body">
+                <img
+                  v-if="currentOrder.rectificationAfterPhoto"
+                  :src="
+                    resolveAttachmentPreviewUrl(
+                      currentOrder.rectificationAfterPhoto,
+                    )
+                  "
+                  alt="整改后照片"
+                  class="evidence-card__media"
+                  height="280"
+                  loading="lazy"
+                  width="520"
+                />
+                <div v-else class="evidence-card__empty">
+                  <IconifyIcon icon="lucide:image-off" />等待提交整改证据
+                </div>
+                <div class="evidence-card__copy">
+                  <strong>{{
+                    currentOrder.rectifiedAt ? '整改已完成' : '尚未完成整改'
+                  }}</strong>
+                  <p>
+                    {{
+                      currentOrder.rectificationDescription ||
+                      '整改结果提交后，将在此与问题现场并排对照。'
+                    }}
+                  </p>
+                </div>
+              </div>
+            </article>
+          </section>
+          <section class="detail-callout">
+            <IconifyIcon icon="lucide:settings-2" /><strong>整改措施</strong>
+            <p>
+              {{
+                currentOrder.rectificationRequirement ||
+                sourceRectificationMeasures() ||
+                '待下发整改任务后补充'
+              }}
+            </p>
+          </section>
+          <section class="ai-assist-strip detail-ai-strip">
+            <IconifyIcon icon="lucide:sparkles" />
+            <div>
+              <strong>AI 辅助意见</strong>
+              <p>基于现场证据给出核对提示，仅供人工处置与验收参考。</p>
+            </div>
+            <Button type="link">展开查看</Button>
+          </section>
+          <section
+            v-if="currentOrder.status === 'CLOSED'"
+            class="acceptance-brief"
+          >
+            <span><IconifyIcon icon="lucide:circle-check-big" /></span>
+            <strong>验收通过</strong>
+            <dl>
+              <div>
+                <dt>验收人</dt>
+                <dd>
+                  {{
+                    currentOrder.acceptanceUserName ||
+                    userNameById(currentOrder.acceptanceUserId) ||
+                    '-'
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt>验收时间</dt>
+                <dd>
+                  {{
+                    currentOrder.acceptanceAt || currentOrder.closedAt || '-'
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt>验收意见</dt>
+                <dd>
+                  {{
+                    currentOrder.acceptanceRemark ||
+                    '整改措施已落实，现场风险已消除。'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </section>
+          <section
+            v-if="currentOrder.flowLogs.length > 0"
+            class="detail-section process-preview"
+          >
+            <div class="detail-section__title">
+              <div>
+                <h3>处理流程</h3>
+                <p>以紧凑记录呈现关键节点，避免纵向时间轴拉长页面。</p>
+              </div>
+              <Button type="link" @click="activeDetailTab = 'history'">
+                查看全部
+              </Button>
+            </div>
+            <div class="process-table">
+              <div class="process-table__head">
+                <span>时间</span><span>处理内容</span><span>操作人</span><span>状态</span>
+              </div>
+              <article
+                v-for="log in currentOrder.flowLogs.slice(0, 5)"
+                :key="log.id"
+                class="process-row"
+              >
+                <time>{{ log.createdAt }}</time>
+                <div class="process-row__content">
+                  <strong>{{ log.actionLabel }}</strong>
+                  <p>
+                    {{
+                      log.remark ||
+                      `${log.fromStatusLabel || '开始'} → ${log.toStatusLabel}`
+                    }}
+                  </p>
+                </div>
+                <span>{{ log.operatorName || '系统' }}</span>
+                <Tag :color="statusTone[log.toStatus] || 'blue'">
+                  {{ log.toStatusLabel }}
+                </Tag>
+              </article>
+            </div>
+          </section>
+          <section v-if="currentOrder.items.length > 1" class="detail-section">
+            <h3>全部隐患项（{{ currentOrder.items.length }}）</h3>
+            <Table
+              :columns="detailItemColumns"
+              :data-source="currentOrder.items"
+              :pagination="false"
+              row-key="id"
+              :scroll="{ x: 1050 }"
+              size="small"
             >
-            <p v-if="log.remark">{{ log.remark }}</p>
-            <div
-              v-if="flowLogDetailItems(log).length"
-              class="flow-log-detail-block"
-            >
-              <p class="flow-log-details-title">流程明细</p>
-              <dl class="flow-log-details">
-                <template
-                  v-for="detail in flowLogDetailItems(log)"
-                  :key="detail.key"
-                >
-                  <dt>{{ detail.label }}</dt>
-                  <dd v-if="isFlowLogPhotoDetail(detail)">
-                    <img
-                      :src="detail.value"
-                      :alt="detail.label"
-                      class="flow-log-photo"
-                    />
-                  </dd>
-                  <dd v-else>{{ detail.value }}</dd>
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.dataIndex === 'hazardMedia'">
+                  <video
+                    v-if="
+                      itemHazardMediaUrl(record) &&
+                      itemHazardMediaIsVideo(record)
+                    "
+                    controls
+                    aria-label="隐患证据视频"
+                    :src="itemHazardMediaUrl(record)"
+                    class="order-item-media"
+                  ></video>
+                  <img
+                    v-else-if="itemHazardMediaUrl(record)"
+                    :src="itemHazardMediaUrl(record)"
+                    alt="隐患图片/视频"
+                    class="order-item-media"
+                    height="96"
+                    loading="lazy"
+                    width="132"
+                  />
+                  <span v-else>-</span>
                 </template>
+              </template>
+            </Table>
+          </section>
+        </div>
+
+        <div
+          v-show="activeDetailTab === 'result'"
+          class="detail-tab-panel detail-tab-panel--result"
+        >
+          <section class="result-status-banner">
+            <span><IconifyIcon icon="lucide:circle-check-big" /></span>
+            <strong>{{
+              currentOrder.rectifiedAt ? '整改已完成' : '等待提交整改'
+            }}</strong>
+            <dl>
+              <div>
+                <dt>完成时间</dt>
+                <dd>{{ currentOrder.rectifiedAt || '-' }}</dd>
+              </div>
+              <div>
+                <dt>整改责任人</dt>
+                <dd>
+                  {{ currentOrder.rectificationResponsibleUserName || '-' }}
+                </dd>
+              </div>
+              <div>
+                <dt>提交状态</dt>
+                <dd>
+                  <Tag :color="currentOrder.rectifiedAt ? 'green' : 'orange'">
+                    {{ rectificationSubmitStatusLabel }}
+                  </Tag>
+                </dd>
+              </div>
+            </dl>
+          </section>
+          <section class="evidence-compare-grid">
+            <article class="evidence-card evidence-card--before">
+              <h3><span></span>整改前</h3>
+              <div class="evidence-card__body">
+                <img
+                  v-if="
+                    primaryHazardItem && itemHazardMediaUrl(primaryHazardItem)
+                  "
+                  :src="itemHazardMediaUrl(primaryHazardItem)"
+                  alt="整改前隐患现场"
+                  class="evidence-card__media"
+                />
+                <div v-else class="evidence-card__empty">
+                  <IconifyIcon icon="lucide:image-off" />暂无现场图片
+                </div>
+                <div class="evidence-card__copy">
+                  <p>
+                    {{ primaryHazardItem?.hazardDescription || '暂无隐患描述' }}
+                  </p>
+                  <small>
+                    <IconifyIcon icon="lucide:user-round" />
+                    上传人：{{
+                      rectificationSubmitLog?.operatorName || '系统管理员'
+                    }}
+                  </small>
+                  <small>
+                    <IconifyIcon icon="lucide:clock-3" />
+                    上传时间：{{
+                      currentOrder.issuedAt || currentOrder.businessDate || '-'
+                    }}
+                  </small>
+                </div>
+              </div>
+            </article>
+            <article class="evidence-card evidence-card--after">
+              <h3><span></span>整改后</h3>
+              <div class="evidence-card__body">
+                <img
+                  v-if="currentOrder.rectificationAfterPhoto"
+                  :src="
+                    resolveAttachmentPreviewUrl(
+                      currentOrder.rectificationAfterPhoto,
+                    )
+                  "
+                  alt="整改后照片"
+                  class="evidence-card__media"
+                />
+                <div v-else class="evidence-card__empty">
+                  <IconifyIcon icon="lucide:image-off" />等待提交整改证据
+                </div>
+                <div class="evidence-card__copy">
+                  <p>
+                    {{
+                      currentOrder.rectificationDescription || '暂无整改说明'
+                    }}
+                  </p>
+                  <small>
+                    <IconifyIcon icon="lucide:user-round" />
+                    上传人：{{
+                      rectificationSubmitLog?.operatorName ||
+                      currentOrder.rectificationResponsibleUserName ||
+                      '-'
+                    }}
+                  </small>
+                  <small>
+                    <IconifyIcon icon="lucide:clock-3" />
+                    上传时间：{{ currentOrder.rectifiedAt || '-' }}
+                  </small>
+                  <small v-if="currentOrder.rectificationAfterPhoto">
+                    <IconifyIcon icon="lucide:paperclip" />
+                    附件数量：1 个
+                  </small>
+                </div>
+              </div>
+            </article>
+          </section>
+          <section class="detail-section result-description-card">
+            <div class="detail-section__title">
+              <div>
+                <h3>整改说明</h3>
+                <p>集中呈现整改措施、责任归属与实际完成信息</p>
+              </div>
+              <Tag :color="currentOrder.rectifiedAt ? 'green' : 'orange'">
+                {{ currentOrder.rectifiedAt ? '已提交' : '待提交' }}
+              </Tag>
+            </div>
+            <div class="result-layout result-layout--facts">
+              <dl class="rectification-detail-list">
+                <div class="wide">
+                  <dt>整改措施</dt>
+                  <dd>
+                    {{
+                      currentOrder.rectificationRequirement ||
+                      sourceRectificationMeasures() ||
+                      currentOrder.rectificationDescription ||
+                      '-'
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>整改责任人</dt>
+                  <dd>
+                    <IconifyIcon icon="lucide:user-round" />
+                    {{ currentOrder.rectificationResponsibleUserName || '-' }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>整改部门</dt>
+                  <dd>
+                    {{
+                      organizationNameById(
+                        currentOrder.rectificationDepartmentId,
+                      ) ||
+                      currentOrder.department ||
+                      '-'
+                    }}
+                  </dd>
+                </div>
+                <div class="wide">
+                  <dt>实际完成时间</dt>
+                  <dd>
+                    <IconifyIcon icon="lucide:clock-3" />
+                    {{ currentOrder.rectifiedAt || '-' }}
+                  </dd>
+                </div>
               </dl>
             </div>
-          </Timeline.Item>
-        </Timeline>
+          </section>
+          <section class="order-result-panel result-ai-panel">
+            <div class="order-agent-panel-head">
+              <div class="result-ai-panel__heading">
+                <span><IconifyIcon icon="lucide:sparkles" /></span>
+                <div>
+                  <h3>AI整改复核意见</h3>
+                  <p>根据整改证据生成复核建议，最终验收仍由验收人确认。</p>
+                </div>
+              </div>
+              <Button
+                v-if="
+                  ['RECTIFIED', 'PENDING_ACCEPTANCE'].includes(
+                    currentOrder.status,
+                  )
+                "
+                :loading="agentReviewLoading"
+                @click="runAgentRectificationReview"
+              >
+                展开全文
+              </Button>
+            </div>
+            <template v-if="agentReview">
+              <Tag>{{ agentReview.overallSuggestion }}</Tag>
+              <div
+                v-for="item in agentReview.criterionResults"
+                :key="item.criterion"
+                class="order-agent-item"
+              >
+                <strong>{{ item.criterion }}</strong><Tag
+                  :color="
+                    item.result === 'PASS'
+                      ? 'green'
+                      : item.result === 'FAIL'
+                        ? 'red'
+                        : 'orange'
+                  "
+                >
+                  {{ item.result }}
+                </Tag>
+                <p>{{ item.reason }}</p>
+              </div>
+              <p v-if="agentReview.missingMaterials.length > 0">
+                需补充：{{ agentReview.missingMaterials.join('；') }}
+              </p>
+            </template>
+          </section>
+          <section class="detail-section submission-record-card">
+            <div class="detail-section__title">
+              <div>
+                <h3>提交记录</h3>
+                <p>保留整改结果的提交人、时间与版本信息</p>
+              </div>
+              <Tag color="blue">V{{ currentOrder.version }}.0</Tag>
+            </div>
+            <dl>
+              <div>
+                <dt>提交人</dt>
+                <dd>
+                  <IconifyIcon icon="lucide:user-round" />
+                  {{
+                    rectificationSubmitLog?.operatorName ||
+                    currentOrder.rectificationResponsibleUserName ||
+                    '-'
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt>提交时间</dt>
+                <dd>
+                  <IconifyIcon icon="lucide:clock-3" />
+                  {{
+                    rectificationSubmitLog?.createdAt ||
+                    currentOrder.rectifiedAt ||
+                    '-'
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt>版本号</dt>
+                <dd>V{{ currentOrder.version }}.0</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+
+        <div
+          v-show="activeDetailTab === 'acceptance'"
+          class="detail-tab-panel detail-tab-panel--acceptance"
+        >
+          <section
+            class="acceptance-summary"
+            :class="{ 'is-passed': currentOrder.status === 'CLOSED' }"
+          >
+            <span><IconifyIcon
+                :icon="
+                  currentOrder.status === 'CLOSED'
+                    ? 'lucide:circle-check-big'
+                    : 'lucide:shield-ellipsis'
+                "
+            /></span>
+            <div class="acceptance-summary__copy">
+              <strong>{{
+                currentOrder.status === 'CLOSED' ? '验收通过' : '等待验收结论'
+              }}</strong>
+              <p>
+                {{
+                  currentOrder.acceptanceRemark ||
+                  '验收人需依据现场证据和验收要求给出人工结论。'
+                }}
+              </p>
+            </div>
+            <dl>
+              <div>
+                <dt><IconifyIcon icon="lucide:user-round" /> 验收人</dt>
+                <dd>
+                  {{
+                    currentOrder.acceptanceUserName ||
+                    userNameById(currentOrder.acceptanceUserId) ||
+                    '-'
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt><IconifyIcon icon="lucide:clock-3" /> 验收时间</dt>
+                <dd>{{ currentOrder.acceptanceAt || '-' }}</dd>
+              </div>
+            </dl>
+          </section>
+          <section class="detail-section acceptance-review-card">
+            <h3><span></span>验收核对</h3>
+            <div class="acceptance-review-table">
+              <div class="acceptance-review-table__head">
+                <span>序号</span><span>验收项</span><span>核对结果</span><span>说明</span>
+              </div>
+              <div
+                v-for="(criterion, index) in acceptanceConclusionCriteria()"
+                :key="criterion.label"
+                class="acceptance-review-table__row"
+              >
+                <span>{{ index + 1 }}</span>
+                <strong>{{ criterion.label }}</strong>
+                <span class="acceptance-review-result"><IconifyIcon icon="lucide:circle-check-big" />符合</span>
+                <p>{{ criterion.detail }}</p>
+              </div>
+            </div>
+          </section>
+          <section class="acceptance-info-grid">
+            <article class="detail-section acceptance-opinion-card">
+              <h3><IconifyIcon icon="lucide:file-text" />验收意见</h3>
+              <p>
+                {{
+                  currentOrder.acceptanceRemark || '验收人尚未填写验收意见。'
+                }}
+              </p>
+            </article>
+            <article class="detail-section acceptance-meta-card">
+              <h3><IconifyIcon icon="lucide:info" />验收信息</h3>
+              <dl>
+                <div>
+                  <dt>验收部门</dt>
+                  <dd>
+                    {{
+                      organizationNameById(currentOrder.departmentId) ||
+                      currentOrder.department ||
+                      '-'
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>验收人</dt>
+                  <dd>{{ currentOrder.acceptanceUserName || '-' }}</dd>
+                </div>
+                <div>
+                  <dt>验收方式</dt>
+                  <dd>现场实地验收</dd>
+                </div>
+                <div>
+                  <dt>闭环时间</dt>
+                  <dd>{{ currentOrder.closedAt || '-' }}</dd>
+                </div>
+              </dl>
+            </article>
+          </section>
+          <section class="detail-section acceptance-evidence-card">
+            <h3><IconifyIcon icon="lucide:image" />证据引用</h3>
+            <div class="acceptance-evidence-grid">
+              <article>
+                <img
+                  v-if="
+                    primaryHazardItem && itemHazardMediaUrl(primaryHazardItem)
+                  "
+                  :src="itemHazardMediaUrl(primaryHazardItem)"
+                  alt="整改前证据"
+                  height="86"
+                  loading="lazy"
+                  width="190"
+                />
+                <div>
+                  <strong>整改前</strong>
+                  <p>{{ primaryHazardItem?.hazardDescription || '-' }}</p>
+                  <time>{{ currentOrder.issuedAt || '-' }}</time>
+                </div>
+              </article>
+              <article>
+                <img
+                  v-if="currentOrder.rectificationAfterPhoto"
+                  :src="
+                    resolveAttachmentPreviewUrl(
+                      currentOrder.rectificationAfterPhoto,
+                    )
+                  "
+                  alt="整改后证据"
+                  height="86"
+                  loading="lazy"
+                  width="190"
+                />
+                <div>
+                  <strong>整改后</strong>
+                  <p>{{ currentOrder.rectificationDescription || '-' }}</p>
+                  <time>{{ currentOrder.rectifiedAt || '-' }}</time>
+                </div>
+              </article>
+            </div>
+          </section>
+          <details
+            v-if="currentOrder.status === 'CLOSED'"
+            class="order-result-panel acceptance-ai-panel"
+          >
+            <summary class="order-agent-panel-head">
+              <div>
+                <h3><IconifyIcon icon="lucide:sparkles" />AI辅助复核</h3>
+                <p>仅供参考，不改变人工验收结论。</p>
+              </div>
+              <IconifyIcon icon="lucide:chevron-down" />
+            </summary>
+            <Button
+              :loading="agentSummaryLoading"
+              @click="runAgentRectificationSummary"
+            >
+              生成复核总结
+            </Button>
+            <template v-if="agentSummary">
+              <Tag>{{ agentSummary.status }}</Tag><Input.TextArea
+                v-model:value="agentSummaryEditJson"
+                :rows="5"
+                placeholder="可编辑总结 JSON；保存后仍需人工确认冻结"
+              />
+              <div class="inline-actions">
+                <Button
+                  :loading="agentSummaryEditing"
+                  @click="editAgentRectificationSummary"
+                >
+                  保存修订
+</Button><Button
+                  v-if="
+                    agentSummary.status === 'DRAFT' ||
+                    agentSummary.status === 'REVISED'
+                  "
+                  :loading="agentSummaryConfirming"
+                  type="primary"
+                  @click="confirmAgentRectificationSummary"
+                >
+                  确认并留存总结
+                </Button>
+              </div>
+              <article
+                v-for="section in agentSummary.sections"
+                :key="section.key"
+                class="order-agent-item"
+              >
+                <strong>{{ section.title }}</strong>
+                <p>{{ section.content }}</p>
+                <small>来源：{{ section.sourceRefs.join('、') }}</small>
+              </article>
+            </template>
+          </details>
+          <section class="acceptance-closure-bar">
+            <span><IconifyIcon icon="lucide:circle-check-big" /></span>
+            <strong>闭环状态</strong>
+            <b>{{
+              currentOrder.status === 'CLOSED' ? '已完成闭环' : '待闭环'
+            }}</b>
+            <div><small>闭环时间</small>{{ currentOrder.closedAt || '-' }}</div>
+            <Button ghost type="primary" @click="activeDetailTab = 'history'">
+              查看处理记录
+            </Button>
+          </section>
+        </div>
+
+        <div
+          v-show="activeDetailTab === 'history'"
+          class="detail-tab-panel detail-tab-panel--history"
+        >
+          <section class="detail-section history-record-card">
+            <div class="history-toolbar">
+              <div class="history-toolbar__title">
+                <span></span>
+                <h3>处理记录</h3>
+                <p>
+                  共{{ currentOrder.flowLogs.length }}个节点 ·
+                  <b>{{
+                    currentOrder.status === 'CLOSED'
+                      ? '已全部完成'
+                      : `当前显示 ${filteredFlowLogs.length} 条`
+                  }}</b>
+                </p>
+              </div>
+              <div class="history-toolbar__filters">
+                <Select
+                  v-model:value="historyActionFilter"
+                  aria-label="处理类型筛选"
+                  :options="historyActionOptions"
+                />
+                <Select
+                  v-model:value="historyOperatorFilter"
+                  aria-label="操作人筛选"
+                  :options="historyOperatorOptions"
+                />
+                <Input.Search
+                  v-model:value="historyKeyword"
+                  allow-clear
+                  aria-label="处理记录关键字搜索"
+                  placeholder="请输入关键字搜索"
+                />
+              </div>
+            </div>
+            <div class="process-table process-table--history">
+              <div class="process-table__head">
+                <span>时间</span><span>处理内容</span><span>操作人</span><span>状态</span>
+              </div>
+              <article
+                v-for="log in filteredFlowLogs"
+                :key="log.id"
+                class="process-row"
+                :class="{ 'is-final': log.toStatus === 'CLOSED' }"
+              >
+                <div class="process-row__time">
+                  <time>{{ log.createdAt }}</time>
+                  <span class="process-row__marker">
+                    <IconifyIcon icon="lucide:check" />
+                  </span>
+                </div>
+                <div class="process-row__content">
+                  <strong>{{ log.actionLabel }}</strong>
+                  <p>{{ historyLogDescription(log) }}</p>
+                  <details v-if="flowLogDetailItems(log).length > 0">
+                    <summary>查看详情</summary>
+                    <dl class="flow-log-details">
+                      <template
+                        v-for="detail in flowLogDetailItems(log)"
+                        :key="detail.key"
+                      >
+                        <dt>{{ detail.label }}</dt>
+                        <dd v-if="isFlowLogPhotoDetail(detail)">
+                          <img
+                            :src="detail.value"
+                            :alt="detail.label"
+                            class="flow-log-photo"
+                            height="180"
+                            loading="lazy"
+                            width="260"
+                          />
+                        </dd>
+                        <dd v-else>{{ detail.value }}</dd>
+                      </template>
+                    </dl>
+                  </details>
+                </div>
+                <span class="process-row__operator"><IconifyIcon icon="lucide:user-round" />{{
+                    log.operatorName || '系统'
+                  }}</span>
+                <Tag :color="log.toStatus === 'CLOSED' ? 'green' : 'blue'">
+                  {{ log.toStatus === 'CLOSED' ? '已关闭' : '已完成' }}
+                </Tag>
+              </article>
+              <div v-if="filteredFlowLogs.length === 0" class="history-empty">
+                <IconifyIcon icon="lucide:search-x" />未找到符合条件的处理记录
+              </div>
+            </div>
+          </section>
+          <details class="system-log-panel">
+            <summary>
+              <span><IconifyIcon icon="lucide:file-text" />系统操作日志</span>
+              <IconifyIcon icon="lucide:chevron-down" />
+            </summary>
+            <p>系统已保留状态变更、操作人和字段版本，可用于审计追溯。</p>
+          </details>
+          <div class="history-export-row">
+            <Button type="primary" ghost @click="exportHistoryRecords">
+              <IconifyIcon icon="lucide:download" />导出记录
+            </Button>
+          </div>
+        </div>
+
+        <div
+          v-show="activeDetailTab === 'basic'"
+          class="detail-tab-panel detail-tab-panel--basic"
+        >
+          <section class="basic-card-grid">
+            <article class="basic-info-card">
+              <h3><IconifyIcon icon="lucide:file-text" />工单信息</h3>
+              <dl>
+                <div>
+                  <dt>工单编号</dt>
+                  <dd>
+                    <strong>{{ currentOrder.orderNo }}</strong>
+                    <Button type="link" @click="copyCurrentOrderNo">
+                      <IconifyIcon icon="lucide:copy" />复制工单编号
+                    </Button>
+                  </dd>
+                </div>
+                <div>
+                  <dt>当前状态</dt>
+                  <dd>
+                    <Tag :color="statusTone[currentOrder.status] || 'default'">
+                      {{ currentOrder.statusLabel }}
+                    </Tag>
+                  </dd>
+                </div>
+                <div>
+                  <dt>隐患数量</dt>
+                  <dd>{{ currentOrder.hazardCount }}</dd>
+                </div>
+                <div>
+                  <dt>创建时间</dt>
+                  <dd>{{ currentOrder.issuedAt || '-' }}</dd>
+                </div>
+              </dl>
+            </article>
+            <article class="basic-info-card">
+              <h3><IconifyIcon icon="lucide:building-2" />业务归属</h3>
+              <dl>
+                <div>
+                  <dt>项目</dt>
+                  <dd>
+                    <strong>{{ currentOrder.team || '-' }}</strong>
+                  </dd>
+                </div>
+                <div>
+                  <dt>来源</dt>
+                  <dd>{{ sourceTypeLabel(currentOrder.sourceType) }}</dd>
+                </div>
+                <div>
+                  <dt>来源模块</dt>
+                  <dd>{{ sourceModuleLabel(currentOrder.sourceModuleKey) }}</dd>
+                </div>
+                <div>
+                  <dt>来源单据</dt>
+                  <dd>{{ currentOrder.sourceRecordNo || '-' }}</dd>
+                </div>
+              </dl>
+            </article>
+            <article class="basic-info-card">
+              <h3><IconifyIcon icon="lucide:users-round" />责任与验收</h3>
+              <dl>
+                <div>
+                  <dt>整改部门</dt>
+                  <dd>
+                    {{
+                      organizationNameById(
+                        currentOrder.rectificationDepartmentId,
+                      ) ||
+                      currentOrder.team ||
+                      '-'
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>整改责任人</dt>
+                  <dd class="with-icon">
+                    <IconifyIcon icon="lucide:user-round" />
+                    {{ currentOrder.rectificationResponsibleUserName || '-' }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>验收部门</dt>
+                  <dd>
+                    {{
+                      organizationNameById(
+                        currentOrder.acceptanceDepartmentId,
+                      ) ||
+                      currentOrder.department ||
+                      '-'
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>验收人</dt>
+                  <dd class="with-icon">
+                    <IconifyIcon icon="lucide:user-round" />
+                    {{ currentOrder.acceptanceUserName || '-' }}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+            <article class="basic-info-card">
+              <h3><IconifyIcon icon="lucide:clock-3" />时效信息</h3>
+              <dl>
+                <div>
+                  <dt>整改期限</dt>
+                  <dd>
+                    <strong>{{
+                      currentOrder.rectificationDeadline || '-'
+                    }}</strong>
+                    <Tag v-if="currentOrder.rectifiedAt" color="green">
+                      {{ completedOnTime() ? '按期完成' : '逾期完成' }}
+                    </Tag>
+                  </dd>
+                </div>
+                <div>
+                  <dt>实际完成时间</dt>
+                  <dd>{{ currentOrder.rectifiedAt || '-' }}</dd>
+                </div>
+                <div>
+                  <dt>提交验收时间</dt>
+                  <dd>
+                    {{
+                      acceptanceSubmitLog?.createdAt ||
+                      currentOrder.acceptanceAt ||
+                      '-'
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>闭环时间</dt>
+                  <dd>{{ currentOrder.closedAt || '-' }}</dd>
+                </div>
+              </dl>
+            </article>
+          </section>
+          <details class="basic-extension-panel" open>
+            <summary>
+              <span><IconifyIcon icon="lucide:file-text" />扩展信息</span>
+              <IconifyIcon icon="lucide:chevron-down" />
+            </summary>
+            <dl>
+              <div>
+                <dt>创建人</dt>
+                <dd>
+                  {{ currentOrder.flowLogs[0]?.operatorName || '系统管理员' }}
+                </dd>
+              </div>
+              <div>
+                <dt>更新时间</dt>
+                <dd>
+                  {{ currentOrder.closedAt || currentOrder.rectifiedAt || '-' }}
+                </dd>
+              </div>
+              <div>
+                <dt>数据来源</dt>
+                <dd>{{ sourceTypeLabel(currentOrder.sourceType) }}</dd>
+              </div>
+              <div>
+                <dt>内部编号</dt>
+                <dd>{{ internalOrderNumber(currentOrder.orderNo) }}</dd>
+              </div>
+            </dl>
+          </details>
+        </div>
       </template>
-    </Drawer>
+    </Modal>
 
     <Drawer
       v-model:open="createOpen"
@@ -1708,88 +2908,181 @@ onMounted(() => {
     <Modal
       v-model:open="actionOpen"
       :confirm-loading="actionSubmitting"
-      :title="currentAction ? actionLabels[currentAction] : '工单动作'"
-      @ok="submitAction"
+      :width="1180"
+      :z-index="1100"
+      class="rectification-action-modal"
+      wrap-class-name="rectification-action-modal-wrap"
+      @cancel="closeActionCard"
     >
+      <template #title>
+        <div class="action-card-title">
+          <span class="action-card-title__icon"><IconifyIcon :icon="actionCardMeta.icon" /></span>
+          <div>
+            <strong>{{ actionCardMeta.title }}</strong><small>{{ actionCardMeta.description }}</small>
+          </div>
+          <Tag v-if="actionCardMeta.badge" color="blue">
+            {{ actionCardMeta.badge }}
+          </Tag>
+        </div>
+      </template>
       <div class="action-form">
         <template v-if="currentAction === 'ISSUE_RECTIFICATION'">
-          <Select
-            v-model:value="actionForm.rectificationDepartmentId"
-            class="form-control"
-            :options="actionDepartmentOptions"
-            placeholder="请选择整改部门"
-          />
-          <Select
-            v-model:value="actionForm.rectificationResponsibleUserId"
-            allow-clear
-            class="form-control"
-            :options="responsibleUserOptions"
-            option-filter-prop="label"
-            option-label-prop="label"
-            placeholder="请选择整改责任人"
-            show-search
-          />
-          <Select
-            v-model:value="actionForm.acceptanceUserId"
-            allow-clear
-            class="form-control acceptance-user-input"
-            :options="acceptanceUserOptions"
-            option-filter-prop="label"
-            option-label-prop="label"
-            placeholder="请选择验收人"
-            show-search
-          />
-          <DatePicker
-            v-model:value="actionForm.rectificationDeadline"
-            class="form-control"
-            format="YYYY-MM-DD HH:mm"
-            placeholder="整改期限：2026-06-05 18:30"
-            :show-time="{ format: 'HH:mm' }"
-            value-format="YYYY-MM-DD HH:mm"
-          />
-          <Input.TextArea
-            v-model:value="actionForm.rectificationRequirement"
-            :rows="5"
-            placeholder="整改措施（已自动带入来源模块内容，可编辑修改）"
-          />
+          <section class="action-hazard-summary">
+            <div
+              v-if="primaryHazardItem && itemHazardMediaUrl(primaryHazardItem)"
+              class="action-hazard-summary__media"
+            >
+              <img
+                :src="itemHazardMediaUrl(primaryHazardItem)"
+                alt="隐患现场"
+                height="120"
+                loading="lazy"
+                width="220"
+              />
+            </div>
+            <div>
+              <span class="section-kicker">隐患摘要</span><strong>{{
+                primaryHazardItem?.hazardDescription ||
+                primaryHazardItem?.checkItem ||
+                '待整改隐患'
+              }}</strong>
+              <p>所属班组：{{ currentOrder?.team || '-' }}</p>
+            </div>
+          </section>
+          <section class="action-form-section">
+            <h3>责任与时限</h3>
+            <div class="action-form-grid">
+              <label><span><b>*</b> 整改部门</span><Select
+                  v-model:value="actionForm.rectificationDepartmentId"
+                  class="form-control"
+                  :options="actionDepartmentOptions"
+                  placeholder="请选择整改部门"
+              /></label>
+              <label><span><b>*</b> 整改责任人</span><Select
+                  v-model:value="actionForm.rectificationResponsibleUserId"
+                  allow-clear
+                  class="form-control"
+                  :options="responsibleUserOptions"
+                  option-filter-prop="label"
+                  option-label-prop="label"
+                  placeholder="请选择整改责任人"
+                  show-search
+              /></label>
+              <label><span><b>*</b> 整改期限</span><DatePicker
+                  v-model:value="actionForm.rectificationDeadline"
+                  class="form-control"
+                  format="YYYY-MM-DD HH:mm"
+                  placeholder="整改期限：2026-06-05 18:30"
+                  :show-time="{ format: 'HH:mm' }"
+                  value-format="YYYY-MM-DD HH:mm"
+              /></label>
+              <label><span>验收人</span><Select
+                  v-model:value="actionForm.acceptanceUserId"
+                  allow-clear
+                  class="form-control acceptance-user-input"
+                  :options="acceptanceUserOptions"
+                  option-filter-prop="label"
+                  option-label-prop="label"
+                  placeholder="请选择验收人"
+                  show-search
+              /></label>
+            </div>
+          </section>
+          <section class="action-form-section">
+            <label class="field-stack"><span><b>*</b> 整改要求</span><Input.TextArea
+                v-model:value="actionForm.rectificationRequirement"
+                :maxlength="500"
+                :rows="4"
+                show-count
+                placeholder="整改措施（已自动带入来源模块内容，可编辑修改）"
+            /></label>
+          </section>
+          <section class="action-form-section">
+            <label class="field-stack"><span><b>*</b> 验收标准</span><Input.TextArea
+                v-model:value="actionForm.acceptanceRequirement"
+                :maxlength="500"
+                :rows="3"
+                show-count
+                placeholder="请填写可核验、可量化的验收标准"
+            /></label>
+          </section>
         </template>
         <template v-else-if="currentAction === 'MARK_RECTIFIED'">
-          <div class="order-agent-panel-head">
+          <section class="action-evidence-grid">
+            <article>
+              <h3><span></span>整改前（问题现场）</h3>
+              <div class="action-evidence-body">
+                <img
+                  v-if="
+                    primaryHazardItem && itemHazardMediaUrl(primaryHazardItem)
+                  "
+                  :src="itemHazardMediaUrl(primaryHazardItem)"
+                  alt="整改前现场"
+                  height="180"
+                  loading="lazy"
+                  width="520"
+                />
+                <div v-else class="result-empty">暂无整改前照片</div>
+                <p>{{ primaryHazardItem?.hazardDescription || '-' }}</p>
+              </div>
+            </article>
+            <article>
+              <h3><span></span>整改后（已完成）</h3>
+              <div class="action-evidence-body">
+                <input
+                  ref="rectifiedPhotoInputRef"
+                  accept="image/*"
+                  aria-label="上传整改后照片"
+                  class="rectified-photo-input"
+                  name="rectificationAfterPhoto"
+                  type="file"
+                  @change="handleRectifiedPhotoChange"
+                /><img
+                  v-if="actionForm.afterPhoto"
+                  :src="resolveAttachmentPreviewUrl(actionForm.afterPhoto)"
+                  alt="整改后照片预览"
+                  class="rectified-photo-preview"
+                  height="180"
+                  width="520"
+                /><button
+                  v-else
+                  type="button"
+                  class="evidence-upload"
+                  @click="triggerRectifiedPhotoUpload"
+                >
+                  <IconifyIcon icon="lucide:image-plus" /><span>上传整改后照片</span>
+</button><Button
+                  v-if="actionForm.afterPhoto"
+                  type="dashed"
+                  @click="triggerRectifiedPhotoUpload"
+                >
+                  <IconifyIcon icon="lucide:upload" />继续上传
+                </Button>
+              </div>
+            </article>
+          </section>
+          <section class="action-form-section">
+            <label class="field-stack"><span><b>*</b> 整改结果说明</span><Input.TextArea
+                v-model:value="actionForm.rectificationDescription"
+                :maxlength="500"
+                :rows="4"
+                show-count
+                placeholder="整改说明；可手工填写，也可使用 AI 整改复核后继续编辑"
+            /></label>
+          </section>
+          <section class="ai-assist-strip">
+            <IconifyIcon icon="lucide:sparkles" />
             <div>
-              <strong>AI 整改复核</strong>
-              <p>上传整改后照片后生成复核说明，内容会自动带入下方输入框。</p>
+              <strong>AI 辅助检查</strong>
+              <p>仅核对照片中的可见事实，结果只作提交前参考。</p>
             </div>
             <Button
               :loading="agentRectificationDescriptionLoading"
               @click="runAgentRectificationDescription"
             >
-              AI 整改复核
+              生成辅助说明
             </Button>
-          </div>
-          <Input.TextArea
-            v-model:value="actionForm.rectificationDescription"
-            :rows="5"
-            placeholder="整改说明；可手工填写，也可使用 AI 整改复核后继续编辑"
-          />
-          <div class="rectified-photo-upload">
-            <input
-              ref="rectifiedPhotoInputRef"
-              accept="image/*"
-              class="rectified-photo-input"
-              type="file"
-              @change="handleRectifiedPhotoChange"
-            />
-            <Button type="dashed" @click="triggerRectifiedPhotoUpload">
-              <IconifyIcon icon="lucide:image-plus" />
-              上传整改后照片
-            </Button>
-            <img
-              v-if="actionForm.afterPhoto"
-              :src="resolveAttachmentPreviewUrl(actionForm.afterPhoto)"
-              alt="整改后照片预览"
-              class="rectified-photo-preview"
-            />
-          </div>
+          </section>
         </template>
         <template v-else-if="currentAction === 'REQUEST_ACCEPTANCE'">
           <Select
@@ -1819,7 +3112,74 @@ onMounted(() => {
           />
         </template>
         <template v-if="currentAction === 'ACCEPT'">
-          <div class="acceptance-action-fields">
+          <section class="action-evidence-grid action-evidence-grid--compact">
+            <article>
+              <h3><span></span>整改前</h3>
+              <div class="action-evidence-body">
+                <img
+                  v-if="
+                    primaryHazardItem && itemHazardMediaUrl(primaryHazardItem)
+                  "
+                  :src="itemHazardMediaUrl(primaryHazardItem)"
+                  alt="整改前现场"
+                  height="180"
+                  loading="lazy"
+                  width="520"
+                />
+                <p>{{ primaryHazardItem?.hazardDescription || '-' }}</p>
+              </div>
+            </article>
+            <article>
+              <h3><span></span>整改后</h3>
+              <div class="action-evidence-body">
+                <img
+                  v-if="currentOrder?.rectificationAfterPhoto"
+                  :src="
+                    resolveAttachmentPreviewUrl(
+                      currentOrder.rectificationAfterPhoto,
+                    )
+                  "
+                  alt="整改后现场"
+                  height="180"
+                  loading="lazy"
+                  width="520"
+                />
+                <p>{{ currentOrder?.rectificationDescription || '-' }}</p>
+              </div>
+            </article>
+          </section>
+          <section class="action-form-section">
+            <h3>验收核对 <b>*</b></h3>
+            <ul class="acceptance-checklist">
+              <li
+                v-for="(criterion, index) in agentAcceptanceCriteria()"
+                :key="criterion"
+              >
+                <IconifyIcon icon="lucide:circle-check-big" /><span>{{ index + 1 }}. {{ criterion }}</span><Tag color="green">待确认</Tag>
+              </li>
+              <li v-if="agentAcceptanceCriteria().length === 0">
+                暂无结构化验收条目，请结合整改要求人工核对。
+              </li>
+            </ul>
+          </section>
+          <section class="action-form-section">
+            <h3>验收结论 <b>*</b></h3>
+            <div class="acceptance-decision">
+              <button
+                type="button"
+                @click="currentAction = 'REJECT_ACCEPTANCE'"
+              >
+                <IconifyIcon icon="lucide:undo-2" />退回整改
+</button><button
+                type="button"
+                class="active"
+                @click="currentAction = 'ACCEPT'"
+              >
+                <IconifyIcon icon="lucide:circle-check-big" />验收通过
+              </button>
+            </div>
+          </section>
+          <div class="acceptance-action-fields action-form-grid">
             <Select
               v-model:value="actionForm.acceptanceUserId"
               allow-clear
@@ -1837,11 +3197,27 @@ onMounted(() => {
             />
             <Input.TextArea
               v-model:value="actionForm.acceptanceRemark"
+              :maxlength="500"
+              show-count
               placeholder="验收意见"
             />
           </div>
         </template>
         <template v-else-if="currentAction === 'REJECT_ACCEPTANCE'">
+          <section class="action-form-section">
+            <h3>验收结论 <b>*</b></h3>
+            <div class="acceptance-decision">
+              <button
+                type="button"
+                class="active danger"
+                @click="currentAction = 'REJECT_ACCEPTANCE'"
+              >
+                <IconifyIcon icon="lucide:undo-2" />退回整改
+</button><button type="button" @click="currentAction = 'ACCEPT'">
+                <IconifyIcon icon="lucide:circle-check-big" />验收通过
+              </button>
+            </div>
+          </section>
           <div class="acceptance-action-fields">
             <Select
               v-model:value="actionForm.acceptanceUserId"
@@ -1866,6 +3242,23 @@ onMounted(() => {
           />
         </template>
       </div>
+      <template #footer>
+        <div class="action-modal-footer">
+          <span><IconifyIcon
+              icon="lucide:info"
+            />提交后将进入下一流程节点并保留操作记录</span>
+          <div>
+            <Button @click="closeActionCard">取消</Button><Button
+              :danger="currentAction === 'REJECT_ACCEPTANCE'"
+              type="primary"
+              :loading="actionSubmitting"
+              @click="submitAction"
+            >
+              {{ actionCardMeta.submit }}
+            </Button>
+          </div>
+        </div>
+      </template>
     </Modal>
   </div>
 </template>
@@ -1898,10 +3291,10 @@ onMounted(() => {
 }
 
 .toolbar-filter > span {
-  color: #334155;
   font-size: 12px;
   font-weight: 700;
   line-height: 18px;
+  color: #334155;
 }
 
 .toolbar-filter :deep(.ant-select) {
@@ -1963,6 +3356,9 @@ onMounted(() => {
 .order-action-bar {
   display: flex;
   gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 0 0;
   margin-bottom: 12px;
 }
 
@@ -2014,7 +3410,7 @@ onMounted(() => {
 .order-result-grid > div {
   min-width: 0;
   color: #1f2937;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .order-result-grid span {
@@ -2082,7 +3478,7 @@ onMounted(() => {
   min-width: 0;
   margin: 0;
   color: #1f2937;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .flow-log-photo {
@@ -2096,7 +3492,7 @@ onMounted(() => {
 
 .action-form {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
 .form-control {
@@ -2119,8 +3515,9 @@ onMounted(() => {
 
 .rectified-photo-preview {
   width: 100%;
-  max-height: 220px;
-  object-fit: contain;
+  height: 180px;
+  max-height: none;
+  object-fit: cover;
   background: #f8fafc;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -2165,7 +3562,2036 @@ onMounted(() => {
 
 .create-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 8px;
+  justify-content: flex-end;
+}
+
+.detail-drawer-title {
+  display: flex;
+  gap: 18px;
+  align-items: baseline;
+  color: hsl(var(--foreground));
+}
+
+:global(.rectification-detail-drawer .ant-modal-content),
+:global(.rectification-action-modal .ant-modal-content) {
+  color: #172033;
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  box-shadow: 0 22px 64px rgb(15 40 75 / 14%);
+}
+
+:global(.rectification-detail-drawer) {
+  width: min(1320px, calc(100vw - 48px)) !important;
+}
+
+:global(.rectification-action-modal) {
+  width: min(1180px, calc(100vw - 48px)) !important;
+}
+
+:global(.rectification-action-modal-wrap) {
+  z-index: 2100 !important;
+}
+
+:global(.rectification-detail-drawer .ant-modal-header),
+:global(.rectification-action-modal .ant-modal-header) {
+  padding: 18px 22px 14px;
+  margin: 0;
+  background: #fff;
+  border-bottom: 1px solid #e7edf5;
+  border-radius: 12px 12px 0 0;
+}
+
+:global(.rectification-detail-drawer .ant-modal-body) {
+  max-height: calc(100vh - 118px);
+  padding: 0 18px 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+}
+
+:global(.rectification-detail-drawer .ant-modal-close),
+:global(.rectification-action-modal .ant-modal-close) {
+  color: #52627a;
+}
+
+.detail-drawer-title span {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.detail-drawer-title small {
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+
+.detail-status-overview {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  padding: 16px 18px;
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+}
+
+.detail-status-main {
+  display: flex;
+  flex: 0 0 220px;
+  gap: 12px;
+  align-items: center;
+  padding-right: 20px;
+  border-right: 1px solid #dbe3ef;
+}
+
+.detail-status-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  font-size: 22px;
+  color: #fff;
+  background: #1677ff;
+  border-radius: 50%;
+}
+
+.detail-status-overview[data-tone='success'] .detail-status-icon {
+  background: #0aaa62;
+}
+
+.detail-status-overview[data-tone='warning'] .detail-status-icon {
+  background: #d97706;
+}
+
+.detail-status-overview[data-tone='danger'] .detail-status-icon {
+  background: #e5484d;
+}
+
+.detail-status-overview[data-tone='neutral'] .detail-status-icon {
+  background: #64748b;
+}
+
+.detail-status-main strong,
+.detail-status-main span {
+  display: block;
+}
+
+.detail-status-main strong {
+  font-size: 19px;
+  color: #0f172a;
+}
+
+.detail-status-main div > span {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.detail-status-facts {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.detail-status-facts > div {
+  padding: 0 18px;
+  border-left: 1px solid #e2e8f0;
+}
+
+.detail-status-facts > div:first-child {
+  border-left: 0;
+}
+
+.detail-status-facts dt {
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.detail-status-facts dd {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin: 0;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.detail-status-facts svg {
+  color: #1677ff;
+}
+
+.order-action-bar > span {
+  margin-right: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.detail-tabs {
+  display: flex;
+  gap: 28px;
+  margin-top: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-tabs button {
+  position: relative;
+  padding: 13px 2px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
+.detail-tabs button.active {
+  color: #1677ff;
+}
+
+.detail-tabs button.active::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  content: '';
+  background: #1677ff;
+}
+
+.detail-tabs button:focus-visible {
+  outline: 2px solid #1677ff;
+  outline-offset: 2px;
+}
+
+.detail-tab-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px 0 6px;
+}
+
+.detail-tab-panel--result {
+  gap: 10px;
+}
+
+.detail-tab-panel--result .detail-section {
+  padding: 12px 14px;
+}
+
+.detail-tab-panel--result .evidence-card__body {
+  min-height: 162px;
+  padding: 10px;
+}
+
+.detail-tab-panel--result .evidence-card__media {
+  height: 138px;
+}
+
+.detail-tab-panel--result .rectification-detail-list dt,
+.detail-tab-panel--result .rectification-detail-list dd {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.detail-tab-panel--result .order-result-panel {
+  padding: 10px 14px;
+  margin-top: 0;
+}
+
+.result-ai-panel__heading {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.result-ai-panel__heading > span {
+  display: grid;
+  flex: 0 0 30px;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #1677ff;
+  background: #eaf3ff;
+  border-radius: 7px;
+}
+
+.detail-ai-strip {
+  background: #f8fbff;
+}
+
+.acceptance-brief,
+.result-status-banner {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  background: linear-gradient(90deg, #f1fcf7, #f8fffb);
+  border: 1px solid #bdebd3;
+  border-radius: 8px;
+}
+
+.acceptance-brief > span,
+.result-status-banner > span {
+  display: grid;
+  flex: 0 0 42px;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  font-size: 23px;
+  color: #fff;
+  background: #0aaa62;
+  border-radius: 50%;
+}
+
+.acceptance-brief > strong,
+.result-status-banner > strong {
+  flex: 0 0 auto;
+  font-size: 18px;
+  color: #079455;
+}
+
+.acceptance-brief dl,
+.result-status-banner dl {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.result-status-banner dl {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.acceptance-brief dl > div,
+.result-status-banner dl > div {
+  padding: 0 20px;
+  border-left: 1px solid #cee9dc;
+}
+
+.acceptance-brief dt,
+.result-status-banner dt {
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #718096;
+}
+
+.acceptance-brief dd,
+.result-status-banner dd {
+  margin: 0;
+  color: #1f365c;
+}
+
+.process-preview {
+  padding: 14px 0 0;
+}
+
+.process-preview .detail-section__title {
+  padding: 0 16px;
+}
+
+.evidence-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.evidence-card,
+.detail-section {
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+}
+
+.evidence-card h3,
+.action-evidence-grid h3 {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding: 12px 14px;
+  margin: 0;
+  font-size: 15px;
+  color: hsl(var(--foreground));
+  border-bottom: 1px solid #e7edf5;
+}
+
+.evidence-card h3 {
+  color: #172033;
+}
+
+.action-evidence-grid h3 {
+  color: #172033 !important;
+}
+
+.evidence-card h3 span,
+.action-evidence-grid h3 span {
+  width: 4px;
+  height: 18px;
+  background: #1677ff;
+  border-radius: 4px;
+}
+
+.evidence-card--after h3 span,
+.action-evidence-grid article:nth-child(2) h3 span {
+  background: #0aaa62;
+}
+
+.evidence-card__body {
+  display: grid;
+  grid-template-columns: minmax(180px, 44%) minmax(0, 1fr);
+  gap: 16px;
+  min-height: 182px;
+  padding: 12px;
+}
+
+.evidence-card__media {
+  width: 100%;
+  height: 156px;
+  object-fit: cover;
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.evidence-card__empty,
+.result-empty {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  color: #94a3b8;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+}
+
+.evidence-card__copy strong {
+  display: block;
+  margin: 8px 0;
+  color: #1e293b;
+}
+
+.evidence-card__copy p {
+  margin: 0;
+  line-height: 1.7;
+  color: #475569;
+}
+
+.evidence-card__copy small {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin-top: 9px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.evidence-card__copy small svg {
+  color: #5272a3;
+}
+
+.detail-callout {
+  display: grid;
+  grid-template-columns: 24px 90px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 12px 14px;
+  background: #f8fbff;
+  border: 1px solid #d7e7ff;
+  border-radius: 8px;
+}
+
+.detail-callout svg {
+  font-size: 19px;
+  color: #1677ff;
+}
+
+.detail-callout p {
+  margin: 0;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.detail-section {
+  padding: 16px;
+}
+
+.detail-section > h3,
+.detail-section__title h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #172033;
+}
+
+.detail-section__title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.detail-section__title p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.result-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 40%) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.result-layout--facts {
+  grid-template-columns: 1fr;
+}
+
+.result-description-card .detail-section__title {
+  margin-bottom: 10px;
+}
+
+.rectification-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+}
+
+.rectification-detail-list > div {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  grid-column: span 1;
+  min-width: 0;
+  border-top: 1px solid #edf1f6;
+}
+
+.rectification-detail-list > div:first-child {
+  border-top: 0;
+}
+
+.rectification-detail-list > div.wide {
+  grid-column: 1 / -1;
+}
+
+.rectification-detail-list dt,
+.rectification-detail-list dd {
+  min-width: 0;
+  padding: 11px 14px;
+  margin: 0;
+}
+
+.rectification-detail-list dt {
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.rectification-detail-list dd {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  line-height: 1.65;
+  color: #1e293b;
+  white-space: pre-line;
+}
+
+.rectification-detail-list dd svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: #1677ff;
+}
+
+.submission-record-card dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.submission-record-card dl > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 18px 0;
+  border-left: 1px solid #e2e8f0;
+}
+
+.submission-record-card dl > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.submission-record-card dt {
+  color: #64748b;
+}
+
+.submission-record-card dd {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  color: #1e293b;
+}
+
+.submission-record-card dd svg {
+  color: #1677ff;
+}
+
+.result-facts,
+.basic-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+  margin: 0;
+}
+
+.result-facts div,
+.basic-info-grid div {
+  min-width: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.result-facts .wide,
+.basic-info-grid .wide {
+  grid-column: 1 / -1;
+}
+
+.result-facts dt,
+.basic-info-grid dt {
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.result-facts dd,
+.basic-info-grid dd {
+  margin: 0;
+  line-height: 1.7;
+  color: #1e293b;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.detail-tab-panel--basic {
+  gap: 14px;
+  padding-top: 16px;
+}
+
+.basic-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.basic-info-card {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+}
+
+.basic-info-card h3 {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 15px 18px;
+  margin: 0;
+  font-size: 17px;
+  color: #172033;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.basic-info-card h3 svg {
+  font-size: 23px;
+  color: #1677ff;
+}
+
+.basic-info-card dl {
+  padding: 0 22px;
+  margin: 0;
+}
+
+.basic-info-card dl > div {
+  display: grid;
+  grid-template-columns: 142px minmax(0, 1fr);
+  min-height: 63px;
+  border-top: 1px solid #e7edf5;
+}
+
+.basic-info-card dl > div:first-child {
+  border-top: 0;
+}
+
+.basic-info-card dt,
+.basic-info-card dd {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+}
+
+.basic-info-card dt {
+  color: #64748b;
+}
+
+.basic-info-card dd {
+  color: #172033;
+  overflow-wrap: anywhere;
+}
+
+.basic-info-card dd strong {
+  font-weight: 600;
+}
+
+.basic-info-card dd .ant-btn {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding-right: 0;
+  margin-left: auto;
+}
+
+.basic-info-card dd.with-icon svg {
+  font-size: 18px;
+  color: #1677ff;
+}
+
+.basic-info-card .ant-tag {
+  color: #079455;
+  background: #def7e9;
+  border-color: transparent;
+}
+
+.basic-extension-panel {
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+}
+
+.basic-extension-panel summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  font-weight: 600;
+  color: #172033;
+  cursor: pointer;
+  list-style: none;
+}
+
+.basic-extension-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.basic-extension-panel summary span {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.basic-extension-panel summary span svg {
+  font-size: 20px;
+  color: #526987;
+}
+
+.basic-extension-panel[open] summary > svg {
+  transform: rotate(180deg);
+}
+
+.basic-extension-panel dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 0 18px 14px;
+  margin: 0;
+  border-top: 1px solid #e7edf5;
+}
+
+.basic-extension-panel dl > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 13px 18px 0;
+  border-left: 1px solid #e2e8f0;
+}
+
+.basic-extension-panel dl > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.basic-extension-panel dt {
+  color: #64748b;
+}
+
+.basic-extension-panel dd {
+  min-width: 0;
+  margin: 0;
+  color: #172033;
+}
+
+.acceptance-summary {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 18px;
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+}
+
+.acceptance-summary > span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font-size: 25px;
+  color: #1677ff;
+  background: #eaf3ff;
+  border-radius: 50%;
+}
+
+.acceptance-summary.is-passed {
+  background: #f2fbf7;
+  border-color: #bfead4;
+}
+
+.acceptance-summary.is-passed > span {
+  color: #0aaa62;
+  background: #dcf8e9;
+}
+
+.acceptance-summary strong {
+  font-size: 18px;
+  color: #172033;
+}
+
+.acceptance-summary p {
+  margin: 3px 0 0;
+  color: #475569;
+}
+
+.detail-tab-panel--acceptance {
+  gap: 8px;
+  padding-top: 10px;
+  padding-bottom: 0;
+}
+
+.acceptance-summary__copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.acceptance-summary dl {
+  display: grid;
+  flex: 0 0 47%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.acceptance-summary dl > div {
+  padding: 0 24px;
+  border-left: 1px solid #cce7d9;
+}
+
+.acceptance-summary dt {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.acceptance-summary dt svg {
+  font-size: 17px;
+  color: #1677ff;
+}
+
+.acceptance-summary dd {
+  margin: 0;
+  font-weight: 600;
+  color: #172033;
+}
+
+.detail-tab-panel--acceptance .detail-section {
+  padding: 10px 14px;
+}
+
+.acceptance-review-card > h3,
+.acceptance-evidence-card > h3,
+.acceptance-info-grid h3 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: #172033;
+}
+
+.acceptance-review-card > h3 > span {
+  width: 4px;
+  height: 18px;
+  background: #1677ff;
+  border-radius: 3px;
+}
+
+.acceptance-evidence-card > h3 svg,
+.acceptance-info-grid h3 svg {
+  font-size: 18px;
+  color: #1677ff;
+}
+
+.acceptance-review-table {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+}
+
+.acceptance-review-table__head,
+.acceptance-review-table__row {
+  display: grid;
+  grid-template-columns: 72px minmax(220px, 1.15fr) 190px minmax(300px, 1.65fr);
+  align-items: center;
+}
+
+.acceptance-review-table__head {
+  font-size: 12px;
+  color: #64748b;
+  background: #f6f8fb;
+}
+
+.acceptance-review-table__head > *,
+.acceptance-review-table__row > * {
+  min-width: 0;
+  padding: 8px 14px;
+  margin: 0;
+  border-left: 1px solid #e2e8f0;
+}
+
+.acceptance-review-table__head > *:first-child,
+.acceptance-review-table__row > *:first-child {
+  text-align: center;
+  border-left: 0;
+}
+
+.acceptance-review-table__row {
+  color: #334155;
+  border-top: 1px solid #e2e8f0;
+}
+
+.acceptance-review-result {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-weight: 700;
+  color: #079455;
+}
+
+.acceptance-review-result svg {
+  font-size: 18px;
+}
+
+.acceptance-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.acceptance-opinion-card > p {
+  min-height: 66px;
+  padding: 12px 14px;
+  margin: 0;
+  line-height: 1.7;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.acceptance-meta-card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 16px;
+  margin: 0;
+}
+
+.acceptance-meta-card dl > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.acceptance-meta-card dt {
+  color: #64748b;
+}
+
+.acceptance-meta-card dd {
+  margin: 0;
+  color: #172033;
+}
+
+.acceptance-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.acceptance-evidence-grid article {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+}
+
+.acceptance-evidence-grid article + article {
+  padding-left: 22px;
+  border-left: 1px solid #e2e8f0;
+}
+
+.acceptance-evidence-grid img {
+  width: 100%;
+  height: 82px;
+  object-fit: cover;
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.acceptance-evidence-grid strong {
+  color: #172033;
+}
+
+.acceptance-evidence-grid p {
+  display: -webkit-box;
+  margin: 5px 0;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  line-height: 1.55;
+  color: #475569;
+  -webkit-box-orient: vertical;
+}
+
+.acceptance-evidence-grid time {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.acceptance-ai-panel {
+  padding: 0;
+  margin-top: 0;
+}
+
+.acceptance-ai-panel summary {
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.acceptance-ai-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.acceptance-ai-panel summary h3 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.acceptance-ai-panel summary h3 svg,
+.acceptance-ai-panel summary > svg {
+  color: #1677ff;
+}
+
+.acceptance-ai-panel[open] {
+  padding-bottom: 12px;
+}
+
+.acceptance-ai-panel[open] > :not(summary) {
+  margin-right: 14px;
+  margin-left: 14px;
+}
+
+.acceptance-ai-panel[open] summary > svg {
+  transform: rotate(180deg);
+}
+
+.acceptance-closure-bar {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8fffb;
+  border: 1px solid #bfead4;
+  border-radius: 8px;
+}
+
+.acceptance-closure-bar > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  background: #0aaa62;
+  border-radius: 50%;
+}
+
+.acceptance-closure-bar > strong {
+  color: #172033;
+}
+
+.acceptance-closure-bar > b {
+  padding-right: 24px;
+  color: #079455;
+  border-right: 1px solid #cce7d9;
+}
+
+.acceptance-closure-bar > div {
+  display: flex;
+  flex: 1;
+  gap: 14px;
+  color: #334155;
+}
+
+.acceptance-closure-bar small {
+  color: #64748b;
+}
+
+.inline-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.process-table {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+}
+
+.process-table__head,
+.process-row {
+  display: grid;
+  grid-template-columns: 180px minmax(320px, 1fr) 150px 110px;
+  gap: 16px;
+  align-items: start;
+  padding: 12px 16px;
+}
+
+.process-table__head {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f6f8fb;
+}
+
+.process-row {
+  position: relative;
+  border-top: 1px solid #edf1f6;
+}
+
+.process-row time,
+.process-row > span {
+  color: #64748b;
+}
+
+.process-row__content strong {
+  color: #172033;
+}
+
+.process-row__content p {
+  margin: 3px 0 0;
+  color: #64748b;
+}
+
+.process-row details {
+  margin-top: 8px;
+}
+
+.process-row summary {
+  color: #1677ff;
+  cursor: pointer;
+}
+
+.detail-tab-panel--history {
+  gap: 14px;
+  padding-top: 18px;
+}
+
+.history-record-card {
+  padding: 16px;
+}
+
+.history-toolbar {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.history-toolbar__title {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 300px;
+}
+
+.history-toolbar__title > span {
+  width: 5px;
+  height: 22px;
+  background: #1677ff;
+  border-radius: 4px;
+}
+
+.history-toolbar__title h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #172033;
+}
+
+.history-toolbar__title p {
+  margin: 0 0 0 8px;
+  color: #64748b;
+}
+
+.history-toolbar__title b {
+  font-weight: 600;
+  color: #079455;
+}
+
+.history-toolbar__filters {
+  display: grid;
+  grid-template-columns: 150px 170px 260px;
+  gap: 10px;
+}
+
+.process-table--history {
+  border-color: #dbe3ef;
+}
+
+.process-table--history .process-table__head,
+.process-table--history .process-row {
+  grid-template-columns: 240px minmax(360px, 1fr) 190px 100px;
+  gap: 0;
+  padding: 0;
+}
+
+.process-table--history .process-table__head > span {
+  padding: 11px 16px;
+}
+
+.process-table--history .process-row {
+  align-items: stretch;
+  min-height: 76px;
+}
+
+.process-table--history .process-row > * {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 13px 16px;
+}
+
+.process-table--history .process-row.is-final {
+  background: #f2fbf7;
+  border-color: #bfead4;
+}
+
+.process-row__time {
+  position: relative;
+  color: #526987;
+}
+
+.process-row__marker {
+  position: absolute;
+  top: 50%;
+  right: -13px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: #1677ff;
+  background: #ddecff;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.process-row__marker::before,
+.process-row__marker::after {
+  position: absolute;
+  right: 9px;
+  width: 1px;
+  height: 30px;
+  content: '';
+  background: #bad5f4;
+}
+
+.process-row__marker::before {
+  bottom: 21px;
+}
+
+.process-row__marker::after {
+  top: 21px;
+}
+
+.process-table--history .process-row:first-of-type .process-row__marker::before,
+.process-table--history .process-row:last-of-type .process-row__marker::after {
+  display: none;
+}
+
+.process-table--history .process-row.is-final .process-row__marker {
+  right: -19px;
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
+  color: #fff;
+  background: #0aaa62;
+  border-color: #d8f5e6;
+  box-shadow: 0 0 0 1px #9cdec0;
+}
+
+.process-table--history .process-row__content {
+  display: grid;
+  grid-template-columns: 135px minmax(0, 1fr);
+  gap: 8px 18px;
+  align-content: center;
+  padding-left: 52px;
+}
+
+.process-table--history .process-row__content strong {
+  font-size: 16px;
+}
+
+.process-table--history .process-row.is-final .process-row__content strong {
+  color: #079455;
+}
+
+.process-table--history .process-row__content p {
+  margin: 0;
+}
+
+.process-table--history .process-row__content details {
+  grid-column: 2;
+  margin: 0;
+}
+
+.process-row__operator {
+  gap: 8px;
+  color: #172033 !important;
+}
+
+.process-row__operator svg {
+  font-size: 17px;
+  color: #1677ff;
+}
+
+.process-table--history .ant-tag {
+  place-self: center start;
+  width: fit-content;
+}
+
+.process-table--history .process-row:not(.is-final) .ant-tag {
+  color: #1677ff;
+  background: #eaf3ff;
+  border-color: transparent;
+}
+
+.process-table--history .process-row.is-final .ant-tag {
+  color: #079455;
+  background: #def7e9;
+  border-color: transparent;
+}
+
+:global(
+  .rectification-detail-drawer
+    .history-toolbar__filters
+    .ant-input-affix-wrapper
+) {
+  color: #172033;
+  background: #fff;
+  border-color: #dbe3ef;
+}
+
+:global(
+  .rectification-detail-drawer .history-toolbar__filters .ant-select-selector
+) {
+  border-color: #dbe3ef !important;
+}
+
+:global(
+  .rectification-detail-drawer .history-toolbar__filters input::placeholder
+) {
+  color: #94a3b8;
+}
+
+:global(
+  .rectification-detail-drawer
+    .history-toolbar__filters
+    .ant-input-group-addon
+    .ant-btn
+) {
+  color: #1677ff;
+  background: #fff;
+  border-color: #d9d9d9;
+}
+
+.history-empty {
+  display: grid;
+  gap: 8px;
+  place-items: center;
+  min-height: 220px;
+  color: #94a3b8;
+}
+
+.history-empty svg {
+  font-size: 26px;
+}
+
+.system-log-panel {
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+}
+
+.system-log-panel summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  font-weight: 600;
+  color: #172033;
+  cursor: pointer;
+  list-style: none;
+}
+
+.system-log-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.system-log-panel summary span {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.system-log-panel summary span svg {
+  font-size: 20px;
+  color: #526987;
+}
+
+.system-log-panel[open] summary > svg {
+  transform: rotate(180deg);
+}
+
+.system-log-panel p {
+  padding: 0 18px 14px;
+  margin: 0;
+  color: #64748b;
+}
+
+.history-export-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.history-export-row .ant-btn {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.action-card-title {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-right: 32px;
+}
+
+.action-card-title__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: 21px;
+  color: #fff;
+  background: #1677ff;
+  border-radius: 50%;
+}
+
+.action-card-title div {
+  display: grid;
+  gap: 2px;
+}
+
+.action-card-title strong {
+  font-size: 19px;
+  color: #172033 !important;
+}
+
+.action-card-title small {
+  font-weight: 400;
+  color: #64748b !important;
+}
+
+.action-card-title .ant-tag {
+  margin-left: 8px;
+}
+
+.action-hazard-summary {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 14px;
+  background: #f7faff;
+  border: 1px solid #dfebfb;
+  border-radius: 8px;
+}
+
+.action-hazard-summary__media img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.action-hazard-summary strong {
+  display: block;
+  margin: 8px 0;
+  font-size: 16px;
+  color: #172033;
+}
+
+.action-hazard-summary p {
+  margin: 0;
+  color: #64748b;
+}
+
+.section-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1677ff;
+}
+
+.action-form-section {
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.action-form-section h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: #172033 !important;
+}
+
+.action-form-section b,
+.field-stack b,
+.action-form-grid label > span b {
+  color: #ef4444;
+}
+
+.action-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.action-form-grid label,
+.field-stack {
+  display: grid;
+  gap: 7px;
+}
+
+.action-form-grid label > span,
+.field-stack > span {
+  font-weight: 600;
+  color: #172033 !important;
+}
+
+.action-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.action-evidence-grid article {
+  overflow: hidden;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+}
+
+.action-evidence-body {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.action-evidence-body img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.action-evidence-body p {
+  min-height: 42px;
+  margin: 0;
+  color: #64748b;
+}
+
+.evidence-upload {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  font-size: 14px;
+  color: #1677ff;
+  cursor: pointer;
+  background: #f8fbff;
+  border: 1px dashed #9cc6ff;
+  border-radius: 6px;
+}
+
+.evidence-upload svg {
+  align-self: end;
+  font-size: 30px;
+}
+
+.evidence-upload span {
+  align-self: start;
+}
+
+.ai-assist-strip {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  background: #f4f8ff;
+  border: 1px solid #d7e7ff;
+  border-radius: 8px;
+}
+
+.ai-assist-strip > svg {
+  font-size: 20px;
+  color: #1677ff;
+}
+
+.ai-assist-strip p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+.acceptance-checklist {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+}
+
+.acceptance-checklist li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 12px;
+  border-top: 1px solid #edf1f6;
+}
+
+.acceptance-checklist li:first-child {
+  border-top: 0;
+}
+
+.acceptance-checklist svg {
+  font-size: 19px;
+  color: #0aaa62;
+}
+
+.acceptance-decision {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.acceptance-decision button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+}
+
+.acceptance-decision button.active {
+  color: #079455;
+  background: #f0fdf6;
+  border-color: #12b76a;
+}
+
+.acceptance-decision button.active.danger {
+  color: #dc2626;
+  background: #fff6f6;
+  border-color: #ef4444;
+}
+
+.action-modal-footer {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.action-modal-footer > span {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+.action-modal-footer > div {
+  display: flex;
+  gap: 10px;
+}
+
+:global(.rectification-action-modal .ant-modal-body) {
+  max-height: calc(100vh - 220px);
+  padding: 18px 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+}
+
+:global(.rectification-action-modal .ant-modal-footer) {
+  padding: 14px 22px;
+  margin: 0;
+  background: #fff;
+  border-top: 1px solid #e7edf5;
+  border-radius: 0 0 12px 12px;
+}
+
+:global(.rectification-detail-drawer .ant-select-selector),
+:global(.rectification-action-modal .ant-select-selector),
+:global(.rectification-detail-drawer .ant-input),
+:global(.rectification-action-modal .ant-input),
+:global(.rectification-action-modal .ant-picker) {
+  color: #172033 !important;
+  background: #fff !important;
+}
+
+:global(.rectification-action-modal .ant-input::placeholder) {
+  color: #94a3b8;
+}
+
+:global(.dark) .detail-drawer-title span,
+:global(.dark) .action-card-title strong,
+:global(.dark) .action-form-section h3,
+:global(.dark) .action-form-grid label > span,
+:global(.dark) .field-stack > span {
+  color: #172033;
+}
+
+:global(.dark) .detail-drawer-title small,
+:global(.dark) .action-card-title small,
+:global(.dark) .action-modal-footer > span,
+:global(.dark) .ai-assist-strip p {
+  color: #64748b;
+}
+
+:global(.dark) .action-form-section,
+:global(.dark) .action-evidence-grid article {
+  border-color: #dbe3ef;
+}
+
+:global(.dark) .acceptance-decision button {
+  color: #172033;
+  background: #fff;
+  border-color: #cbd5e1;
+}
+
+:global(.dark) .acceptance-decision button.active {
+  color: #079455;
+  background: #f0fdf6;
+  border-color: #12b76a;
+}
+
+:global(.dark) .acceptance-decision button.active.danger {
+  color: #dc2626;
+  background: #fff6f6;
+  border-color: #ef4444;
+}
+
+@media (max-width: 900px) {
+  .detail-status-overview {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-status-main {
+    flex-basis: auto;
+    width: 100%;
+    padding-right: 0;
+    padding-bottom: 12px;
+    border-right: 0;
+    border-bottom: 1px solid #dbe3ef;
+  }
+
+  .detail-status-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+  }
+
+  .detail-status-facts > div {
+    padding: 0;
+    border-left: 0;
+  }
+
+  .evidence-compare-grid,
+  .action-evidence-grid,
+  .result-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .process-table__head {
+    display: none;
+  }
+
+  .process-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .acceptance-brief,
+  .result-status-banner {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .acceptance-brief dl,
+  .result-status-banner dl {
+    flex-basis: 100%;
+  }
+
+  .acceptance-summary {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .acceptance-summary dl {
+    flex-basis: 100%;
+  }
+
+  .acceptance-info-grid,
+  .acceptance-evidence-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .acceptance-evidence-grid article + article {
+    padding-top: 10px;
+    padding-left: 0;
+    border-top: 1px solid #e2e8f0;
+    border-left: 0;
+  }
+
+  .acceptance-review-table {
+    overflow-x: auto;
+  }
+
+  .acceptance-review-table__head,
+  .acceptance-review-table__row {
+    min-width: 850px;
+  }
+
+  .history-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .history-toolbar__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(220px, 1.4fr);
+  }
+
+  .process-table--history {
+    overflow-x: auto;
+  }
+
+  .process-table--history .process-table__head {
+    display: grid;
+  }
+
+  .process-table--history .process-table__head,
+  .process-table--history .process-row {
+    grid-template-columns: 210px minmax(420px, 1fr) 170px 100px;
+    min-width: 980px;
+  }
+
+  .basic-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .basic-extension-panel dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .basic-extension-panel dl > div:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .detail-tabs {
+    gap: 8px;
+    overflow-x: auto;
+  }
+
+  .detail-tabs button {
+    flex: 0 0 auto;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .detail-status-facts,
+  .action-form-grid,
+  .basic-info-grid,
+  .result-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-card__body,
+  .action-hazard-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .action-modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-modal-footer > div {
+    justify-content: flex-end;
+  }
+
+  .acceptance-brief dl,
+  .result-status-banner dl {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .acceptance-brief dl > div,
+  .result-status-banner dl > div {
+    padding: 0;
+    border-left: 0;
+  }
+
+  .rectification-detail-list,
+  .submission-record-card dl {
+    grid-template-columns: 1fr;
+  }
+
+  .rectification-detail-list > div {
+    grid-template-columns: 112px minmax(0, 1fr);
+    grid-column: 1;
+  }
+
+  .submission-record-card dl > div {
+    padding: 10px 0;
+    border-top: 1px solid #e2e8f0;
+    border-left: 0;
+  }
+
+  .acceptance-summary dl {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .acceptance-summary dl > div {
+    padding: 0;
+    border-left: 0;
+  }
+
+  .acceptance-evidence-grid article {
+    grid-template-columns: 1fr;
+  }
+
+  .acceptance-evidence-grid img {
+    height: 140px;
+  }
+
+  .acceptance-meta-card dl {
+    grid-template-columns: 1fr;
+  }
+
+  .acceptance-closure-bar {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .acceptance-closure-bar > div {
+    flex-basis: 100%;
+  }
+
+  .history-toolbar__title {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .history-toolbar__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .process-table--history .process-table__head {
+    display: none;
+  }
+
+  .process-table--history .process-row {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .process-table--history .process-row > * {
+    padding: 8px 12px;
+  }
+
+  .process-table--history .process-row__content {
+    grid-template-columns: 1fr;
+    padding-left: 12px;
+  }
+
+  .process-table--history .process-row__content details {
+    grid-column: 1;
+  }
+
+  .process-row__marker {
+    display: none;
+  }
+
+  .basic-info-card dl > div {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+
+  .basic-extension-panel dl {
+    grid-template-columns: 1fr;
+  }
+
+  .basic-extension-panel dl > div {
+    padding: 10px 0;
+    border-top: 1px solid #e2e8f0;
+    border-left: 0;
+  }
 }
 </style>
