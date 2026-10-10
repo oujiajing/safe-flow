@@ -22,6 +22,7 @@ import {
   Select,
   Table,
   Tag,
+  TimePicker,
 } from 'ant-design-vue';
 
 import {
@@ -186,7 +187,8 @@ const actionForm = reactive({
   acceptanceUserInput: '',
   afterPhoto: '',
   cancelReason: '',
-  rectificationDeadline: '',
+  rectificationDeadlineDate: '',
+  rectificationDeadlineTime: '18:00',
   rectificationDepartmentId: undefined as
     | PinganHazardRectificationOrderApi.Id
     | undefined,
@@ -681,7 +683,8 @@ function resetActionForm() {
   actionForm.acceptanceUserInput = '';
   actionForm.afterPhoto = '';
   actionForm.cancelReason = '';
-  actionForm.rectificationDeadline = '';
+  actionForm.rectificationDeadlineDate = '';
+  actionForm.rectificationDeadlineTime = '18:00';
   actionForm.rectificationDepartmentId = undefined;
   actionForm.rectificationDescription = '';
   actionForm.rectificationRequirement = '';
@@ -1228,7 +1231,7 @@ function actionPayload(): Record<string, unknown> {
           actionForm.acceptanceUserInput,
         ),
         rectificationDepartmentId: actionForm.rectificationDepartmentId,
-        rectificationDeadline: actionForm.rectificationDeadline,
+        rectificationDeadline: selectedRectificationDeadline(),
         rectificationRequirement: actionForm.rectificationRequirement,
         rectificationResponsibleUserId:
           selectedRectificationResponsibleUserId(),
@@ -1261,6 +1264,12 @@ function actionPayload(): Record<string, unknown> {
       return {};
     }
   }
+}
+
+function selectedRectificationDeadline() {
+  const date = actionForm.rectificationDeadlineDate.trim();
+  const time = actionForm.rectificationDeadlineTime.trim();
+  return date && time ? `${date} ${time}` : '';
 }
 
 function unknownToText(value: unknown) {
@@ -1407,6 +1416,13 @@ async function submitAction() {
     !actionForm.acceptanceRequirement.trim()
   ) {
     message.error('请填写验收标准');
+    return;
+  }
+  if (
+    currentAction.value === 'ISSUE_RECTIFICATION' &&
+    !selectedRectificationDeadline()
+  ) {
+    message.error('请选择完整的整改日期和时间');
     return;
   }
   if (
@@ -3102,14 +3118,23 @@ onMounted(() => {
                   :options="editableUserOptions"
                   placeholder="请选择或输入整改责任人"
               /><small class="person-input-hint">演示模式：可选择建议人员，也可直接输入任意姓名</small></label>
-              <label><span><b>*</b> 整改期限</span><DatePicker
-                  v-model:value="actionForm.rectificationDeadline"
-                  class="form-control"
-                  format="YYYY-MM-DD HH:mm"
-                  placeholder="整改期限：2026-06-05 18:30"
-                  :show-time="{ format: 'HH:mm' }"
-                  value-format="YYYY-MM-DD HH:mm"
-              /></label>
+              <label><span><b>*</b> 整改期限</span><div
+                  class="deadline-picker-group"
+                ><DatePicker
+                    v-model:value="actionForm.rectificationDeadlineDate"
+                    class="form-control"
+                    format="YYYY-MM-DD"
+                    placeholder="选择日期"
+                    value-format="YYYY-MM-DD"
+                  /><TimePicker
+                    v-model:value="actionForm.rectificationDeadlineTime"
+                    allow-clear
+                    class="form-control"
+                    format="HH:mm"
+                    :minute-step="5"
+                    placeholder="选择时间"
+                    value-format="HH:mm"
+                /></div><small class="person-input-hint">日期和时间均可选择，默认时间为 18:00</small></label>
               <label><span>验收人</span><AutoComplete
                   v-model:value="actionForm.acceptanceUserInput"
                   allow-clear
@@ -5301,6 +5326,16 @@ onMounted(() => {
   margin-top: -2px;
   font-size: 12px;
   color: #8793a8;
+}
+
+.deadline-picker-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(110px, 0.65fr);
+  gap: 8px;
+}
+
+.deadline-picker-group :deep(.ant-picker) {
+  width: 100%;
 }
 
 .supplemental-attachment-input {

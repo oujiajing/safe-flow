@@ -136,11 +136,15 @@ describe('hazard rectification order page', () => {
 
     expect(page).toContain('DatePicker');
     expect(page).toContain('<DatePicker');
-    expect(page).toContain('show-time');
-    expect(page).toContain('format="YYYY-MM-DD HH:mm"');
-    expect(page).toContain('value-format="YYYY-MM-DD HH:mm"');
-    expect(page).toContain('placeholder="整改期限：2026-06-05 18:30"');
-    expect(page).not.toContain('placeholder="整改期限：2026-09-20 18:00:00"');
+    expect(page).toContain('TimePicker');
+    expect(page).toContain('actionForm.rectificationDeadlineDate');
+    expect(page).toContain('actionForm.rectificationDeadlineTime');
+    expect(page).toContain('placeholder="选择日期"');
+    expect(page).toContain('placeholder="选择时间"');
+    expect(page).toContain(':minute-step="5"');
+    expect(page).toContain("rectificationDeadlineTime: '18:00'");
+    expect(page).toContain('function selectedRectificationDeadline()');
+    expect(page).toContain("message.error('请选择完整的整改日期和时间')");
   });
 
   it('uploads rectification completion photos through the order attachment api instead of data urls', () => {
