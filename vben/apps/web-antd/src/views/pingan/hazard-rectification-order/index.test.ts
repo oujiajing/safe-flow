@@ -210,8 +210,15 @@ describe('hazard rectification order page', () => {
     expect(page).toContain("{ key: 'history', label: '处理记录' }");
     expect(page).toContain("{ key: 'basic', label: '基础信息' }");
     expect(page).toContain('class="detail-status-overview"');
+    expect(page).not.toContain('当前待办');
+    expect(page).toMatch(
+      /\.detail-status-icon\s*\{[^}]*align-items:\s*center;[^}]*justify-content:\s*center;/,
+    );
     expect(page).toContain('class="evidence-compare-grid"');
     expect(page).toContain('class="process-table"');
+    expect(page).toMatch(
+      /\.process-preview \.process-row__content\s*\{[^}]*text-align:\s*right;/,
+    );
     expect(page).toContain('class="rectification-detail-drawer"');
     expect(page).toContain(':width="1320"');
     expect(page).toContain('centered');
@@ -280,7 +287,7 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('提交后将进入下一流程节点并保留操作记录');
   });
 
-  it('allows selecting an acceptance user when accepting or rejecting acceptance', () => {
+  it('allows selecting or entering an acceptance user when accepting or rejecting acceptance', () => {
     const page = readFileSync(
       appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
       'utf8',
@@ -292,9 +299,16 @@ describe('hazard rectification order page', () => {
     expect(page).toMatch(
       /case 'REJECT_ACCEPTANCE':\s+\{\s+return \{[\s\S]*acceptanceUserId: selectedAcceptanceUserId\(\)/,
     );
+    expect(page).toMatch(
+      /case 'ACCEPT':\s+\{\s+return \{[\s\S]*acceptanceUserName: editableUserIdentity/,
+    );
+    expect(page).toMatch(
+      /case 'REJECT_ACCEPTANCE':\s+\{\s+return \{[\s\S]*acceptanceUserName: editableUserIdentity/,
+    );
     expect(page).toContain('function selectedAcceptanceUserId()');
     expect(page).toContain('function actionRequiresAcceptanceUser()');
-    expect(page).toContain('请选择验收人');
+    expect(page).toContain('function hasAcceptanceUserSelection()');
+    expect(page).toContain('请选择或填写验收人');
     expect(page).not.toContain('验收人必须是数字');
     expect(page).toContain('String(currentOrder.value.acceptanceUserId)');
     expect(page).toContain('const acceptanceUserOptions = computed');
@@ -308,9 +322,13 @@ describe('hazard rectification order page', () => {
       'v-else-if="currentAction === \'REJECT_ACCEPTANCE\'"',
     );
     expect(page).toContain('acceptance-user-input');
-    expect(page).toContain('placeholder="请选择验收人"');
+    expect(page).toContain('placeholder="请选择或输入验收人"');
     expect(page).toMatch(
-      /<Select\s+[\s\S]*v-model:value="actionForm\.acceptanceUserId"[\s\S]*:options="acceptanceUserOptions"[\s\S]*show-search/,
+      /<AutoComplete\s+[\s\S]*v-model:value="actionForm\.acceptanceUserInput"[\s\S]*:options="editableUserOptions"/,
+    );
+    expect(page).toContain('popup-class-name="rectification-person-dropdown"');
+    expect(page).toMatch(
+      /:global\(\.rectification-person-dropdown\)\s*\{[^}]*z-index:\s*2200\s*!important;/,
     );
     expect(page).toContain('placeholder="验收意见"');
     expect(page).toContain('placeholder="驳回原因"');
@@ -378,7 +396,7 @@ describe('hazard rectification order page', () => {
     expect(page).toContain("rectificationResponsibleUserId: '整改责任人'");
     expect(page).toContain('placeholder="请选择或输入整改责任人"');
     expect(page).toContain('placeholder="请选择验收人"');
-    expect(page).toContain("message.error('请选择验收人')");
+    expect(page).toContain("message.error('请选择或填写验收人')");
     expect(page).not.toContain('验收人必须是数字');
     expect(page).not.toContain('整改责任人ID');
     expect(page).not.toContain('验收人ID');

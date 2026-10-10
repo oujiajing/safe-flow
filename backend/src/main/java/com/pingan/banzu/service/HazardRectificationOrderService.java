@@ -1105,14 +1105,20 @@ public class HazardRectificationOrderService {
         order.acceptanceRequirement = firstText(payload, "acceptanceRequirement");
       }
       case "ACCEPT" -> {
-        Long selectedAcceptanceUserId = longValue(payload.get("acceptanceUserId"));
-        if (selectedAcceptanceUserId == null) {
+        String selectedAcceptanceUserName = firstText(payload, "acceptanceUserName");
+        Long selectedAcceptanceUserId =
+            resolveOptionalUserId(payload, "acceptanceUserId", "acceptanceUserName");
+        if (selectedAcceptanceUserId == null && isBlank(selectedAcceptanceUserName)) {
           validateAcceptanceOperator(order, user.userId());
-        } else {
+        } else if (selectedAcceptanceUserId != null) {
           validateAcceptanceUser(order, selectedAcceptanceUserId);
           order.acceptanceUserId = selectedAcceptanceUserId;
+        } else {
+          order.acceptanceUserId = null;
         }
-        if (order.acceptanceUserId == null && order.acceptanceDepartmentId == null) {
+        if (order.acceptanceUserId == null
+            && order.acceptanceDepartmentId == null
+            && isBlank(selectedAcceptanceUserName)) {
           throw new BusinessException("验收人或验收部门不能为空");
         }
         order.acceptanceAt = LocalDateTime.now();
@@ -1124,14 +1130,20 @@ public class HazardRectificationOrderService {
         order.acceptanceRemark = firstText(payload, "acceptanceRemark", "remark");
       }
       case "REJECT_ACCEPTANCE" -> {
-        Long selectedAcceptanceUserId = longValue(payload.get("acceptanceUserId"));
-        if (selectedAcceptanceUserId == null) {
+        String selectedAcceptanceUserName = firstText(payload, "acceptanceUserName");
+        Long selectedAcceptanceUserId =
+            resolveOptionalUserId(payload, "acceptanceUserId", "acceptanceUserName");
+        if (selectedAcceptanceUserId == null && isBlank(selectedAcceptanceUserName)) {
           validateAcceptanceOperator(order, user.userId());
-        } else {
+        } else if (selectedAcceptanceUserId != null) {
           validateAcceptanceUser(order, selectedAcceptanceUserId);
           order.acceptanceUserId = selectedAcceptanceUserId;
+        } else {
+          order.acceptanceUserId = null;
         }
-        if (order.acceptanceUserId == null && order.acceptanceDepartmentId == null) {
+        if (order.acceptanceUserId == null
+            && order.acceptanceDepartmentId == null
+            && isBlank(selectedAcceptanceUserName)) {
           throw new BusinessException("验收人或验收部门不能为空");
         }
         order.acceptanceAt = LocalDateTime.now();

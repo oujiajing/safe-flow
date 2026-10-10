@@ -720,6 +720,10 @@ async function openAction(action: PinganHazardRectificationOrderApi.Action) {
     actionForm.acceptanceUserId = currentOrder.value?.acceptanceUserId
       ? String(currentOrder.value.acceptanceUserId)
       : undefined;
+    if (action === 'ACCEPT' || action === 'REJECT_ACCEPTANCE') {
+      actionForm.acceptanceUserInput =
+        currentOrder.value?.acceptanceUserName ?? '';
+    }
     actionForm.acceptanceRequirement =
       currentOrder.value?.acceptanceRequirement?.trim()
         ? numberedListText(
@@ -1156,9 +1160,10 @@ async function submitManualOrder() {
 }
 
 function selectedAcceptanceUserId() {
-  if (currentAction.value === 'ISSUE_RECTIFICATION') {
-    return editableUser(actionForm.acceptanceUserInput)?.id;
-  }
+  const editableAcceptanceUser = editableUser(
+    actionForm.acceptanceUserInput,
+  );
+  if (editableAcceptanceUser) return editableAcceptanceUser.id;
   const value = Number(actionForm.acceptanceUserId);
   return Number.isSafeInteger(value) && value > 0 ? value : undefined;
 }
@@ -1206,6 +1211,12 @@ function actionRequiresAcceptanceUser() {
   );
 }
 
+function hasAcceptanceUserSelection() {
+  return Boolean(
+    actionForm.acceptanceUserInput.trim() || selectedAcceptanceUserId(),
+  );
+}
+
 function actionPayload(): Record<string, unknown> {
   switch (currentAction.value) {
     case 'ACCEPT': {
@@ -1213,6 +1224,9 @@ function actionPayload(): Record<string, unknown> {
         acceptanceRequirement: actionForm.acceptanceRequirement,
         acceptanceRemark: actionForm.acceptanceRemark,
         acceptanceUserId: selectedAcceptanceUserId(),
+        acceptanceUserName: editableUserIdentity(
+          actionForm.acceptanceUserInput,
+        ),
       };
     }
     case 'CANCEL': {
@@ -1246,6 +1260,9 @@ function actionPayload(): Record<string, unknown> {
     case 'REJECT_ACCEPTANCE': {
       return {
         acceptanceUserId: selectedAcceptanceUserId(),
+        acceptanceUserName: editableUserIdentity(
+          actionForm.acceptanceUserInput,
+        ),
         rejectReason: actionForm.rejectReason,
       };
     }
@@ -1428,8 +1445,8 @@ async function submitAction() {
     message.error('请选择验收部门或填写验收人');
     return;
   }
-  if (actionRequiresAcceptanceUser() && !selectedAcceptanceUserId()) {
-    message.error('请选择验收人');
+  if (actionRequiresAcceptanceUser() && !hasAcceptanceUserSelection()) {
+    message.error('请选择或填写验收人');
     return;
   }
   if (currentAction.value === 'CANCEL' && !actionForm.cancelReason.trim()) {
@@ -2009,7 +2026,6 @@ onMounted(() => {
         </section>
 
         <section v-if="availableActions.length > 0" class="order-action-bar">
-          <span>当前待办</span>
           <Button
             v-for="action in availableActions"
             :key="action"
@@ -3112,6 +3128,7 @@ onMounted(() => {
                   class="form-control person-combobox"
                   :options="editableUserOptions"
                   placeholder="请选择或输入整改责任人"
+                  popup-class-name="rectification-person-dropdown"
               /><small class="person-input-hint">演示模式：可选择建议人员，也可直接输入任意姓名</small></label>
               <label><span><b>*</b> 整改期限</span><input
                   v-model="actionForm.rectificationDeadline"
@@ -3126,6 +3143,7 @@ onMounted(() => {
                   class="form-control acceptance-user-input person-combobox"
                   :options="editableUserOptions"
                   placeholder="请选择或输入验收人"
+                  popup-class-name="rectification-person-dropdown"
               /><small class="person-input-hint">选填；演示模式下支持直接输入任意姓名</small></label>
             </div>
           </section>
@@ -3284,6 +3302,7 @@ onMounted(() => {
             option-filter-prop="label"
             option-label-prop="label"
             placeholder="请选择验收人"
+            popup-class-name="rectification-person-dropdown"
             show-search
           />
           <Input.TextArea
@@ -3365,16 +3384,17 @@ onMounted(() => {
             </div>
           </section>
           <div class="acceptance-action-fields action-form-grid">
-            <Select
-              v-model:value="actionForm.acceptanceUserId"
-              allow-clear
-              class="form-control acceptance-user-input"
-              :options="acceptanceUserOptions"
-              option-filter-prop="label"
-              option-label-prop="label"
-              placeholder="请选择验收人"
-              show-search
-            />
+            <div class="acceptance-person-field">
+              <AutoComplete
+                v-model:value="actionForm.acceptanceUserInput"
+                allow-clear
+                class="form-control acceptance-user-input person-combobox"
+                :options="editableUserOptions"
+                placeholder="请选择或输入验收人"
+                popup-class-name="rectification-person-dropdown"
+              />
+              <small class="person-input-hint">演示模式：可选择建议人员，也可直接输入任意姓名</small>
+            </div>
             <Input.TextArea
               v-model:value="actionForm.acceptanceRequirement"
               :rows="4"
@@ -3404,16 +3424,17 @@ onMounted(() => {
             </div>
           </section>
           <div class="acceptance-action-fields">
-            <Select
-              v-model:value="actionForm.acceptanceUserId"
-              allow-clear
-              class="form-control acceptance-user-input"
-              :options="acceptanceUserOptions"
-              option-filter-prop="label"
-              option-label-prop="label"
-              placeholder="请选择验收人"
-              show-search
-            />
+            <div class="acceptance-person-field">
+              <AutoComplete
+                v-model:value="actionForm.acceptanceUserInput"
+                allow-clear
+                class="form-control acceptance-user-input person-combobox"
+                :options="editableUserOptions"
+                placeholder="请选择或输入验收人"
+                popup-class-name="rectification-person-dropdown"
+              />
+              <small class="person-input-hint">演示模式：可选择建议人员，也可直接输入任意姓名</small>
+            </div>
             <Input.TextArea
               v-model:value="actionForm.rejectReason"
               placeholder="驳回原因"
@@ -3833,14 +3854,23 @@ onMounted(() => {
 }
 
 .detail-status-icon {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex: 0 0 42px;
+  align-items: center;
+  justify-content: center;
   width: 42px;
   height: 42px;
   font-size: 22px;
+  line-height: 1;
   color: #fff;
   background: #1677ff;
   border-radius: 50%;
+}
+
+.detail-status-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
 }
 
 .detail-status-overview[data-tone='success'] .detail-status-icon {
@@ -3908,13 +3938,6 @@ onMounted(() => {
 
 .detail-status-facts svg {
   color: #1677ff;
-}
-
-.order-action-bar > span {
-  margin-right: auto;
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
 }
 
 .detail-tabs {
@@ -4892,6 +4915,11 @@ onMounted(() => {
   color: #64748b;
 }
 
+.process-preview .process-table__head > span:nth-child(2),
+.process-preview .process-row__content {
+  text-align: right;
+}
+
 .process-row details {
   margin-top: 8px;
 }
@@ -5312,6 +5340,16 @@ onMounted(() => {
   margin-top: -2px;
   font-size: 12px;
   color: #8793a8;
+}
+
+.acceptance-person-field {
+  display: grid;
+  gap: 7px;
+  align-content: start;
+}
+
+:global(.rectification-person-dropdown) {
+  z-index: 2200 !important;
 }
 
 .deadline-datetime-input {

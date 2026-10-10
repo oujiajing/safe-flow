@@ -3296,17 +3296,21 @@ class ThreeCheckRecordApiTest {
             adminToken,
             orderId,
             "ACCEPT",
-            Map.of("acceptanceUserId", 3, "acceptanceRemark", "单账号代验收通过"));
+            Map.of(
+                "acceptanceUserName",
+                "演示审核验收人789",
+                "acceptanceRemark",
+                "手动填写验收人后验收通过"));
 
     assertThat(closed.path("status").asText()).isEqualTo("CLOSED");
-    assertThat(closed.path("acceptanceUserId").asLong()).isEqualTo(3);
     assertThat(closed.path("rectificationResponsibleUserId").asLong()).isEqualTo(1);
     assertThat(closed.path("rectificationResponsibleUserName").asText())
         .isEqualTo("演示整改人123");
-    assertThat(closed.path("acceptanceUserName").asText()).isEqualTo("幕墙安全员");
+    assertThat(closed.path("acceptanceUserId").isNull()).isTrue();
+    assertThat(closed.path("acceptanceUserName").asText()).isEqualTo("演示审核验收人789");
     assertThat(closed.path("flowLogs").toString())
         .contains("rectificationResponsibleUserName", "演示整改人123")
-        .contains("acceptanceUserName", "幕墙安全员");
+        .contains("acceptanceUserName", "演示审核验收人789");
     assertThat(closed.path("rectificationDeadline").asText()).isEqualTo("2026-09-20 18:30:00");
     assertThat(closed.path("rectificationAfterPhoto").asText())
         .startsWith("data:image/png;base64,");
