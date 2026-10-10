@@ -163,7 +163,7 @@ public class HazardRectificationOrderController {
       @PathVariable Long id,
       @RequestParam String fileKind,
       @RequestParam MultipartFile file) {
-    orderService.assertCanUploadAttachment(id);
+    orderService.assertCanUploadAttachment(id, fileKind);
     return ApiResponse.ok(
         fileStorageService.saveBusinessAttachment(BIZ_TYPE, id, MODULE_FOLDER, fileKind, file));
   }

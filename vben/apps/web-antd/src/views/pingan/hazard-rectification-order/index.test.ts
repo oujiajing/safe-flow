@@ -136,11 +136,16 @@ describe('hazard rectification order page', () => {
 
     expect(page).toContain('DatePicker');
     expect(page).toContain('<DatePicker');
-    expect(page).toContain('show-time');
-    expect(page).toContain('format="YYYY-MM-DD HH:mm"');
-    expect(page).toContain('value-format="YYYY-MM-DD HH:mm"');
-    expect(page).toContain('placeholder="整改期限：2026-06-05 18:30"');
-    expect(page).not.toContain('placeholder="整改期限：2026-09-20 18:00:00"');
+    expect(page).toContain('type="datetime-local"');
+    expect(page).toContain('v-model="actionForm.rectificationDeadline"');
+    expect(page).toContain('aria-label="选择整改日期和时间"');
+    expect(page).toContain('step="300"');
+    expect(page).toContain("rectificationDeadline: ''");
+    expect(page).not.toContain('rectificationDeadlineTime');
+    expect(page).not.toContain('默认时间为 18:00');
+    expect(page).toContain('function selectedRectificationDeadline()');
+    expect(page).toContain(".replace('T', ' ')");
+    expect(page).toContain("message.error('请选择完整的整改日期和时间')");
   });
 
   it('uploads rectification completion photos through the order attachment api instead of data urls', () => {
@@ -156,6 +161,12 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('accept="image/*"');
     expect(page).toContain('上传整改后照片');
     expect(page).toContain('class="rectified-photo-preview"');
+    expect(page).toMatch(
+      /\.action-evidence-body img\s*\{[^}]*object-fit:\s*contain;/,
+    );
+    expect(page).toMatch(
+      /\.rectified-photo-preview\s*\{[^}]*object-fit:\s*contain;/,
+    );
     expect(page).toContain(
       ':src="resolveAttachmentPreviewUrl(actionForm.afterPhoto)"',
     );
@@ -178,7 +189,7 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('整改结果');
     expect(page).toContain('currentOrder.rectificationDescription');
     expect(page).toContain('currentOrder.rectificationAfterPhoto');
-    expect(page).toContain('流程明细');
+    expect(page).toContain('查看详情');
     expect(page).toContain('flowLogDetailItems(log)');
     expect(page).toContain('isFlowLogPhotoDetail');
     expect(page).toContain('flow-log-photo');
@@ -187,35 +198,149 @@ describe('hazard rectification order page', () => {
     );
   });
 
-  it('allows selecting an acceptance user when accepting or rejecting acceptance', () => {
+  it('groups the redesigned detail into five focused tabs and a compact process table', () => {
+    const page = readFileSync(
+      appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
+      'utf8',
+    );
+
+    expect(page).toContain("{ key: 'hazard', label: '隐患与证据' }");
+    expect(page).toContain("{ key: 'result', label: '整改结果' }");
+    expect(page).toContain("{ key: 'acceptance', label: '验收结论' }");
+    expect(page).toContain("{ key: 'history', label: '处理记录' }");
+    expect(page).toContain("{ key: 'basic', label: '基础信息' }");
+    expect(page).toContain('class="detail-status-overview"');
+    expect(page).not.toContain('当前待办');
+    expect(page).toMatch(
+      /\.detail-status-icon\s*\{[^}]*align-items:\s*center;[^}]*justify-content:\s*center;/,
+    );
+    expect(page).toContain('class="detail-command-bar"');
+    expect(page).toMatch(
+      /\.detail-command-bar\s*\{[^}]*align-items:\s*stretch;/,
+    );
+    expect(page).toMatch(/\.detail-tabs button\s*\{[^}]*min-height:\s*52px;/);
+    expect(page).toMatch(/\.order-action-bar\s*\{[^}]*min-height:\s*52px;/);
+    expect(page).toContain('class="evidence-compare-grid"');
+    expect(page).toContain('class="process-table"');
+    expect(page).not.toContain(
+      '.process-preview .process-row__content {\n  text-align: right;',
+    );
+    expect(page).toContain('class="rectification-detail-drawer"');
+    expect(page).toContain(':width="1320"');
+    expect(page).toContain('centered');
+    expect(page).toContain('class="acceptance-brief"');
+    expect(page).toContain('rectificationSubmitLog');
+    expect(page).toContain('rectificationSubmitStatusLabel');
+    expect(page).toContain('class="rectification-detail-list"');
+    expect(page).toContain('class="wide rectification-owner-row"');
+    expect(page).toContain('class="wide rectification-department-row"');
+    expect(page.indexOf('rectification-owner-row')).toBeLessThan(
+      page.indexOf('rectification-department-row'),
+    );
+    expect(page).toContain('class="detail-section submission-record-card"');
+    expect(page).not.toContain('保留整改结果的提交人、时间与版本信息');
+    expect(page).toContain('附件数量：1 个');
+    expect(page).toContain('function acceptanceConclusionCriteria()');
+    expect(page).toContain('class="detail-section acceptance-review-card"');
+    expect(page).toContain('class="acceptance-info-grid"');
+    expect(page).toContain('class="detail-section acceptance-evidence-card"');
+    expect(page).toContain('class="order-result-panel acceptance-ai-panel"');
+    expect(page).toContain('class="acceptance-closure-bar"');
+    expect(page).toContain("activeDetailTab = 'history'");
+    expect(page).toContain('const filteredFlowLogs = computed');
+    expect(page).toContain('class="history-toolbar"');
+    expect(page).toContain('class="process-table process-table--history"');
+    expect(page).toContain('class="process-row__marker"');
+    expect(page).toContain('class="system-log-panel"');
+    expect(page).toContain('@click="exportHistoryRecords"');
+    expect(page).toContain('_处理记录.csv');
+    expect(page).toContain('class="basic-card-grid"');
+    expect(page).toContain('class="basic-info-card"');
+    expect(page).toContain('class="basic-extension-panel"');
+    expect(page).toContain('@click="copyCurrentOrderNo"');
+    expect(page).toContain('function completedOnTime()');
+    expect(page).toContain('function internalOrderNumber');
+    expect(page).toContain('acceptanceSubmitLog');
+    expect(page).not.toContain('<Timeline');
+  });
+
+  it('keeps redesigned evidence, filters and modal scrolling accessible', () => {
+    const page = readFileSync(
+      appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
+      'utf8',
+    );
+
+    expect(page).toContain('aria-label="处理类型筛选"');
+    expect(page).toContain('aria-label="操作人筛选"');
+    expect(page).toContain('aria-label="处理记录关键字搜索"');
+    expect(page).toContain('aria-label="上传整改后照片"');
+    expect(page).toContain('aria-label="整改前隐患视频"');
+    expect(page).toContain('height="280"');
+    expect(page).toContain('width="520"');
+    expect(page).toContain('overscroll-behavior: contain');
+  });
+
+  it('renders task-focused cards for issue, rectification result and acceptance review', () => {
+    const page = readFileSync(
+      appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
+      'utf8',
+    );
+
+    expect(page).toContain("title: '下发整改'");
+    expect(page).toContain("title: '提交整改结果'");
+    expect(page).toContain("title: '审核验收'");
+    expect(page).toContain('class="action-hazard-summary"');
+    expect(page).toContain('class="action-evidence-grid"');
+    expect(page).toContain('class="acceptance-decision"');
+    expect(page).toContain(':z-index="1100"');
+    expect(page).toContain(':width="1180"');
+    expect(page).toContain('placeholder="请填写可核验、可量化的验收标准"');
+    expect(page).toContain("message.error('请填写验收标准')");
+    expect(page).toContain('提交后将进入下一流程节点并保留操作记录');
+  });
+
+  it('allows selecting or entering an acceptance user when accepting or rejecting acceptance', () => {
     const page = readFileSync(
       appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
       'utf8',
     );
 
     expect(page).toMatch(
-      /case 'ACCEPT':\s+return \{[\s\S]*acceptanceUserId: selectedAcceptanceUserId\(\)/,
+      /case 'ACCEPT':\s+\{\s+return \{[\s\S]*acceptanceUserId: selectedAcceptanceUserId\(\)/,
     );
     expect(page).toMatch(
-      /case 'REJECT_ACCEPTANCE':\s+return \{[\s\S]*acceptanceUserId: selectedAcceptanceUserId\(\)/,
+      /case 'REJECT_ACCEPTANCE':\s+\{\s+return \{[\s\S]*acceptanceUserId: selectedAcceptanceUserId\(\)/,
+    );
+    expect(page).toMatch(
+      /case 'ACCEPT':\s+\{\s+return \{[\s\S]*acceptanceUserName: editableUserIdentity/,
+    );
+    expect(page).toMatch(
+      /case 'REJECT_ACCEPTANCE':\s+\{\s+return \{[\s\S]*acceptanceUserName: editableUserIdentity/,
     );
     expect(page).toContain('function selectedAcceptanceUserId()');
     expect(page).toContain('function actionRequiresAcceptanceUser()');
-    expect(page).toContain('请选择验收人');
+    expect(page).toContain('function hasAcceptanceUserSelection()');
+    expect(page).toContain('请选择或填写验收人');
     expect(page).not.toContain('验收人必须是数字');
     expect(page).toContain('String(currentOrder.value.acceptanceUserId)');
     expect(page).toContain('const acceptanceUserOptions = computed');
     expect(page).toContain('value: String(user.id)');
-    expect(page).toContain('options.push({ label: selectedName, value: selectedId })');
+    expect(page).toContain(
+      'options.push({ label: selectedName, value: selectedId })',
+    );
     expect(page).toContain('acceptance-action-fields');
     expect(page).toContain('v-if="currentAction === \'ACCEPT\'"');
     expect(page).toContain(
       'v-else-if="currentAction === \'REJECT_ACCEPTANCE\'"',
     );
     expect(page).toContain('acceptance-user-input');
-    expect(page).toContain('placeholder="请选择验收人"');
+    expect(page).toContain('placeholder="请选择或输入验收人"');
     expect(page).toMatch(
-      /<Select\s+[\s\S]*v-model:value="actionForm\.acceptanceUserId"[\s\S]*:options="acceptanceUserOptions"[\s\S]*show-search/,
+      /<AutoComplete\s+[\s\S]*v-model:value="actionForm\.acceptanceUserInput"[\s\S]*:options="editableUserOptions"/,
+    );
+    expect(page).toContain('popup-class-name="rectification-person-dropdown"');
+    expect(page).toMatch(
+      /:global\(\.rectification-person-dropdown\)\s*\{[^}]*z-index:\s*2200\s*!important;/,
     );
     expect(page).toContain('placeholder="验收意见"');
     expect(page).toContain('placeholder="驳回原因"');
@@ -236,14 +361,14 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('placeholder="请选择整改部门"');
     expect(page).toContain('placeholder="请选择验收部门"');
     expect(page).toMatch(
-      /case 'ISSUE_RECTIFICATION':\s+return \{[\s\S]*rectificationDepartmentId: actionForm\.rectificationDepartmentId[\s\S]*rectificationResponsibleUserId/,
+      /case 'ISSUE_RECTIFICATION':\s+\{\s+return \{[\s\S]*rectificationDepartmentId: actionForm\.rectificationDepartmentId[\s\S]*rectificationResponsibleUserId/,
     );
     expect(page).toMatch(
-      /case 'REQUEST_ACCEPTANCE':\s+return \{[\s\S]*acceptanceDepartmentId: actionForm\.acceptanceDepartmentId[\s\S]*acceptanceUserId/,
+      /case 'REQUEST_ACCEPTANCE':\s+\{\s+return \{[\s\S]*acceptanceDepartmentId: actionForm\.acceptanceDepartmentId[\s\S]*acceptanceUserId/,
     );
   });
 
-  it('loads scoped users and selects a rectification responsible person by name', () => {
+  it('supports selecting a suggested user or entering any demo name', () => {
     const page = readFileSync(
       appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
       'utf8',
@@ -251,16 +376,21 @@ describe('hazard rectification order page', () => {
 
     expect(page).toContain('getPinganUsersApi');
     expect(page).toContain('loadResponsibleUsers');
-    expect(page).toContain('responsibleUserOptions');
+    expect(page).toContain('editableUserOptions');
+    expect(page).toContain('function editableUserIdentity');
     expect(page).toContain('function selectedRectificationResponsibleUserId()');
     expect(page).toMatch(
       /rectificationResponsibleUserId:\s*selectedRectificationResponsibleUserId\(\)/,
     );
     expect(page).toMatch(
-      /<Select\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserId"[\s\S]*:options="responsibleUserOptions"[\s\S]*show-search/,
+      /<AutoComplete\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserInput"[\s\S]*:options="editableUserOptions"/,
     );
-    expect(page).toContain('placeholder="请选择整改责任人"');
-    expect(page).toContain("message.error('请选择整改责任人')");
+    expect(page).toContain('v-model:value="actionForm.acceptanceUserInput"');
+    expect(page).toContain('placeholder="请选择或输入整改责任人"');
+    expect(page).toContain('placeholder="请选择或输入验收人"');
+    expect(page).toContain('演示模式：可选择建议人员，也可直接输入任意姓名');
+    expect(page).toContain('演示模式下支持直接输入任意姓名');
+    expect(page).toContain("message.error('请选择或填写整改责任人')");
     expect(page).not.toMatch(
       /<InputNumber\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserId"/,
     );
@@ -276,14 +406,29 @@ describe('hazard rectification order page', () => {
     expect(page).toContain("acceptanceUserId: '验收人'");
     expect(page).toContain("rectificationDepartmentId: '整改部门'");
     expect(page).toContain("rectificationResponsibleUserId: '整改责任人'");
-    expect(page).toContain('placeholder="请选择整改责任人"');
+    expect(page).toContain('placeholder="请选择或输入整改责任人"');
     expect(page).toContain('placeholder="请选择验收人"');
-    expect(page).toContain("message.error('请选择验收人')");
+    expect(page).toContain("message.error('请选择或填写验收人')");
     expect(page).not.toContain('验收人必须是数字');
     expect(page).not.toContain('整改责任人ID');
     expect(page).not.toContain('验收人ID');
     expect(page).not.toContain('整改部门ID');
     expect(page).not.toContain('验收部门ID');
+  });
+
+  it('adds optional supplemental attachments to the dispatch action', () => {
+    const page = readFileSync(
+      appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
+      'utf8',
+    );
+
+    expect(page).toContain('补充附件');
+    expect(page).toContain('supplementalAttachmentFiles');
+    expect(page).toContain('multiple');
+    expect(page).toContain('accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx"');
+    expect(page).toContain('单个不超过 10MB，最多 5 个');
+    expect(page).toContain("'RECTIFICATION_SUPPLEMENT'");
+    expect(page).toContain('payload.supplementalAttachments');
   });
 
   it('renders rectification and acceptance department names in flow log details instead of raw ids', () => {
@@ -295,7 +440,7 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('function organizationNameById');
     expect(page).toContain('function flowLogPayloadValue');
     expect(page).toMatch(
-      /if \(\['rectificationDepartmentId', 'acceptanceDepartmentId'\]\.includes\(key\)\)/,
+      /if \(\[\s*'acceptanceDepartmentId',\s*'rectificationDepartmentId',?\s*\]\.includes\(key\)\)/,
     );
     expect(page).toContain(
       'organizationNameById(value) || unknownToText(value)',
@@ -316,14 +461,14 @@ describe('hazard rectification order page', () => {
     expect(page).toContain("{ label: '已作废', value: 'CANCELLED' }");
     expect(page).toContain("CANCELLED: 'default'");
     expect(page).toContain("CANCEL: '作废'");
-    expect(page).toContain("status === 'PENDING_ASSIGN'");
+    expect(page).toContain("case 'PENDING_ASSIGN':");
     expect(page).toContain("['ISSUE_RECTIFICATION', 'CANCEL']");
-    expect(page).toContain("status === 'PENDING_RECTIFY'");
+    expect(page).toContain("case 'PENDING_RECTIFY':");
     expect(page).toContain("['MARK_RECTIFIED', 'CANCEL']");
-    expect(page).toContain("status === 'RECTIFIED'");
+    expect(page).toContain("case 'RECTIFIED':");
     expect(page).toContain("['REQUEST_ACCEPTANCE', 'CANCEL']");
-    expect(page).toContain("status === 'PENDING_ACCEPTANCE'");
-    expect(page).toContain("['ACCEPT', 'REJECT_ACCEPTANCE', 'CANCEL']");
+    expect(page).toContain("case 'PENDING_ACCEPTANCE':");
+    expect(page).toContain("['ACCEPT', 'CANCEL']");
     expect(page).toContain('canPerformOrderAction');
     expect(page).toContain('cancelReason');
     expect(page).toContain("case 'CANCEL':");

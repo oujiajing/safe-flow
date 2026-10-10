@@ -48,6 +48,23 @@ class FileUploadValidatorTest {
         .hasMessageContaining("10MB");
   }
 
+  @Test
+  void acceptsSafeRectificationSupplementAndEnforcesTenMegabytes() {
+    MockMultipartFile pdf =
+        file("instruction.pdf", "application/pdf", "%PDF-1.7 supplement".getBytes());
+
+    assertThat(validator.validateAttachment("RECTIFICATION_SUPPLEMENT", pdf))
+        .isEqualTo("RECTIFICATION_SUPPLEMENT");
+
+    MockMultipartFile oversized =
+        new MockMultipartFile(
+            "file", "large.docx", "application/octet-stream", new byte[10 * 1024 * 1024 + 1]);
+    assertThatThrownBy(
+            () -> validator.validateAttachment("RECTIFICATION_SUPPLEMENT", oversized))
+        .isInstanceOf(BusinessException.class)
+        .hasMessageContaining("10MB");
+  }
+
   private MockMultipartFile file(String name, String contentType, byte[] content) {
     return new MockMultipartFile("file", name, contentType, content);
   }

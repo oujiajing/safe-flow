@@ -24,7 +24,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest(
+    properties = {
+      "pingan.notification.escalation-initial-delay-ms=3600000",
+      "pingan.notification.outbox-initial-delay-ms=3600000"
+    })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class NotificationCenterApiTest {
 

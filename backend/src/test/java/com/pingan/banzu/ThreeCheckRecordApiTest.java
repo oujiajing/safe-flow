@@ -3256,19 +3256,26 @@ class ThreeCheckRecordApiTest {
             .path("id")
             .asText();
 
-    hazardOrderAction(
+    JsonNode issued =
+        hazardOrderAction(
         adminToken,
         orderId,
         "ISSUE_RECTIFICATION",
         Map.of(
-            "rectificationResponsibleUserId",
-            2,
-            "acceptanceUserId",
-            3,
+            "rectificationResponsibleUserName",
+            "演示整改人123",
+            "acceptanceUserName",
+            "演示验收人456",
             "rectificationDeadline",
             "2026-09-20 18:30",
             "rectificationRequirement",
             "加固安全绳固定点"));
+    assertThat(issued.path("status").asText()).isEqualTo("PENDING_RECTIFY");
+    assertThat(issued.path("rectificationResponsibleUserId").asLong()).isEqualTo(1);
+    assertThat(issued.path("rectificationResponsibleUserName").asText())
+        .isEqualTo("演示整改人123");
+    assertThat(issued.path("acceptanceUserId").isNull()).isTrue();
+    assertThat(issued.path("acceptanceUserName").asText()).isEqualTo("演示验收人456");
     hazardOrderAction(
         adminToken,
         orderId,
@@ -3289,16 +3296,21 @@ class ThreeCheckRecordApiTest {
             adminToken,
             orderId,
             "ACCEPT",
-            Map.of("acceptanceUserId", 3, "acceptanceRemark", "单账号代验收通过"));
+            Map.of(
+                "acceptanceUserName",
+                "演示审核验收人789",
+                "acceptanceRemark",
+                "手动填写验收人后验收通过"));
 
     assertThat(closed.path("status").asText()).isEqualTo("CLOSED");
-    assertThat(closed.path("acceptanceUserId").asLong()).isEqualTo(3);
+    assertThat(closed.path("rectificationResponsibleUserId").asLong()).isEqualTo(1);
     assertThat(closed.path("rectificationResponsibleUserName").asText())
-        .isEqualTo("Demo Harbor班长");
-    assertThat(closed.path("acceptanceUserName").asText()).isEqualTo("幕墙安全员");
+        .isEqualTo("演示整改人123");
+    assertThat(closed.path("acceptanceUserId").isNull()).isTrue();
+    assertThat(closed.path("acceptanceUserName").asText()).isEqualTo("演示审核验收人789");
     assertThat(closed.path("flowLogs").toString())
-        .contains("rectificationResponsibleUserName", "Demo Harbor班长")
-        .contains("acceptanceUserName", "幕墙安全员");
+        .contains("rectificationResponsibleUserName", "演示整改人123")
+        .contains("acceptanceUserName", "演示审核验收人789");
     assertThat(closed.path("rectificationDeadline").asText()).isEqualTo("2026-09-20 18:30:00");
     assertThat(closed.path("rectificationAfterPhoto").asText())
         .startsWith("data:image/png;base64,");
@@ -3360,6 +3372,27 @@ class ThreeCheckRecordApiTest {
             .get(0)
             .path("id")
             .asText();
+    MockMultipartFile supplement =
+        new MockMultipartFile("file", "dispatch.jpg", "image/jpeg", tinyJpeg());
+    JsonNode supplementResponse =
+        objectMapper
+            .readTree(
+                mockMvc
+                    .perform(
+                        multipart(
+                                "/api/pingan/hazard-rectification/orders/"
+                                    + orderId
+                                    + "/attachments")
+                            .file(supplement)
+                            .param("fileKind", "RECTIFICATION_SUPPLEMENT")
+                            .header("Authorization", "Bearer " + adminToken))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString(StandardCharsets.UTF_8))
+            .path("data");
+    assertThat(supplementResponse.path("fileKind").asText())
+        .isEqualTo("RECTIFICATION_SUPPLEMENT");
     hazardOrderAction(
         adminToken,
         orderId,
@@ -3416,6 +3449,12 @@ class ThreeCheckRecordApiTest {
     assertThat(
             jdbcTemplate.queryForObject(
                 "select count(*) from biz_attachment where biz_type = 'HAZARD_RECTIFICATION_ORDER' and biz_id = ? and file_kind = 'RECTIFICATION_AFTER_PHOTO'",
+                Integer.class,
+                Long.parseLong(orderId)))
+        .isEqualTo(1);
+    assertThat(
+            jdbcTemplate.queryForObject(
+                "select count(*) from biz_attachment where biz_type = 'HAZARD_RECTIFICATION_ORDER' and biz_id = ? and file_kind = 'RECTIFICATION_SUPPLEMENT'",
                 Integer.class,
                 Long.parseLong(orderId)))
         .isEqualTo(1);

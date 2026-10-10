@@ -14,6 +14,7 @@ public class FileUploadValidator {
   private static final long IMAGE_MAX = 10L * 1024 * 1024;
   private static final long VIDEO_MAX = 200L * 1024 * 1024;
   private static final long DOCUMENT_MAX = 50L * 1024 * 1024;
+  private static final long RECTIFICATION_SUPPLEMENT_MAX = 10L * 1024 * 1024;
   private static final Set<String> IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp");
   private static final Set<String> VIDEO_EXTENSIONS = Set.of("mp4");
 
@@ -53,6 +54,18 @@ public class FileUploadValidator {
           throw new BusinessException("文档附件仅支持真实的 PDF、DOC 或 DOCX 文件");
         }
       }
+      case "RECTIFICATION_SUPPLEMENT" -> {
+        requireSize(file, RECTIFICATION_SUPPLEMENT_MAX, "补充附件");
+        boolean valid =
+            (IMAGE_EXTENSIONS.contains(extension) && matchesImage(extension, header))
+                || ("pdf".equals(extension) && startsWith(header, "%PDF-".getBytes()))
+                || ("doc".equals(extension) && isOle(header))
+                || ("docx".equals(extension) && isZip(header));
+        if (!valid) {
+          throw new BusinessException(
+              "补充附件仅支持真实的图片、PDF、DOC 或 DOCX 文件");
+        }
+      }
       default -> throw new BusinessException("不支持的附件类型");
     }
     return kind;
@@ -78,8 +91,16 @@ public class FileUploadValidator {
       throw new BusinessException("附件类型不能为空");
     }
     String kind = fileKind.trim().toUpperCase(Locale.ROOT);
-    if (!Set.of("IMAGE", "RECTIFICATION_AFTER_PHOTO", "VIDEO", "PDF", "DOCUMENT").contains(kind)) {
-      throw new BusinessException("附件类型仅支持 IMAGE、RECTIFICATION_AFTER_PHOTO、VIDEO、PDF 或 DOCUMENT");
+    if (!Set.of(
+            "IMAGE",
+            "RECTIFICATION_AFTER_PHOTO",
+            "RECTIFICATION_SUPPLEMENT",
+            "VIDEO",
+            "PDF",
+            "DOCUMENT")
+        .contains(kind)) {
+      throw new BusinessException(
+          "附件类型仅支持 IMAGE、RECTIFICATION_AFTER_PHOTO、RECTIFICATION_SUPPLEMENT、VIDEO、PDF 或 DOCUMENT");
     }
     return kind;
   }
