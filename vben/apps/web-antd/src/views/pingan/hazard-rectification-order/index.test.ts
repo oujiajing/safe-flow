@@ -136,14 +136,15 @@ describe('hazard rectification order page', () => {
 
     expect(page).toContain('DatePicker');
     expect(page).toContain('<DatePicker');
-    expect(page).toContain('TimePicker');
-    expect(page).toContain('actionForm.rectificationDeadlineDate');
-    expect(page).toContain('actionForm.rectificationDeadlineTime');
-    expect(page).toContain('placeholder="选择日期"');
-    expect(page).toContain('placeholder="选择时间"');
-    expect(page).toContain(':minute-step="5"');
-    expect(page).toContain("rectificationDeadlineTime: '18:00'");
+    expect(page).toContain('type="datetime-local"');
+    expect(page).toContain('v-model="actionForm.rectificationDeadline"');
+    expect(page).toContain('aria-label="选择整改日期和时间"');
+    expect(page).toContain('step="300"');
+    expect(page).toContain("rectificationDeadline: ''");
+    expect(page).not.toContain('rectificationDeadlineTime');
+    expect(page).not.toContain('默认时间为 18:00');
     expect(page).toContain('function selectedRectificationDeadline()');
+    expect(page).toContain(".replace('T', ' ')");
     expect(page).toContain("message.error('请选择完整的整改日期和时间')");
   });
 
