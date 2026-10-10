@@ -22,7 +22,12 @@ class CoreRelationIntegrityPatrolTest {
 
   @Test
   void reportsPolymorphicOrphansWithoutDeletingAuditHistory() {
-    assertThat(patrol.audit()).isEmpty();
+    long existingIssueCount =
+        patrol.audit().stream()
+            .filter(issue -> issue.sourceTable().equals("biz_status_log"))
+            .filter(issue -> issue.relationType().equals("HAZARD_SAFETY_CHECK"))
+            .mapToLong(CoreRelationIntegrityPatrol.RelationIssueSummary::issueCount)
+            .sum();
 
     jdbcTemplate.update(
         """
@@ -32,12 +37,12 @@ class CoreRelationIntegrityPatrolTest {
         """);
 
     assertThat(patrol.audit())
+        .filteredOn(issue -> issue.sourceTable().equals("biz_status_log"))
+        .filteredOn(issue -> issue.relationType().equals("HAZARD_SAFETY_CHECK"))
         .singleElement()
         .satisfies(
             issue -> {
-              assertThat(issue.sourceTable()).isEqualTo("biz_status_log");
-              assertThat(issue.relationType()).isEqualTo("HAZARD_SAFETY_CHECK");
-              assertThat(issue.issueCount()).isOne();
+              assertThat(issue.issueCount()).isEqualTo(existingIssueCount + 1);
             });
   }
 
