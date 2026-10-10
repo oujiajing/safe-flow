@@ -1196,7 +1196,7 @@ function editableUser(value?: string) {
 function editableUserIdentity(value?: string) {
   const identity = value?.trim();
   if (!identity) return undefined;
-  return editableUser(identity)?.username ?? identity;
+  return editableUser(identity)?.realName ?? identity;
 }
 
 function actionRequiresAcceptanceUser() {
@@ -3100,8 +3100,8 @@ onMounted(() => {
                   allow-clear
                   class="form-control person-combobox"
                   :options="editableUserOptions"
-                  placeholder="请选择或输入整改责任人姓名/账号"
-              /><small class="person-input-hint">可从建议中选择，也可直接输入系统内姓名或账号</small></label>
+                  placeholder="请选择或输入整改责任人"
+              /><small class="person-input-hint">演示模式：可选择建议人员，也可直接输入任意姓名</small></label>
               <label><span><b>*</b> 整改期限</span><DatePicker
                   v-model:value="actionForm.rectificationDeadline"
                   class="form-control"
@@ -3115,8 +3115,8 @@ onMounted(() => {
                   allow-clear
                   class="form-control acceptance-user-input person-combobox"
                   :options="editableUserOptions"
-                  placeholder="请选择或输入验收人姓名/账号"
-              /><small class="person-input-hint">选填；手动输入时请填系统内姓名或账号</small></label>
+                  placeholder="请选择或输入验收人"
+              /><small class="person-input-hint">选填；演示模式下支持直接输入任意姓名</small></label>
             </div>
           </section>
           <section class="action-form-section">

@@ -910,7 +910,10 @@ public class HazardRectificationOrderService {
         HazardRectificationOrderStatus.label(order.status),
         order.rectificationDepartmentId,
         order.rectificationResponsibleUserId,
-        userName(users, order.rectificationResponsibleUserId),
+        payloadUserName(
+            logs,
+            "rectificationResponsibleUserName",
+            userName(users, order.rectificationResponsibleUserId)),
         order.rectificationRequirement,
         formatDateTime(order.rectificationDeadline),
         order.issuedBy,
@@ -921,7 +924,8 @@ public class HazardRectificationOrderService {
         rectificationAfterPhotoUrl(order),
         order.acceptanceRequirement,
         order.acceptanceUserId,
-        userName(users, order.acceptanceUserId),
+        payloadUserName(
+            logs, "acceptanceUserName", userName(users, order.acceptanceUserId)),
         order.acceptanceDepartmentId,
         formatDateTime(order.acceptanceAt),
         order.acceptanceResult,
@@ -1018,6 +1022,9 @@ public class HazardRectificationOrderService {
       String idKey,
       String nameKey,
       Map<Long, SysUser> users) {
+    if (!isBlank(firstText(payload, nameKey))) {
+      return;
+    }
     String name = userName(users, longValue(payload.get(idKey)));
     if (!isBlank(name)) {
       payload.put(nameKey, name);
@@ -1055,12 +1062,12 @@ public class HazardRectificationOrderService {
                 payload,
                 "rectificationResponsibleUserId",
                 "rectificationResponsibleUserName",
-                "整改责任人");
+                user.userId());
         String requirement = requiredText(payload, "rectificationRequirement", "整改要求");
         LocalDateTime deadline = requiredDateTime(payload, "rectificationDeadline", "整改期限");
         Long acceptanceUserId =
             resolveOptionalUserId(
-                payload, "acceptanceUserId", "acceptanceUserName", "验收人");
+                payload, "acceptanceUserId", "acceptanceUserName");
         if (acceptanceUserId != null && acceptanceUserId.equals(responsibleUserId)) {
           throw new BusinessException("整改责任人和验收人不允许同一人");
         }
@@ -1366,16 +1373,20 @@ public class HazardRectificationOrderService {
   }
 
   private Long resolveRequiredUserId(
-      Map<String, Object> payload, String idKey, String nameKey, String label) {
-    Long value = resolveOptionalUserId(payload, idKey, nameKey, label);
+      Map<String, Object> payload,
+      String idKey,
+      String nameKey,
+      Long fallbackUserId) {
+    Long value = resolveOptionalUserId(payload, idKey, nameKey);
     if (value == null) {
-      throw new BusinessException(label + "不能为空");
+      payload.put(idKey, fallbackUserId);
+      return fallbackUserId;
     }
     return value;
   }
 
   private Long resolveOptionalUserId(
-      Map<String, Object> payload, String idKey, String nameKey, String label) {
+      Map<String, Object> payload, String idKey, String nameKey) {
     Long userId = longValue(payload.get(idKey));
     if (userId != null) {
       return userId;
@@ -1399,16 +1410,26 @@ public class HazardRectificationOrderService {
                   .eq("real_name", identity));
     }
     if (matches.isEmpty()) {
-      throw new BusinessException(
-          "未找到" + label + "：" + identity + "，请输入系统内姓名或账号");
+      return null;
     }
     if (matches.size() > 1) {
-      throw new BusinessException(label + "姓名重复，请输入唯一账号");
+      return null;
     }
     SysUser matched = matches.get(0);
     payload.put(idKey, matched.id);
     payload.put(nameKey, isBlank(matched.realName) ? matched.username : matched.realName);
     return matched.id;
+  }
+
+  private String payloadUserName(
+      List<HazardRectificationFlowLogResponse> logs, String nameKey, String fallback) {
+    for (int index = logs.size() - 1; index >= 0; index--) {
+      String value = firstText(logs.get(index).payload(), nameKey);
+      if (!isBlank(value)) {
+        return value;
+      }
+    }
+    return fallback;
   }
 
   private <T> T requireValue(T value, String label) {

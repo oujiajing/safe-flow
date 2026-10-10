@@ -327,7 +327,7 @@ describe('hazard rectification order page', () => {
     );
   });
 
-  it('supports selecting or manually entering dispatch users by name or username', () => {
+  it('supports selecting a suggested user or entering any demo name', () => {
     const page = readFileSync(
       appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
       'utf8',
@@ -345,8 +345,10 @@ describe('hazard rectification order page', () => {
       /<AutoComplete\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserInput"[\s\S]*:options="editableUserOptions"/,
     );
     expect(page).toContain('v-model:value="actionForm.acceptanceUserInput"');
-    expect(page).toContain('placeholder="请选择或输入整改责任人姓名/账号"');
-    expect(page).toContain('placeholder="请选择或输入验收人姓名/账号"');
+    expect(page).toContain('placeholder="请选择或输入整改责任人"');
+    expect(page).toContain('placeholder="请选择或输入验收人"');
+    expect(page).toContain('演示模式：可选择建议人员，也可直接输入任意姓名');
+    expect(page).toContain('演示模式下支持直接输入任意姓名');
     expect(page).toContain("message.error('请选择或填写整改责任人')");
     expect(page).not.toMatch(
       /<InputNumber\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserId"/,
@@ -363,7 +365,7 @@ describe('hazard rectification order page', () => {
     expect(page).toContain("acceptanceUserId: '验收人'");
     expect(page).toContain("rectificationDepartmentId: '整改部门'");
     expect(page).toContain("rectificationResponsibleUserId: '整改责任人'");
-    expect(page).toContain('placeholder="请选择或输入整改责任人姓名/账号"');
+    expect(page).toContain('placeholder="请选择或输入整改责任人"');
     expect(page).toContain('placeholder="请选择验收人"');
     expect(page).toContain("message.error('请选择验收人')");
     expect(page).not.toContain('验收人必须是数字');
