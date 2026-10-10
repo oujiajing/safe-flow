@@ -40,7 +40,7 @@ export namespace PinganHazardRectificationOrderApi {
     sourceModuleKey?: string;
     sourceRecordId?: Id;
     sourceType?: SourceType;
-    status?: Status | 'all';
+    status?: 'all' | Status;
     teamId?: Id;
   }
 
@@ -147,7 +147,9 @@ export namespace PinganHazardRectificationOrderApi {
     teamId: Id;
   }
 
-  export type AttachmentFileKind = 'RECTIFICATION_AFTER_PHOTO';
+  export type AttachmentFileKind =
+    | 'RECTIFICATION_AFTER_PHOTO'
+    | 'RECTIFICATION_SUPPLEMENT';
 
   export interface BatchDeleteRequest {
     ids: Id[];
@@ -191,9 +193,9 @@ export namespace PinganHazardRectificationOrderApi {
     orderVersion: number;
     status: string;
     overallSuggestion: string;
-    criterionResults: Array<{ criterion: string; result: string; evidence: string[]; reason: string }>;
+    criterionResults: Array<{ criterion: string; evidence: string[]; reason: string; result: string; }>;
     missingMaterials: string[];
-    workflowTrace: Array<{ stage: string; message: string; executed: boolean }>;
+    workflowTrace: Array<{ executed: boolean; message: string; stage: string; }>;
   }
 
   export interface AgentSummaryResponse {
@@ -201,7 +203,7 @@ export namespace PinganHazardRectificationOrderApi {
     orderId: string;
     orderVersion: number;
     status: string;
-    sections: Array<{ key: string; title: string; content: string; sourceRefs: string[] }>;
+    sections: Array<{ content: string; key: string; sourceRefs: string[]; title: string; }>;
     citations: string[];
     summaryVersion?: number;
   }
@@ -245,7 +247,7 @@ export async function createHazardRectificationOrderApi(
 export async function batchDeleteHazardRectificationOrdersApi(
   ids: PinganHazardRectificationOrderApi.Id[],
 ) {
-  return requestClient.post<void>(`${ordersPath}/batch-delete`, { ids });
+  return requestClient.post(`${ordersPath}/batch-delete`, { ids });
 }
 
 export async function uploadHazardRectificationOrderAttachmentApi(

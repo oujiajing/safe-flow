@@ -12,6 +12,7 @@ import { IconifyIcon } from '@vben/icons';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
 import {
+  AutoComplete,
   Button,
   DatePicker,
   Drawer,
@@ -130,6 +131,7 @@ const flowLogPayloadLabels: Record<string, string> = {
   rectificationDescription: '整改说明',
   rectificationRequirement: '整改措施',
   rectificationResponsibleUserId: '整改责任人',
+  supplementalAttachments: '补充附件',
   rejectReason: '驳回原因',
   remark: '说明',
 };
@@ -172,6 +174,8 @@ const actionOpen = ref(false);
 const actionReturnToDetail = ref(false);
 const currentAction = ref<PinganHazardRectificationOrderApi.Action>();
 const rectifiedPhotoInputRef = ref<HTMLInputElement>();
+const supplementalAttachmentInputRef = ref<HTMLInputElement>();
+const supplementalAttachmentFiles = ref<File[]>([]);
 const actionForm = reactive({
   acceptanceDepartmentId: undefined as
     | PinganHazardRectificationOrderApi.Id
@@ -179,6 +183,7 @@ const actionForm = reactive({
   acceptanceRequirement: '',
   acceptanceRemark: '',
   acceptanceUserId: undefined as string | undefined,
+  acceptanceUserInput: '',
   afterPhoto: '',
   cancelReason: '',
   rectificationDeadline: '',
@@ -188,6 +193,7 @@ const actionForm = reactive({
   rectificationDescription: '',
   rectificationRequirement: '',
   rectificationResponsibleUserId: undefined as string | undefined,
+  rectificationResponsibleUserInput: '',
   rejectReason: '',
 });
 const createForm = reactive({
@@ -465,27 +471,6 @@ function canPerformOrderAction(
 }
 
 const flatOrganizations = computed(() => flattenOrganizations(orgNodes.value));
-const responsibleUserOptions = computed(() => {
-  const options = responsibleUsers.value.map((user) => ({
-    label:
-      user.realName === user.username
-        ? user.realName
-        : `${user.realName}（${user.username}）`,
-    value: String(user.id),
-  }));
-  const selectedId = String(
-    currentOrder.value?.rectificationResponsibleUserId ?? '',
-  );
-  const selectedName = currentOrder.value?.rectificationResponsibleUserName;
-  if (
-    selectedId &&
-    selectedName &&
-    !options.some((option) => option.value === selectedId)
-  ) {
-    options.push({ label: selectedName, value: selectedId });
-  }
-  return options;
-});
 const acceptanceUserOptions = computed(() => {
   const options = responsibleUsers.value.map((user) => ({
     label:
@@ -505,6 +490,18 @@ const acceptanceUserOptions = computed(() => {
   }
   return options;
 });
+const editableUserOptions = computed(() =>
+  responsibleUsers.value.map((user) => ({
+    label:
+      user.realName === user.username
+        ? user.realName
+        : `${user.realName}（${user.username}）`,
+    value:
+      user.realName === user.username
+        ? user.realName
+        : `${user.realName}（${user.username}）`,
+  })),
+);
 const companyOptions = computed(() => orgOptionsByType('COMPANY'));
 const departmentOptions = computed(() =>
   childOptionsUnderSelectedCompany('DEPARTMENT'),
@@ -681,6 +678,7 @@ function resetActionForm() {
   actionForm.acceptanceRequirement = '';
   actionForm.acceptanceRemark = '';
   actionForm.acceptanceUserId = undefined;
+  actionForm.acceptanceUserInput = '';
   actionForm.afterPhoto = '';
   actionForm.cancelReason = '';
   actionForm.rectificationDeadline = '';
@@ -688,7 +686,9 @@ function resetActionForm() {
   actionForm.rectificationDescription = '';
   actionForm.rectificationRequirement = '';
   actionForm.rectificationResponsibleUserId = undefined;
+  actionForm.rectificationResponsibleUserInput = '';
   actionForm.rejectReason = '';
+  supplementalAttachmentFiles.value = [];
 }
 
 async function openAction(action: PinganHazardRectificationOrderApi.Action) {
@@ -704,6 +704,10 @@ async function openAction(action: PinganHazardRectificationOrderApi.Action) {
     actionForm.acceptanceRequirement = numberedListText(
       sourceAcceptanceCriteria(),
     );
+    actionForm.rectificationResponsibleUserInput =
+      currentOrder.value?.rectificationResponsibleUserName ?? '';
+    actionForm.acceptanceUserInput =
+      currentOrder.value?.acceptanceUserName ?? '';
   }
   if (
     action === 'ACCEPT' ||
@@ -800,6 +804,76 @@ async function handleRectifiedPhotoChange(event: Event) {
   } finally {
     input.value = '';
   }
+}
+
+function triggerSupplementalAttachmentUpload() {
+  supplementalAttachmentInputRef.value?.click();
+}
+
+function handleSupplementalAttachmentChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = [...(input.files ?? [])];
+  input.value = '';
+  if (files.length === 0) return;
+  const acceptedExtensions = new Set([
+    'doc',
+    'docx',
+    'gif',
+    'jpeg',
+    'jpg',
+    'pdf',
+    'png',
+    'webp',
+  ]);
+  const existing = supplementalAttachmentFiles.value;
+  const accepted: File[] = [];
+  for (const file of files) {
+    const extension = file.name.split('.').pop()?.toLocaleLowerCase() ?? '';
+    if (!acceptedExtensions.has(extension)) {
+      message.error(`${file.name}：仅支持图片、PDF、Word 文件`);
+      continue;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      message.error(`${file.name}：单个文件不能超过 10MB`);
+      continue;
+    }
+    const duplicated = [...existing, ...accepted].some(
+      (item) =>
+        item.name === file.name &&
+        item.size === file.size &&
+        item.lastModified === file.lastModified,
+    );
+    if (!duplicated) accepted.push(file);
+  }
+  const remaining = Math.max(0, 5 - existing.length);
+  if (accepted.length > remaining) {
+    message.warning('补充附件最多上传 5 个');
+  }
+  supplementalAttachmentFiles.value = [
+    ...existing,
+    ...accepted.slice(0, remaining),
+  ];
+}
+
+function removeSupplementalAttachment(index: number) {
+  supplementalAttachmentFiles.value.splice(index, 1);
+}
+
+async function uploadSupplementalAttachments() {
+  if (!currentOrder.value || supplementalAttachmentFiles.value.length === 0) {
+    return [];
+  }
+  const attachments: PinganHazardRectificationOrderApi.Attachment[] = [];
+  for (const file of supplementalAttachmentFiles.value) {
+    attachments.push(
+      await uploadHazardRectificationOrderAttachmentApi(
+        currentOrder.value.id,
+        'RECTIFICATION_SUPPLEMENT',
+        file,
+      ),
+    );
+  }
+  return attachments;
 }
 
 function normalizeOrgTree(nodes: OrgNode[]): OrgOption[] {
@@ -1082,13 +1156,47 @@ async function submitManualOrder() {
 }
 
 function selectedAcceptanceUserId() {
+  if (currentAction.value === 'ISSUE_RECTIFICATION') {
+    return editableUser(actionForm.acceptanceUserInput)?.id;
+  }
   const value = Number(actionForm.acceptanceUserId);
   return Number.isSafeInteger(value) && value > 0 ? value : undefined;
 }
 
 function selectedRectificationResponsibleUserId() {
+  if (currentAction.value === 'ISSUE_RECTIFICATION') {
+    return editableUser(actionForm.rectificationResponsibleUserInput)?.id;
+  }
   const value = Number(actionForm.rectificationResponsibleUserId);
   return Number.isSafeInteger(value) && value > 0 ? value : undefined;
+}
+
+function editableUser(value?: string) {
+  const identity = value?.trim();
+  if (!identity) return undefined;
+  const normalizedIdentity = identity.toLocaleLowerCase();
+  const exactIdentityMatch = responsibleUsers.value.find((user) => {
+    const displayName =
+      user.realName === user.username
+        ? user.realName
+        : `${user.realName}（${user.username}）`;
+    return (
+      String(user.id) === identity ||
+      user.username.toLocaleLowerCase() === normalizedIdentity ||
+      displayName === identity
+    );
+  });
+  if (exactIdentityMatch) return exactIdentityMatch;
+  const realNameMatches = responsibleUsers.value.filter(
+    (user) => user.realName === identity,
+  );
+  return realNameMatches.length === 1 ? realNameMatches[0] : undefined;
+}
+
+function editableUserIdentity(value?: string) {
+  const identity = value?.trim();
+  if (!identity) return undefined;
+  return editableUser(identity)?.username ?? identity;
 }
 
 function actionRequiresAcceptanceUser() {
@@ -1098,7 +1206,7 @@ function actionRequiresAcceptanceUser() {
   );
 }
 
-function actionPayload() {
+function actionPayload(): Record<string, unknown> {
   switch (currentAction.value) {
     case 'ACCEPT': {
       return {
@@ -1116,11 +1224,17 @@ function actionPayload() {
       return {
         acceptanceRequirement: actionForm.acceptanceRequirement,
         acceptanceUserId: selectedAcceptanceUserId(),
+        acceptanceUserName: editableUserIdentity(
+          actionForm.acceptanceUserInput,
+        ),
         rectificationDepartmentId: actionForm.rectificationDepartmentId,
         rectificationDeadline: actionForm.rectificationDeadline,
         rectificationRequirement: actionForm.rectificationRequirement,
         rectificationResponsibleUserId:
           selectedRectificationResponsibleUserId(),
+        rectificationResponsibleUserName: editableUserIdentity(
+          actionForm.rectificationResponsibleUserInput,
+        ),
       };
     }
     case 'MARK_RECTIFIED': {
@@ -1221,6 +1335,16 @@ function flowLogPayloadValue(
   value: unknown,
   payload: Record<string, unknown>,
 ) {
+  if (key === 'supplementalAttachments' && Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (!item || typeof item !== 'object') return '';
+        const attachment = item as Record<string, unknown>;
+        return unknownToText(attachment.originalName ?? attachment.name);
+      })
+      .filter(Boolean)
+      .join('、');
+  }
   if (['acceptanceDepartmentId', 'rectificationDepartmentId'].includes(key)) {
     return organizationNameById(value) || unknownToText(value);
   }
@@ -1273,9 +1397,9 @@ async function submitAction() {
   }
   if (
     currentAction.value === 'ISSUE_RECTIFICATION' &&
-    !selectedRectificationResponsibleUserId()
+    !actionForm.rectificationResponsibleUserInput.trim()
   ) {
-    message.error('请选择整改责任人');
+    message.error('请选择或填写整改责任人');
     return;
   }
   if (
@@ -1303,11 +1427,24 @@ async function submitAction() {
   }
   actionSubmitting.value = true;
   try {
+    const payload = actionPayload();
+    if (currentAction.value === 'ISSUE_RECTIFICATION') {
+      const attachments = await uploadSupplementalAttachments();
+      if (attachments.length > 0) {
+        payload.supplementalAttachments = attachments.map((attachment) => ({
+          contentType: attachment.contentType,
+          fileSize: attachment.fileSize,
+          id: attachment.id,
+          originalName: attachment.originalName,
+          url: attachment.url,
+        }));
+      }
+    }
     currentOrder.value = await actionHazardRectificationOrderApi(
       currentOrder.value.id,
       {
         action: currentAction.value,
-        payload: actionPayload(),
+        payload,
         version: currentOrder.value.version,
       },
     );
@@ -2958,16 +3095,13 @@ onMounted(() => {
                   :options="actionDepartmentOptions"
                   placeholder="请选择整改部门"
               /></label>
-              <label><span><b>*</b> 整改责任人</span><Select
-                  v-model:value="actionForm.rectificationResponsibleUserId"
+              <label><span><b>*</b> 整改责任人</span><AutoComplete
+                  v-model:value="actionForm.rectificationResponsibleUserInput"
                   allow-clear
-                  class="form-control"
-                  :options="responsibleUserOptions"
-                  option-filter-prop="label"
-                  option-label-prop="label"
-                  placeholder="请选择整改责任人"
-                  show-search
-              /></label>
+                  class="form-control person-combobox"
+                  :options="editableUserOptions"
+                  placeholder="请选择或输入整改责任人姓名/账号"
+              /><small class="person-input-hint">可从建议中选择，也可直接输入系统内姓名或账号</small></label>
               <label><span><b>*</b> 整改期限</span><DatePicker
                   v-model:value="actionForm.rectificationDeadline"
                   class="form-control"
@@ -2976,16 +3110,13 @@ onMounted(() => {
                   :show-time="{ format: 'HH:mm' }"
                   value-format="YYYY-MM-DD HH:mm"
               /></label>
-              <label><span>验收人</span><Select
-                  v-model:value="actionForm.acceptanceUserId"
+              <label><span>验收人</span><AutoComplete
+                  v-model:value="actionForm.acceptanceUserInput"
                   allow-clear
-                  class="form-control acceptance-user-input"
-                  :options="acceptanceUserOptions"
-                  option-filter-prop="label"
-                  option-label-prop="label"
-                  placeholder="请选择验收人"
-                  show-search
-              /></label>
+                  class="form-control acceptance-user-input person-combobox"
+                  :options="editableUserOptions"
+                  placeholder="请选择或输入验收人姓名/账号"
+              /><small class="person-input-hint">选填；手动输入时请填系统内姓名或账号</small></label>
             </div>
           </section>
           <section class="action-form-section">
@@ -3005,6 +3136,50 @@ onMounted(() => {
                 show-count
                 placeholder="请填写可核验、可量化的验收标准"
             /></label>
+          </section>
+          <section class="action-form-section">
+            <div class="field-stack">
+<span>补充附件 <em>选填</em></span>
+              <input
+                ref="supplementalAttachmentInputRef"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx"
+                aria-label="上传补充附件"
+                class="supplemental-attachment-input"
+                multiple
+                type="file"
+                @change="handleSupplementalAttachmentChange"
+              />
+              <div class="supplemental-attachment-box">
+                <button
+                  class="supplemental-attachment-trigger"
+                  type="button"
+                  @click="triggerSupplementalAttachmentUpload"
+                >
+                  <IconifyIcon icon="lucide:plus" />
+                  <span>上传附件</span>
+                </button>
+                <div class="supplemental-attachment-content">
+                  <p>支持图片、PDF、Word 文件，单个不超过 10MB，最多 5 个。</p>
+                  <ul v-if="supplementalAttachmentFiles.length > 0">
+                    <li
+                      v-for="(file, index) in supplementalAttachmentFiles"
+                      :key="`${file.name}-${file.lastModified}`"
+                    >
+                      <IconifyIcon icon="lucide:paperclip" />
+                      <span>{{ file.name }}</span>
+                      <small>{{ (file.size / 1024 / 1024).toFixed(2) }}MB</small>
+                      <button
+                        :aria-label="`移除 ${file.name}`"
+                        type="button"
+                        @click="removeSupplementalAttachment(index)"
+                      >
+                        <IconifyIcon icon="lucide:x" />
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </section>
         </template>
         <template v-else-if="currentAction === 'MARK_RECTIFIED'">
@@ -5112,6 +5287,104 @@ onMounted(() => {
 .field-stack > span {
   font-weight: 600;
   color: #172033 !important;
+}
+
+.field-stack > span em {
+  margin-left: 4px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  color: #8793a8;
+}
+
+.person-input-hint {
+  margin-top: -2px;
+  font-size: 12px;
+  color: #8793a8;
+}
+
+.supplemental-attachment-input {
+  display: none;
+}
+
+.supplemental-attachment-box {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.supplemental-attachment-trigger {
+  display: grid;
+  flex: 0 0 112px;
+  gap: 6px;
+  place-content: center;
+  min-height: 96px;
+  color: #47617f;
+  cursor: pointer;
+  background: #fbfdff;
+  border: 1px dashed #b8c7dc;
+  border-radius: 8px;
+}
+
+.supplemental-attachment-trigger:hover {
+  color: #1677ff;
+  background: #f5f9ff;
+  border-color: #69a8ff;
+}
+
+.supplemental-attachment-trigger svg {
+  margin: 0 auto;
+  font-size: 24px;
+}
+
+.supplemental-attachment-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.supplemental-attachment-content > p {
+  margin: 8px 0 10px;
+  font-size: 13px;
+  color: #718096;
+}
+
+.supplemental-attachment-content ul {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.supplemental-attachment-content li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 9px;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e5eaf1;
+  border-radius: 6px;
+}
+
+.supplemental-attachment-content li > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.supplemental-attachment-content li small {
+  color: #8793a8;
+}
+
+.supplemental-attachment-content li button {
+  display: grid;
+  padding: 2px;
+  color: #8793a8;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
 }
 
 .action-evidence-grid {

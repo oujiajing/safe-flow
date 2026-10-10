@@ -125,9 +125,25 @@ public class HazardRectificationOrderService {
     return toDetail(order);
   }
 
-  public void assertCanUploadAttachment(Long id) {
+  public void assertCanUploadAttachment(Long id, String fileKind) {
     hazardPermissionPolicy.assertCanRectifyOrder();
-    requireOrder(id);
+    HazardRectificationOrder order = requireOrder(id);
+    if (!"RECTIFICATION_SUPPLEMENT".equalsIgnoreCase(fileKind)) {
+      return;
+    }
+    if (!HazardRectificationOrderStatus.PENDING_ASSIGN.equals(order.status)) {
+      throw new BusinessException("只有待下发工单可上传补充附件");
+    }
+    long count =
+        attachmentMapper.selectCount(
+            new QueryWrapper<BizAttachment>()
+                .eq("biz_type", "HAZARD_RECTIFICATION_ORDER")
+                .eq("biz_id", id)
+                .eq("file_kind", "RECTIFICATION_SUPPLEMENT")
+                .eq("deleted", 0));
+    if (count >= 5) {
+      throw new BusinessException("补充附件最多上传 5 个");
+    }
   }
 
   @Transactional
@@ -203,7 +219,9 @@ public class HazardRectificationOrderService {
     String action = normalizeAction(request == null ? null : request.action());
     assertCanPerformAction(action);
     Map<String, Object> payload =
-        request == null || request.payload() == null ? Map.of() : request.payload();
+        request == null || request.payload() == null
+            ? new LinkedHashMap<>()
+            : new LinkedHashMap<>(request.payload());
     String from = order.status;
     String to = nextStatus(from, action);
 
@@ -1033,10 +1051,16 @@ public class HazardRectificationOrderService {
     switch (action) {
       case "ISSUE_RECTIFICATION" -> {
         Long responsibleUserId =
-            requiredLong(payload, "rectificationResponsibleUserId", "整改责任人");
+            resolveRequiredUserId(
+                payload,
+                "rectificationResponsibleUserId",
+                "rectificationResponsibleUserName",
+                "整改责任人");
         String requirement = requiredText(payload, "rectificationRequirement", "整改要求");
         LocalDateTime deadline = requiredDateTime(payload, "rectificationDeadline", "整改期限");
-        Long acceptanceUserId = longValue(payload.get("acceptanceUserId"));
+        Long acceptanceUserId =
+            resolveOptionalUserId(
+                payload, "acceptanceUserId", "acceptanceUserName", "验收人");
         if (acceptanceUserId != null && acceptanceUserId.equals(responsibleUserId)) {
           throw new BusinessException("整改责任人和验收人不允许同一人");
         }
@@ -1314,10 +1338,10 @@ public class HazardRectificationOrderService {
 
   private void validateAcceptanceOperator(HazardRectificationOrder order, Long operatorId) {
     if (operatorId.equals(order.rectificationResponsibleUserId)) {
-      throw new BusinessException("未填写验收人ID，整改责任人不能验收自己的工单");
+      throw new BusinessException("未指定验收人时，整改责任人不能验收自己的工单");
     }
     if (operatorId.equals(order.issuedBy)) {
-      throw new BusinessException("未填写验收人ID，下发人不能验收自己下发的工单");
+      throw new BusinessException("未指定验收人时，下发人不能验收自己下发的工单");
     }
     if (order.acceptanceUserId != null && !operatorId.equals(order.acceptanceUserId)) {
       throw new BusinessException("当前用户不是该工单验收人");
@@ -1341,12 +1365,50 @@ public class HazardRectificationOrderService {
     return value;
   }
 
-  private Long requiredLong(Map<String, Object> payload, String key, String label) {
-    Long value = longValue(payload.get(key));
+  private Long resolveRequiredUserId(
+      Map<String, Object> payload, String idKey, String nameKey, String label) {
+    Long value = resolveOptionalUserId(payload, idKey, nameKey, label);
     if (value == null) {
       throw new BusinessException(label + "不能为空");
     }
     return value;
+  }
+
+  private Long resolveOptionalUserId(
+      Map<String, Object> payload, String idKey, String nameKey, String label) {
+    Long userId = longValue(payload.get(idKey));
+    if (userId != null) {
+      return userId;
+    }
+    String identity = firstText(payload, nameKey);
+    if (isBlank(identity)) {
+      return null;
+    }
+    List<SysUser> matches =
+        userMapper.selectList(
+            new QueryWrapper<SysUser>()
+                .eq("deleted", 0)
+                .eq("status", "ACTIVE")
+                .eq("username", identity));
+    if (matches.isEmpty()) {
+      matches =
+          userMapper.selectList(
+              new QueryWrapper<SysUser>()
+                  .eq("deleted", 0)
+                  .eq("status", "ACTIVE")
+                  .eq("real_name", identity));
+    }
+    if (matches.isEmpty()) {
+      throw new BusinessException(
+          "未找到" + label + "：" + identity + "，请输入系统内姓名或账号");
+    }
+    if (matches.size() > 1) {
+      throw new BusinessException(label + "姓名重复，请输入唯一账号");
+    }
+    SysUser matched = matches.get(0);
+    payload.put(idKey, matched.id);
+    payload.put(nameKey, isBlank(matched.realName) ? matched.username : matched.realName);
+    return matched.id;
   }
 
   private <T> T requireValue(T value, String label) {

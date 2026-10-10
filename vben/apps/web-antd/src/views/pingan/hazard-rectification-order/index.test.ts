@@ -327,7 +327,7 @@ describe('hazard rectification order page', () => {
     );
   });
 
-  it('loads scoped users and selects a rectification responsible person by name', () => {
+  it('supports selecting or manually entering dispatch users by name or username', () => {
     const page = readFileSync(
       appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
       'utf8',
@@ -335,16 +335,19 @@ describe('hazard rectification order page', () => {
 
     expect(page).toContain('getPinganUsersApi');
     expect(page).toContain('loadResponsibleUsers');
-    expect(page).toContain('responsibleUserOptions');
+    expect(page).toContain('editableUserOptions');
+    expect(page).toContain('function editableUserIdentity');
     expect(page).toContain('function selectedRectificationResponsibleUserId()');
     expect(page).toMatch(
       /rectificationResponsibleUserId:\s*selectedRectificationResponsibleUserId\(\)/,
     );
     expect(page).toMatch(
-      /<Select\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserId"[\s\S]*:options="responsibleUserOptions"[\s\S]*show-search/,
+      /<AutoComplete\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserInput"[\s\S]*:options="editableUserOptions"/,
     );
-    expect(page).toContain('placeholder="请选择整改责任人"');
-    expect(page).toContain("message.error('请选择整改责任人')");
+    expect(page).toContain('v-model:value="actionForm.acceptanceUserInput"');
+    expect(page).toContain('placeholder="请选择或输入整改责任人姓名/账号"');
+    expect(page).toContain('placeholder="请选择或输入验收人姓名/账号"');
+    expect(page).toContain("message.error('请选择或填写整改责任人')");
     expect(page).not.toMatch(
       /<InputNumber\s+[\s\S]*v-model:value="actionForm\.rectificationResponsibleUserId"/,
     );
@@ -360,7 +363,7 @@ describe('hazard rectification order page', () => {
     expect(page).toContain("acceptanceUserId: '验收人'");
     expect(page).toContain("rectificationDepartmentId: '整改部门'");
     expect(page).toContain("rectificationResponsibleUserId: '整改责任人'");
-    expect(page).toContain('placeholder="请选择整改责任人"');
+    expect(page).toContain('placeholder="请选择或输入整改责任人姓名/账号"');
     expect(page).toContain('placeholder="请选择验收人"');
     expect(page).toContain("message.error('请选择验收人')");
     expect(page).not.toContain('验收人必须是数字');
@@ -368,6 +371,21 @@ describe('hazard rectification order page', () => {
     expect(page).not.toContain('验收人ID');
     expect(page).not.toContain('整改部门ID');
     expect(page).not.toContain('验收部门ID');
+  });
+
+  it('adds optional supplemental attachments to the dispatch action', () => {
+    const page = readFileSync(
+      appSourcePath('src/views/pingan/hazard-rectification-order/index.vue'),
+      'utf8',
+    );
+
+    expect(page).toContain('补充附件');
+    expect(page).toContain('supplementalAttachmentFiles');
+    expect(page).toContain('multiple');
+    expect(page).toContain('accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx"');
+    expect(page).toContain('单个不超过 10MB，最多 5 个');
+    expect(page).toContain("'RECTIFICATION_SUPPLEMENT'");
+    expect(page).toContain('payload.supplementalAttachments');
   });
 
   it('renders rectification and acceptance department names in flow log details instead of raw ids', () => {
