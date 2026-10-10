@@ -1,11 +1,22 @@
 param(
   [switch]$ResetDatabasePassword,
-  [string]$DatabaseName
+  [string]$DatabaseName,
+  [string]$AgentRoot = $env:SAFEGUARD_AGENT_ROOT
 )
 
 $ErrorActionPreference = 'Stop'
 $safeFlowRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$agentRoot = 'D:\1-project\safeguard-agent'
+$agentRoot = $AgentRoot
+if (-not $agentRoot) {
+  $siblingAgentRoot = Join-Path (Split-Path $safeFlowRoot -Parent) 'safeguard-agent'
+  if (Test-Path -LiteralPath $siblingAgentRoot -PathType Container) {
+    $agentRoot = $siblingAgentRoot
+  }
+}
+if (-not $agentRoot) {
+  throw '未找到 SafeGuard Agent 项目。请通过 -AgentRoot 参数或 SAFEGUARD_AGENT_ROOT 环境变量指定其目录。'
+}
+$agentRoot = (Resolve-Path -LiteralPath $agentRoot).Path
 $runtimeFile = Join-Path $safeFlowRoot '.env.agent-pilot.local'
 $logRoot = Join-Path $safeFlowRoot '.codex-run-logs'
 New-Item -ItemType Directory -Force -Path $logRoot | Out-Null
