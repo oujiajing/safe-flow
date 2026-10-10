@@ -2399,14 +2399,14 @@ onMounted(() => {
                     }}
                   </dd>
                 </div>
-                <div>
+                <div class="wide rectification-owner-row">
                   <dt>整改责任人</dt>
                   <dd>
                     <IconifyIcon icon="lucide:user-round" />
                     {{ currentOrder.rectificationResponsibleUserName || '-' }}
                   </dd>
                 </div>
-                <div>
+                <div class="wide rectification-department-row">
                   <dt>整改部门</dt>
                   <dd>
                     {{
@@ -2478,7 +2478,6 @@ onMounted(() => {
             <div class="detail-section__title">
               <div>
                 <h3>提交记录</h3>
-                <p>保留整改结果的提交人、时间与版本信息</p>
               </div>
               <Tag color="blue">V{{ currentOrder.version }}.0</Tag>
             </div>

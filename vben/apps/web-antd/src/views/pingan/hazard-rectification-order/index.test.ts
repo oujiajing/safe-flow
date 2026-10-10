@@ -232,7 +232,13 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('rectificationSubmitLog');
     expect(page).toContain('rectificationSubmitStatusLabel');
     expect(page).toContain('class="rectification-detail-list"');
+    expect(page).toContain('class="wide rectification-owner-row"');
+    expect(page).toContain('class="wide rectification-department-row"');
+    expect(page.indexOf('rectification-owner-row')).toBeLessThan(
+      page.indexOf('rectification-department-row'),
+    );
     expect(page).toContain('class="detail-section submission-record-card"');
+    expect(page).not.toContain('保留整改结果的提交人、时间与版本信息');
     expect(page).toContain('附件数量：1 个');
     expect(page).toContain('function acceptanceConclusionCriteria()');
     expect(page).toContain('class="detail-section acceptance-review-card"');
