@@ -185,7 +185,7 @@ catalog:
   vitepress: ^1.6.4
   vitepress-plugin-group-icons: ^1.7.3
   vitest: ^4.1.4
-  vue: ^3.5.32
+  vue: ^3.5.42
   vue-eslint-parser: ^10.4.0
   vue-i18n: ^11.3.2
   vue-json-viewer: ^3.0.4
@@ -202,9 +202,13 @@ catalog:
 overrides:
   '@ast-grep/napi': 'catalog:'
   '@ctrl/tinycolor': 'catalog:'
-  brace-expansion@5.0.5: 5.0.9
+  brace-expansion@1.1.18: 1.1.20
+  brace-expansion@2.1.4: 2.1.6
+  brace-expansion@5.0.5: 5.0.11
   clsx: 'catalog:'
   js-yaml@4.1.1: 4.3.2
   pinia: 'catalog:'
   serialize-javascript@6.0.2: 7.0.3
+  source-map-js@1.2.1: 1.2.2
+  tinypool@2.1.0: 2.1.2
   vue: 'catalog:'
