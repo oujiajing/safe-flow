@@ -94,7 +94,7 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('search-text="查询"');
     expect(page).toContain('@update:model-value="setStatusFilter"');
     expect(page).not.toContain('hazard-status-tabs');
-    expect(page).not.toContain('sourceRecordId');
+    expect(page).not.toContain('v-model:value="query.sourceRecordId"');
     expect(page).not.toContain('来源记录ID');
     expect(page).toContain('<span>来源类型</span>');
     expect(page).toContain('class="toolbar-filter"');
@@ -159,7 +159,11 @@ describe('hazard rectification order page', () => {
     expect(page).toContain(
       ':src="resolveAttachmentPreviewUrl(actionForm.afterPhoto)"',
     );
-    expect(page).not.toContain('FileReader');
+    const uploadHandler = page.match(
+      /async function handleRectifiedPhotoChange[\s\S]*?function normalizeOrgTree/,
+    )?.[0];
+    expect(uploadHandler).toBeTruthy();
+    expect(uploadHandler).not.toContain('FileReader');
     expect(page).not.toContain('data:image/png;base64');
     expect(page).not.toContain('placeholder="整改后照片URL"');
   });

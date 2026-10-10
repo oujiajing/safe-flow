@@ -106,6 +106,7 @@ export namespace PinganHazardRectificationOrderApi {
   export interface OrderDetail extends OrderRow {
     acceptanceAt?: string;
     acceptanceDepartmentId?: Id;
+    acceptanceRequirement?: string;
     acceptanceRemark?: string;
     acceptanceResult?: string;
     acceptanceUserId?: Id;
@@ -160,6 +161,49 @@ export namespace PinganHazardRectificationOrderApi {
     originalName?: string;
     storagePath?: string;
     url: string;
+  }
+
+  export interface AgentReviewRequest {
+    orderVersion: number;
+    criteria: string[];
+    beforeEvidence?: string[];
+    afterEvidence?: string[];
+    rectificationDescription?: string;
+    beforeImageData?: string[];
+    afterImageData?: string[];
+  }
+
+  export interface AgentSummaryRequest {
+    orderVersion: number;
+    hazardDescription?: string;
+    rectificationDescription?: string;
+    acceptanceResult?: string;
+    acceptanceRemark?: string;
+    measures?: string[];
+    acceptanceCriteria?: string[];
+    flowFacts?: string[];
+    citations?: string[];
+  }
+
+  export interface AgentReviewResponse {
+    reviewId: string;
+    orderId: string;
+    orderVersion: number;
+    status: string;
+    overallSuggestion: string;
+    criterionResults: Array<{ criterion: string; result: string; evidence: string[]; reason: string }>;
+    missingMaterials: string[];
+    workflowTrace: Array<{ stage: string; message: string; executed: boolean }>;
+  }
+
+  export interface AgentSummaryResponse {
+    summaryId: string;
+    orderId: string;
+    orderVersion: number;
+    status: string;
+    sections: Array<{ key: string; title: string; content: string; sourceRefs: string[] }>;
+    citations: string[];
+    summaryVersion?: number;
   }
 }
 
@@ -219,4 +263,50 @@ export async function uploadHazardRectificationOrderAttachmentApi(
       headers: { 'Content-Type': 'multipart/form-data' },
     },
   );
+}
+
+export async function reviewHazardRectificationOrderWithAgentApi(
+  id: string,
+  data: PinganHazardRectificationOrderApi.AgentReviewRequest,
+) {
+  return requestClient.post<PinganHazardRectificationOrderApi.AgentReviewResponse>(
+    `${ordersPath}/${id}/agent-review`, data, { timeout: 300_000 },
+  );
+}
+
+export async function summarizeHazardRectificationOrderWithAgentApi(
+  id: string,
+  data: PinganHazardRectificationOrderApi.AgentSummaryRequest,
+) {
+  return requestClient.post<PinganHazardRectificationOrderApi.AgentSummaryResponse>(
+    `${ordersPath}/${id}/agent-summary`, data,
+  );
+}
+
+export async function confirmHazardRectificationSummaryApi(
+  id: string,
+  summaryVersion: number,
+  orderVersion: number,
+  confirmedJson: string,
+) {
+  return requestClient.post(`${ordersPath}/${id}/agent-summary/confirm`, {
+    summaryVersion,
+    orderVersion,
+    confirmedJson,
+  });
+}
+
+export async function editHazardRectificationSummaryApi(
+  id: string,
+  summaryVersion: number,
+  orderVersion: number,
+  editedJson: string,
+  editReason?: string,
+) {
+  return requestClient.post(`${ordersPath}/${id}/agent-summary/edit`, {
+    summaryVersion,
+    orderVersion,
+    editedJson,
+    editReason,
+  });
 }

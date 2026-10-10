@@ -94,6 +94,88 @@ export namespace PinganThreeCheckRecordApi {
     sourceRecordId?: string;
   }
 
+  export interface AgentAssistResponse {
+    analysisId: string;
+    analyzedAt?: string;
+    hazardCandidates: Array<{
+      candidateId: string;
+      confidence: number;
+      description: string;
+      hazardType: string;
+      judgement: 'CONFIRMED' | 'SUSPECTED' | 'UNKNOWN' | string;
+      needsManualVerification: boolean;
+      operationObject: string;
+      potentialRisk: string;
+      visibleEvidence: string[];
+    }>;
+    model?: string;
+    recordId: string;
+    recordVersion: number;
+    scene: string;
+  }
+
+  export type AgentCandidateDecision = 'ACCEPTED' | 'EDITED' | 'REJECTED';
+  export interface AgentLegalEvidence {
+    clauseNo?: string;
+    content: string;
+    documentTitle: string;
+    evidenceId: string;
+    rerankScore?: number;
+    standardNo?: string;
+  }
+  export interface AgentAssessment {
+    acceptanceCriteria?: string[] | string;
+    legalEvidence?: AgentLegalEvidence[];
+    rectificationMeasures?: string[] | string;
+    riskLevel?: { basis?: string; value?: string };
+  }
+  export interface AgentRunResponse {
+    analysisId?: string;
+    assessment?: { assessments?: Array<{ candidateId: string; assessment: AgentAssessment }>; knowledgeUsed?: boolean };
+    assessmentId?: string;
+    attachments: Array<{ attachmentId: string; imageIndex: number; mimeType?: string; sha256: string }>;
+    decisions: Array<{ candidateId: string; decision: AgentCandidateDecision; editedDescription?: string; editedHazardType?: string; editedRiskLevel?: string; editedMeasures?: string[]; reviewerNote?: string }>;
+    errorCode?: string;
+    errorMessage?: string;
+    inputText?: string;
+    knowledgeStatus?: string;
+    model?: string;
+    modelOutput?: { hazardCandidates?: Array<AgentAssistResponse['hazardCandidates'][number] & { sourceAttachmentId?: string; sourceImageIndex?: number }> };
+    recordId: string;
+    recordVersion: number;
+    runId: string;
+    status: string;
+  }
+  export interface AgentRectificationPreview {
+    assessmentId?: string;
+    canApply: boolean;
+    decisionSetVersion: number;
+    existingOrderId?: string;
+    items: Array<{
+      acceptanceCriteria: string[];
+      candidateId: string;
+      checkItem?: string;
+      hazardDescription?: string;
+      legalEvidence: unknown;
+      rectificationMeasures: string[];
+      riskType?: string;
+      sourceAttachmentIds: string[];
+    }>;
+    missingFields: string[];
+    previewDigest: string;
+    recordId: string;
+    recordVersion: number;
+    runId: string;
+  }
+  export interface AgentRectificationApplyResult {
+    appliedAt?: string;
+    errorCode?: string;
+    errorMessage?: string;
+    orderId?: string;
+    runId: string;
+    status: 'APPLIED' | 'APPLYING' | 'FAILED' | 'REUSED_EXISTING' | string;
+  }
+
   export interface DocumentFlowStatusLog {
     action: string;
     createdAt: string;
@@ -158,6 +240,13 @@ export namespace PinganThreeCheckRecordApi {
     payload?: Record<string, unknown>;
     remark?: string;
     version?: number;
+    agentConfirmation?: {
+      assessmentId: string;
+      confirmation: true;
+      decisionSetVersion: number;
+      previewDigest: string;
+      runId: string;
+    };
   }
 
   export interface RecordPayload {
@@ -263,6 +352,75 @@ export async function getThreeCheckRecordDetailApi(
 ) {
   return requestClient.get<PinganThreeCheckRecordApi.RecordDetail>(
     `${recordsPath(moduleKey)}/${id}`,
+  );
+}
+
+export async function runQuickShotAgentAssistApi(
+  id: string,
+  extraDescription?: string,
+) {
+  return requestClient.post<PinganThreeCheckRecordApi.AgentAssistResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-assist`,
+    extraDescription?.trim() ? { extraDescription: extraDescription.trim() } : undefined,
+  );
+}
+
+export async function createQuickShotAgentRunApi(id: string, extraDescription?: string) {
+  return requestClient.post<PinganThreeCheckRecordApi.AgentRunResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs`,
+    extraDescription?.trim() ? { extraDescription: extraDescription.trim() } : undefined,
+    { timeout: 180_000 },
+  );
+}
+
+export async function getLatestQuickShotAgentRunApi(id: string) {
+  return requestClient.get<PinganThreeCheckRecordApi.AgentRunResponse | null>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs`,
+  );
+}
+
+export async function saveQuickShotAgentCandidateDecisionsApi(
+  id: string,
+  runId: string,
+  decisions: Array<{ candidateId: string; decision: PinganThreeCheckRecordApi.AgentCandidateDecision; editedDescription?: string; editedHazardType?: string; editedRiskLevel?: string; editedMeasures?: string[]; reviewerNote?: string }>,
+) {
+  return requestClient.post<PinganThreeCheckRecordApi.AgentRunResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/candidate-decisions`, { decisions },
+  );
+}
+
+export async function assessQuickShotAgentRunApi(id: string, runId: string) {
+  return requestClient.post<PinganThreeCheckRecordApi.AgentRunResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/assess`,
+    undefined,
+    { timeout: 180_000 },
+  );
+}
+
+export async function saveQuickShotAgentReviewDraftApi(
+  id: string,
+  runId: string,
+  data: { reviewerNote?: string; items?: Array<Record<string, unknown>> },
+) {
+  return requestClient.put<PinganThreeCheckRecordApi.AgentRunResponse>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/review-draft`, data,
+  );
+}
+
+export async function getQuickShotAgentRectificationPreviewApi(id: string, runId: string) {
+  return requestClient.get<PinganThreeCheckRecordApi.AgentRectificationPreview>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/rectification-preview`,
+  );
+}
+
+export async function getQuickShotAgentRectificationApplyApi(
+  id: string,
+  runId: string,
+  idempotencyKey?: string,
+) {
+  return requestClient.get<PinganThreeCheckRecordApi.AgentRectificationApplyResult | null>(
+    `/pingan/three-checks/quick-shot/records/${id}/agent-runs/${runId}/rectification-apply`,
+    idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
   );
 }
 
@@ -380,10 +538,12 @@ export async function workflowActionThreeCheckRecordApi(
   moduleKey: string,
   id: string,
   data: PinganThreeCheckRecordApi.WorkflowActionRequest,
+  idempotencyKey?: string,
 ) {
   return requestClient.post<PinganThreeCheckRecordApi.RecordDetail>(
     `${recordsPath(moduleKey)}/${id}/workflow-actions`,
     data,
+    idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
   );
 }
 

@@ -72,6 +72,12 @@ public class HazardPermissionPolicy {
         permission("quick-shot", "REVIEW"), LEGACY_HAZARD_ACCEPT);
   }
 
+  /** Agent runs are initiated by the reporter, but never transition the business workflow. */
+  public void assertCanStartQuickShotAgentRun() {
+    permissionService.assertHasAnyPermission(
+        permission("quick-shot", "REPORT"), LEGACY_HAZARD_REPORT);
+  }
+
   public void assertCanRectifyOrder() {
     permissionService.assertHasAnyPermission(
         permission("hazard-rectification", "RECTIFY"), LEGACY_HAZARD_RECTIFICATION);

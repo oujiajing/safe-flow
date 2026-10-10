@@ -26,15 +26,20 @@ import {
 import {
   actionHazardRectificationOrderApi,
   batchDeleteHazardRectificationOrdersApi,
+  confirmHazardRectificationSummaryApi,
+  editHazardRectificationSummaryApi,
   createHazardRectificationOrderApi,
   getHazardRectificationOrderDetailApi,
   getHazardRectificationOrdersApi,
+  reviewHazardRectificationOrderWithAgentApi,
+  summarizeHazardRectificationOrderWithAgentApi,
   uploadHazardRectificationOrderAttachmentApi,
 } from '#/api/pingan/hazard-rectification-order';
 import {
   getPinganOrgTreeApi,
   getPinganUsersApi,
 } from '#/api/pingan/pre-shift-meeting';
+import { getLatestQuickShotAgentRunApi } from '#/api/pingan/three-check-record';
 import StatusFilterActions from '#/views/pingan/shared/StatusFilterActions.vue';
 import {
   canAcceptHazardRectificationOrder,
@@ -115,6 +120,7 @@ const actionLabels: Record<PinganHazardRectificationOrderApi.Action, string> = {
 };
 const flowLogPayloadLabels: Record<string, string> = {
   acceptanceDepartmentId: '验收部门',
+  acceptanceRequirement: '验收要求',
   acceptanceRemark: '验收说明',
   acceptanceUserId: '验收人',
   afterPhoto: '整改后照片',
@@ -122,7 +128,7 @@ const flowLogPayloadLabels: Record<string, string> = {
   rectificationDeadline: '整改期限',
   rectificationDepartmentId: '整改部门',
   rectificationDescription: '整改说明',
-  rectificationRequirement: '整改要求',
+  rectificationRequirement: '整改措施',
   rectificationResponsibleUserId: '整改责任人',
   rejectReason: '驳回原因',
   remark: '说明',
@@ -148,6 +154,14 @@ const selectedOrderRowKeys = ref<PinganHazardRectificationOrderApi.Id[]>([]);
 const total = ref(0);
 const detailOpen = ref(false);
 const currentOrder = ref<PinganHazardRectificationOrderApi.OrderDetail>();
+const agentReviewLoading = ref(false);
+const agentRectificationDescriptionLoading = ref(false);
+const agentSummaryLoading = ref(false);
+const agentSummaryConfirming = ref(false);
+const agentSummaryEditing = ref(false);
+const agentSummaryEditJson = ref('');
+const agentReview = ref<PinganHazardRectificationOrderApi.AgentReviewResponse>();
+const agentSummary = ref<PinganHazardRectificationOrderApi.AgentSummaryResponse>();
 const actionOpen = ref(false);
 const currentAction = ref<PinganHazardRectificationOrderApi.Action>();
 const rectifiedPhotoInputRef = ref<HTMLInputElement>();
@@ -155,6 +169,7 @@ const actionForm = reactive({
   acceptanceDepartmentId: undefined as
     | PinganHazardRectificationOrderApi.Id
     | undefined,
+  acceptanceRequirement: '',
   acceptanceRemark: '',
   acceptanceUserId: undefined as string | undefined,
   afterPhoto: '',
@@ -405,11 +420,15 @@ async function loadResponsibleUsers() {
 
 async function openDetail(id: string) {
   currentOrder.value = await getHazardRectificationOrderDetailApi(id);
+  agentReview.value = undefined;
+  agentSummary.value = undefined;
+  agentSummaryEditJson.value = '';
   detailOpen.value = true;
 }
 
 function resetActionForm() {
   actionForm.acceptanceDepartmentId = undefined;
+  actionForm.acceptanceRequirement = '';
   actionForm.acceptanceRemark = '';
   actionForm.acceptanceUserId = undefined;
   actionForm.afterPhoto = '';
@@ -422,7 +441,7 @@ function resetActionForm() {
   actionForm.rejectReason = '';
 }
 
-function openAction(action: PinganHazardRectificationOrderApi.Action) {
+async function openAction(action: PinganHazardRectificationOrderApi.Action) {
   if (!canPerformOrderAction(action)) {
     return;
   }
@@ -431,6 +450,7 @@ function openAction(action: PinganHazardRectificationOrderApi.Action) {
     actionForm.rectificationDepartmentId =
       currentOrder.value?.rectificationDepartmentId ??
       currentOrder.value?.departmentId;
+    actionForm.rectificationRequirement = sourceRectificationMeasures();
   }
   if (
     action === 'ACCEPT' ||
@@ -443,6 +463,37 @@ function openAction(action: PinganHazardRectificationOrderApi.Action) {
     actionForm.acceptanceUserId = currentOrder.value?.acceptanceUserId
       ? String(currentOrder.value.acceptanceUserId)
       : undefined;
+    actionForm.acceptanceRequirement = currentOrder.value?.acceptanceRequirement?.trim()
+      ? numberedListText(splitListText(currentOrder.value.acceptanceRequirement))
+      : numberedListText(sourceAcceptanceCriteria());
+    if (
+      !actionForm.acceptanceRequirement &&
+      currentOrder.value?.sourceType === 'QUICK_SHOT' &&
+      currentOrder.value.sourceRecordId
+    ) {
+      try {
+        const run = await getLatestQuickShotAgentRunApi(
+          String(currentOrder.value.sourceRecordId),
+        );
+        const acceptedIds = new Set(
+          (run?.decisions ?? [])
+            .filter((decision) => decision.decision !== 'REJECTED')
+            .map((decision) => decision.candidateId),
+        );
+        const criteria = (run?.assessment?.assessments ?? []).flatMap((item) => {
+          if (acceptedIds.size && !acceptedIds.has(item.candidateId)) return [];
+          const value = item.assessment.acceptanceCriteria;
+          return Array.isArray(value)
+            ? value
+            : typeof value === 'string'
+              ? value.split(/[；;\n]/)
+              : [];
+        });
+        actionForm.acceptanceRequirement = numberedListText(criteria);
+      } catch {
+        // Agent 历史不可用时保留人工填写入口，不阻塞原验收流程。
+      }
+    }
   }
   currentAction.value = action;
   actionOpen.value = true;
@@ -799,11 +850,13 @@ function actionPayload() {
     case 'REQUEST_ACCEPTANCE':
       return {
         acceptanceDepartmentId: actionForm.acceptanceDepartmentId,
+        acceptanceRequirement: actionForm.acceptanceRequirement,
         acceptanceRemark: actionForm.acceptanceRemark,
         acceptanceUserId: selectedAcceptanceUserId(),
       };
     case 'ACCEPT':
       return {
+        acceptanceRequirement: actionForm.acceptanceRequirement,
         acceptanceRemark: actionForm.acceptanceRemark,
         acceptanceUserId: selectedAcceptanceUserId(),
       };
@@ -828,6 +881,25 @@ function unknownToText(value: unknown) {
     return String(value);
   }
   return '';
+}
+
+function cleanNumberedItem(value: string) {
+  return value
+    .trim()
+    .replace(/^\s*(?:\d+\s*[.、．)]|[-•])\s*/u, '')
+    .trim();
+}
+
+function splitListText(value?: string) {
+  return value
+    ? value.split(/[；;\n]/).map(cleanNumberedItem).filter(Boolean)
+    : [];
+}
+
+function numberedListText(values: string[]) {
+  return [...new Set(values.map(cleanNumberedItem).filter(Boolean))]
+    .map((item, index) => `${index + 1}. ${item}`)
+    .join('\n');
 }
 
 function organizationNameById(value: unknown) {
@@ -956,6 +1028,225 @@ async function submitAction() {
     await loadOrders();
   } finally {
     actionSubmitting.value = false;
+  }
+}
+
+function agentAcceptanceCriteria() {
+  const requirement =
+    currentOrder.value?.acceptanceRequirement?.trim() ||
+    currentOrder.value?.rectificationRequirement?.trim();
+  if (requirement) return splitListText(requirement);
+  const sourceCriteria = sourceAcceptanceCriteria();
+  return sourceCriteria.length ? sourceCriteria : currentOrder.value?.items.map((item) => item.defaultFollowUpPlan?.trim()).filter((item): item is string => Boolean(item)) ?? [];
+}
+
+function sourceRectificationMeasures() {
+  const measures = currentOrder.value?.items.flatMap((item) => {
+    const snapshot = item.sourceSnapshot?.rectificationMeasures;
+    const reviewed = Array.isArray(snapshot)
+      ? snapshot.filter((value): value is string => typeof value === 'string')
+      : typeof snapshot === 'string'
+        ? snapshot.split(/[；;\n]/)
+        : [];
+    const reviewedText = reviewed.map((value) => value.trim()).filter(Boolean);
+    if (reviewedText.length) return reviewedText;
+    return splitListText(item.defaultFollowUpPlan);
+  }) ?? [];
+  return numberedListText(measures);
+}
+
+function sourceAcceptanceCriteria() {
+  const criteria = currentOrder.value?.items.flatMap((item) => {
+    const value = item.sourceSnapshot?.acceptanceCriteria;
+    if (Array.isArray(value)) {
+      return value
+        .filter((entry): entry is string => typeof entry === 'string')
+        .map((entry) => entry.trim())
+        .filter(Boolean);
+    }
+    if (typeof value === 'string') {
+      return value.split(/[；;\n]/).map((entry) => entry.trim()).filter(Boolean);
+    }
+    return [];
+  }) ?? [];
+  return [...new Set(criteria.map(cleanNumberedItem).filter(Boolean))];
+}
+
+function reviewDescription(review: PinganHazardRectificationOrderApi.AgentReviewResponse) {
+  const failed = review.criterionResults.filter((item) => item.result === 'FAIL');
+  const uncertain = review.criterionResults.filter((item) =>
+    ['NOT_OBSERVABLE', 'UNCERTAIN'].includes(item.result),
+  );
+  const passed = review.criterionResults.filter((item) => item.result === 'PASS');
+  const lines: string[] = [];
+
+  if (!failed.length && !uncertain.length && passed.length) {
+    lines.push('AI整改复核结论：整改后图片未识别到与验收要求相冲突的明显可见隐患，建议进入人工验收。');
+    lines.push(`复核依据：${passed.map((item) => item.criterion).join('；')}`);
+  } else {
+    const conclusion = failed.length
+      ? '整改后图片仍识别到明确不符合项，建议补充整改后再提交验收。'
+      : '整改后图片存在无法确认的项目，建议人工核验后再决定是否验收。';
+    lines.push(`AI整改复核结论：${conclusion}`);
+    if (failed.length) {
+      lines.push('不符合项：');
+      failed.forEach((item, index) => {
+        lines.push(`${index + 1}. ${item.criterion}；${item.reason}`);
+      });
+    }
+    if (uncertain.length) {
+      lines.push('待人工核验项：');
+      uncertain.forEach((item, index) => {
+        lines.push(`${index + 1}. ${item.criterion}；${item.reason}`);
+      });
+    }
+    if (passed.length) {
+      lines.push(`图片可见范围内已满足：${passed.map((item) => item.criterion).join('；')}`);
+    }
+  }
+
+  if (review.missingMaterials.length) {
+    lines.push(`需补充材料：${review.missingMaterials.join('；')}`);
+  }
+  lines.push('人工确认事项：AI仅核验图片中的可见事实；产品标准、证书、检测数据、培训记录及最终验收结论仍需人工确认。');
+  return lines.join('\n');
+}
+
+async function runAgentRectificationDescription() {
+  const order = currentOrder.value;
+  if (!order) return;
+  if (!actionForm.afterPhoto.trim()) {
+    message.warning('请先上传整改后照片');
+    return;
+  }
+  const criteria = sourceAcceptanceCriteria().length
+    ? sourceAcceptanceCriteria()
+    : agentAcceptanceCriteria();
+  if (!criteria.length) {
+    message.warning('缺少来源模块生成的验收要求或整改要求');
+    return;
+  }
+  agentRectificationDescriptionLoading.value = true;
+  try {
+    const beforePhotos = order.items
+      .map((item) => item.beforePhoto)
+      .filter((value): value is string => Boolean(value));
+    const review = await reviewHazardRectificationOrderWithAgentApi(order.id, {
+      orderVersion: order.version,
+      criteria,
+      beforeEvidence: order.items.flatMap((item) =>
+        [item.hazardDescription, item.beforePhoto].filter(
+          (value): value is string => Boolean(value),
+        ),
+      ),
+      afterEvidence: [actionForm.afterPhoto],
+      rectificationDescription: actionForm.rectificationDescription,
+      beforeImageData: await inlineImageData(beforePhotos),
+      afterImageData: await inlineImageData([actionForm.afterPhoto]),
+    });
+    agentReview.value = review;
+    actionForm.rectificationDescription = reviewDescription(review);
+    message.success('AI 复核内容已带入整改说明，可继续编辑');
+  } finally {
+    agentRectificationDescriptionLoading.value = false;
+  }
+}
+
+async function runAgentRectificationReview() {
+  const order = currentOrder.value;
+  if (!order) return;
+  const criteria = agentAcceptanceCriteria();
+  if (!criteria.length) {
+    message.warning('请先补充整改要求或验收标准');
+    return;
+  }
+  agentReviewLoading.value = true;
+  try {
+    const beforePhotos = order.items.map((item) => item.beforePhoto).filter((value): value is string => Boolean(value));
+    const afterPhotos = [order.rectificationAfterPhoto].filter((value): value is string => Boolean(value));
+    agentReview.value = await reviewHazardRectificationOrderWithAgentApi(order.id, {
+      orderVersion: order.version,
+      criteria,
+      beforeEvidence: order.items.flatMap((item) => [item.hazardDescription, item.beforePhoto].filter((value): value is string => Boolean(value))),
+      afterEvidence: [order.rectificationDescription, order.rectificationAfterPhoto].filter((value): value is string => Boolean(value)),
+      rectificationDescription: order.rectificationDescription,
+      beforeImageData: await inlineImageData(beforePhotos),
+      afterImageData: await inlineImageData(afterPhotos),
+    });
+  } finally {
+    agentReviewLoading.value = false;
+  }
+}
+
+async function inlineImageData(urls: string[]) {
+  const values: string[] = [];
+  for (const url of urls.slice(0, 8)) {
+    if (url.startsWith('data:image/')) { values.push(url); continue; }
+    try {
+      const response = await fetch(url, { credentials: 'include' });
+      const blob = await response.blob();
+      if (!response.ok || !blob.type.startsWith('image/') || blob.size > 6_000_000) continue;
+      values.push(await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      }));
+    } catch {
+      // URL remains in textual evidence; failure to inline must not block manual review.
+    }
+  }
+  return values;
+}
+
+async function runAgentRectificationSummary() {
+  const order = currentOrder.value;
+  if (!order) return;
+  agentSummaryLoading.value = true;
+  try {
+    const summary = await summarizeHazardRectificationOrderWithAgentApi(order.id, {
+      orderVersion: order.version,
+      hazardDescription: order.items.map((item) => item.hazardDescription).filter(Boolean).join('；'),
+      rectificationDescription: order.rectificationDescription,
+      acceptanceResult: order.acceptanceResult,
+      acceptanceRemark: order.acceptanceRemark,
+      measures: order.items.map((item) => item.defaultFollowUpPlan).filter((value): value is string => Boolean(value)),
+      acceptanceCriteria: agentAcceptanceCriteria(),
+      flowFacts: order.flowLogs.map((log) => `${log.actionLabel}：${log.remark || log.toStatusLabel}`),
+      citations: order.items.map((item) => `order.item.${item.id}`),
+    });
+    agentSummary.value = summary;
+    agentSummaryEditJson.value = JSON.stringify(summary, null, 2);
+    message.success('AI 总结草稿已生成，可编辑后保存或确认');
+  } finally {
+    agentSummaryLoading.value = false;
+  }
+}
+
+async function confirmAgentRectificationSummary() {
+  const order = currentOrder.value;
+  const summary = agentSummary.value;
+  if (!order || !summary) return;
+  agentSummaryConfirming.value = true;
+  try {
+    await confirmHazardRectificationSummaryApi(order.id, summary.summaryVersion ?? 1, order.version, JSON.stringify(summary));
+    message.success('整改说明总结已确认并留存版本');
+  } finally {
+    agentSummaryConfirming.value = false;
+  }
+}
+
+async function editAgentRectificationSummary() {
+  const order = currentOrder.value;
+  const summary = agentSummary.value;
+  if (!order || !summary || !agentSummaryEditJson.value.trim()) return;
+  agentSummaryEditing.value = true;
+  try {
+    await editHazardRectificationSummaryApi(order.id, summary.summaryVersion ?? 1, order.version, agentSummaryEditJson.value, '人工修订');
+    message.success('总结修订已保存');
+    agentSummary.value = { ...summary, status: 'REVISED' };
+  } finally {
+    agentSummaryEditing.value = false;
   }
 }
 
@@ -1241,6 +1532,61 @@ onMounted(() => {
           />
         </section>
 
+        <section
+          v-if="['RECTIFIED', 'PENDING_ACCEPTANCE'].includes(currentOrder.status)"
+          class="order-result-panel"
+        >
+          <div class="order-agent-panel-head">
+            <div>
+              <h3>AI 整改复核辅助</h3>
+              <p>仅提供逐项证据核验建议，最终验收仍由验收人执行。</p>
+            </div>
+            <Button :loading="agentReviewLoading" @click="runAgentRectificationReview">
+              生成复核建议
+            </Button>
+          </div>
+          <template v-if="agentReview">
+            <Tag>{{ agentReview.overallSuggestion }}</Tag>
+            <div v-for="item in agentReview.criterionResults" :key="item.criterion" class="order-agent-item">
+              <strong>{{ item.criterion }}</strong>
+              <Tag :color="item.result === 'PASS' ? 'green' : item.result === 'FAIL' ? 'red' : 'orange'">{{ item.result }}</Tag>
+              <p>{{ item.reason }}</p>
+            </div>
+            <p v-if="agentReview.missingMaterials.length">需补充：{{ agentReview.missingMaterials.join('；') }}</p>
+          </template>
+        </section>
+
+        <section v-if="currentOrder.status === 'CLOSED'" class="order-result-panel">
+          <div class="order-agent-panel-head">
+            <div>
+              <h3>AI 整改说明总结</h3>
+              <p>根据已关闭工单事实生成草稿，不改变工单与验收结果。</p>
+            </div>
+            <Button :loading="agentSummaryLoading" @click="runAgentRectificationSummary">
+              生成总结草稿
+            </Button>
+          </div>
+          <template v-if="agentSummary">
+            <Tag>{{ agentSummary.status }}</Tag>
+            <Input.TextArea v-model:value="agentSummaryEditJson" :rows="5" placeholder="可编辑总结 JSON；保存后仍需人工确认冻结" />
+            <Button :loading="agentSummaryEditing" @click="editAgentRectificationSummary">保存修订</Button>
+            <Button
+              v-if="agentSummary.status === 'DRAFT' || agentSummary.status === 'REVISED'"
+              :loading="agentSummaryConfirming"
+              size="small"
+              type="primary"
+              @click="confirmAgentRectificationSummary"
+            >
+              确认并留存总结
+            </Button>
+            <article v-for="section in agentSummary.sections" :key="section.key" class="order-agent-item">
+              <strong>{{ section.title }}</strong>
+              <p>{{ section.content }}</p>
+              <small>来源：{{ section.sourceRefs.join('、') }}</small>
+            </article>
+          </template>
+        </section>
+
         <Timeline class="order-flow">
           <Timeline.Item v-for="log in currentOrder.flowLogs" :key="log.id">
             <strong>{{ log.actionLabel }}</strong>
@@ -1403,13 +1749,27 @@ onMounted(() => {
           />
           <Input.TextArea
             v-model:value="actionForm.rectificationRequirement"
-            placeholder="整改要求"
+            :rows="5"
+            placeholder="整改措施（已自动带入来源模块内容，可编辑修改）"
           />
         </template>
         <template v-else-if="currentAction === 'MARK_RECTIFIED'">
+          <div class="order-agent-panel-head">
+            <div>
+              <strong>AI 整改复核</strong>
+              <p>上传整改后照片后生成复核说明，内容会自动带入下方输入框。</p>
+            </div>
+            <Button
+              :loading="agentRectificationDescriptionLoading"
+              @click="runAgentRectificationDescription"
+            >
+              AI 整改复核
+            </Button>
+          </div>
           <Input.TextArea
             v-model:value="actionForm.rectificationDescription"
-            placeholder="整改说明"
+            :rows="5"
+            placeholder="整改说明；可手工填写，也可使用 AI 整改复核后继续编辑"
           />
           <div class="rectified-photo-upload">
             <input
@@ -1449,6 +1809,11 @@ onMounted(() => {
             show-search
           />
           <Input.TextArea
+            v-model:value="actionForm.acceptanceRequirement"
+            :rows="4"
+            placeholder="验收要求；默认带入来源模块基于整改前图片生成的要求，可编辑"
+          />
+          <Input.TextArea
             v-model:value="actionForm.acceptanceRemark"
             placeholder="验收申请备注"
           />
@@ -1464,6 +1829,11 @@ onMounted(() => {
               option-label-prop="label"
               placeholder="请选择验收人"
               show-search
+            />
+            <Input.TextArea
+              v-model:value="actionForm.acceptanceRequirement"
+              :rows="4"
+              placeholder="验收要求；默认带入来源模块基于整改前图片生成的要求，可编辑"
             />
             <Input.TextArea
               v-model:value="actionForm.acceptanceRemark"
@@ -1611,6 +1981,28 @@ onMounted(() => {
   font-size: 15px;
   font-weight: 600;
   color: #1f2937;
+}
+
+.order-agent-panel-head {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.order-agent-panel-head p,
+.order-agent-item p {
+  margin: 4px 0 0;
+  color: #64748b;
+}
+
+.order-agent-item {
+  padding: 10px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.order-agent-item strong {
+  margin-right: 8px;
 }
 
 .order-result-grid {

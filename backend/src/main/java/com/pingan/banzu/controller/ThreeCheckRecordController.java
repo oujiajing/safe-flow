@@ -19,6 +19,7 @@ import com.pingan.banzu.service.ThreeCheckRecordService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -123,8 +124,14 @@ public class ThreeCheckRecordController {
   public ApiResponse<ThreeCheckRecordDetailResponse> workflowAction(
       @PathVariable String moduleKey,
       @PathVariable Long id,
-      @RequestBody QuickShotWorkflowActionRequest request) {
-    return ApiResponse.ok(recordService.quickShotWorkflowAction(moduleKey, id, request));
+      @RequestBody QuickShotWorkflowActionRequest request,
+      @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+    if (request != null && request.agentConfirmation() != null) {
+      if (idempotencyKey == null || idempotencyKey.isBlank()) {
+        throw new com.pingan.banzu.common.BusinessException("缺少 Idempotency-Key");
+      }
+    }
+    return ApiResponse.ok(recordService.quickShotWorkflowAction(moduleKey, id, request, idempotencyKey));
   }
 
   @PostMapping("/{id}/attachments")

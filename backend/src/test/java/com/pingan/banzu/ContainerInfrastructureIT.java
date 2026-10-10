@@ -74,10 +74,10 @@ class ContainerInfrastructureIT {
   static final GenericContainer<?> minio =
       new GenericContainer<>(
               DockerImageName.parse(
-                  "quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"))
+                  "bitnamilegacy/minio@sha256:fdb6ff48c314e024fdd71960cb94d6c9b65a8bc38338990613da48090b8ff3ee"))
           .withEnv("MINIO_ROOT_USER", MINIO_ACCESS_KEY)
           .withEnv("MINIO_ROOT_PASSWORD", MINIO_SECRET_KEY)
-          .withCommand("server", "/data")
+          .withCommand("server", "/bitnami/minio/data")
           .withExposedPorts(9000)
           .waitingFor(Wait.forHttp("/minio/health/live").forStatusCode(200));
 
@@ -115,7 +115,7 @@ class ContainerInfrastructureIT {
             jdbcTemplate.queryForObject(
                 "select version from flyway_schema_history where success = true order by installed_rank desc limit 1",
                 String.class))
-        .isEqualTo("71");
+        .isEqualTo("76");
     assertThat(
             jdbcTemplate.queryForObject(
                 "select count(*) from information_schema.table_constraints"

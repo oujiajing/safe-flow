@@ -25,6 +25,7 @@ import com.pingan.banzu.dto.HazardRectificationOrderDetailResponse;
 import com.pingan.banzu.dto.HazardRectificationOrderItemResponse;
 import com.pingan.banzu.dto.HazardRectificationOrderListItem;
 import com.pingan.banzu.dto.HazardRectificationOrderQuery;
+import com.pingan.banzu.dto.QuickShotAgentRectificationPreviewResponse;
 import com.pingan.banzu.mapper.HazardRectificationFlowLogMapper;
 import com.pingan.banzu.mapper.HazardRectificationOrderItemMapper;
 import com.pingan.banzu.mapper.HazardRectificationOrderMapper;
@@ -329,6 +330,45 @@ public class HazardRectificationOrderService {
     concurrentUpdater.update(record);
   }
 
+  /** Creates the quick-shot order from the immutable Agent preview that the reviewer confirmed. */
+  @Transactional
+  public void createOrUpdateFromQuickShotAgent(
+      Long sourceRecordId,
+      Long operatorId,
+      List<QuickShotAgentRectificationPreviewResponse.Item> previewItems) {
+    ThreeCheckRecord record = recordMapper.selectById(sourceRecordId);
+    if (record == null || Integer.valueOf(1).equals(record.deleted)) {
+      throw new BusinessException("随手拍记录不存在");
+    }
+    if (!"quick-shot".equals(record.moduleKey)) {
+      return;
+    }
+    if (previewItems == null || previewItems.isEmpty()) {
+      throw new BusinessException("Agent 整改预览没有可创建的隐患条目");
+    }
+    HazardRectificationOrder order = existingSourceOrder(SOURCE_QUICK_SHOT, record);
+    if (order != null) {
+      return;
+    }
+    order = createOrder(record, previewItems.size(), operatorId, SOURCE_QUICK_SHOT);
+    for (int index = 0; index < previewItems.size(); index++) {
+      itemMapper.insert(toQuickShotAgentItem(order, record, previewItems.get(index), index));
+    }
+    writeFlowLog(
+        order.id,
+        null,
+        order.status,
+        "CREATE",
+        "自动生成",
+        operatorId,
+        "随手拍 Agent 审核确认后自动生成工单",
+        null);
+    Map<String, Object> payload = readPayload(record.payloadJson);
+    backfillQuickShotPayload(payload, order, null, null);
+    record.payloadJson = writePayload(payload);
+    concurrentUpdater.update(record);
+  }
+
   @Transactional
   public void cancelFromQuickShotWithdraw(Long sourceRecordId, Long operatorId, String remark) {
     ThreeCheckRecord record = recordMapper.selectById(sourceRecordId);
@@ -451,7 +491,7 @@ public class HazardRectificationOrderService {
             "image",
             "imageUpload");
     item.beforeVideo = sourceMediaValue(record, line.item(), "VIDEO", "beforeVideo", "video", "videoUpload");
-    item.defaultFollowUpPlan = text(line.item().get("defaultFollowUpPlan"));
+    item.defaultFollowUpPlan = firstText(line.item(), "rectificationMeasures", "defaultFollowUpPlan");
     item.sourceSnapshotJson = writePayload(line.item());
     item.rectificationStatus = order.status;
     item.sortOrder = integerValue(line.item().get("sortOrder"), line.index());
@@ -527,10 +567,45 @@ public class HazardRectificationOrderService {
             : isVideoMedia(hazardMedia)
             ? Objects.requireNonNullElse(hazardMedia, firstText(payload, "beforeVideo", "video", "videoUpload"))
             : firstText(payload, "beforeVideo", "video", "videoUpload");
-    item.defaultFollowUpPlan = text(payload.get("defaultFollowUpPlan"));
+    item.defaultFollowUpPlan = firstText(payload, "rectificationMeasures", "defaultFollowUpPlan");
     item.sourceSnapshotJson = writePayload(payload);
     item.rectificationStatus = order.status;
     item.sortOrder = 0;
+    item.createdAt = now;
+    item.updatedAt = now;
+    item.deleted = 0;
+    return item;
+  }
+
+  private HazardRectificationOrderItem toQuickShotAgentItem(
+      HazardRectificationOrder order,
+      ThreeCheckRecord record,
+      QuickShotAgentRectificationPreviewResponse.Item preview,
+      int index) {
+    LocalDateTime now = LocalDateTime.now();
+    Map<String, Object> snapshot = new LinkedHashMap<>();
+    snapshot.put("agentCandidateId", preview.candidateId());
+    snapshot.put("sourceAttachmentIds", preview.sourceAttachmentIds());
+    snapshot.put("riskType", preview.riskType());
+    snapshot.put("checkItem", preview.checkItem());
+    snapshot.put("hazardDescription", preview.hazardDescription());
+    snapshot.put("rectificationMeasures", preview.rectificationMeasures());
+    snapshot.put("acceptanceCriteria", preview.acceptanceCriteria());
+    snapshot.put("legalEvidence", preview.legalEvidence());
+
+    HazardRectificationOrderItem item = new HazardRectificationOrderItem();
+    item.orderId = order.id;
+    item.sourceLineId = "quick-shot-agent-" + record.id + "-" + preview.candidateId();
+    item.sourceLineIndex = index;
+    item.riskType = preview.riskType();
+    item.checkItem = Objects.requireNonNullElse(preview.checkItem(), "随手拍隐患");
+    item.hazardDescription = Objects.requireNonNullElse(preview.hazardDescription(), "随手拍隐患");
+    item.beforePhoto = firstSourceAttachmentUrl(record, "IMAGE");
+    item.beforeVideo = firstSourceAttachmentUrl(record, "VIDEO");
+    item.defaultFollowUpPlan = String.join("；", preview.rectificationMeasures());
+    item.sourceSnapshotJson = writePayload(snapshot);
+    item.rectificationStatus = order.status;
+    item.sortOrder = index;
     item.createdAt = now;
     item.updatedAt = now;
     item.deleted = 0;
@@ -826,6 +901,7 @@ public class HazardRectificationOrderService {
         formatDateTime(order.rectifiedAt),
         order.rectificationDescription,
         rectificationAfterPhotoUrl(order),
+        order.acceptanceRequirement,
         order.acceptanceUserId,
         userName(users, order.acceptanceUserId),
         order.acceptanceDepartmentId,
@@ -995,6 +1071,7 @@ public class HazardRectificationOrderService {
         }
         validateAcceptanceUser(order, acceptanceUserId);
         order.acceptanceUserId = acceptanceUserId;
+        order.acceptanceRequirement = firstText(payload, "acceptanceRequirement");
       }
       case "ACCEPT" -> {
         Long selectedAcceptanceUserId = longValue(payload.get("acceptanceUserId"));
@@ -1009,6 +1086,10 @@ public class HazardRectificationOrderService {
         }
         order.acceptanceAt = LocalDateTime.now();
         order.acceptanceResult = "PASS";
+        String acceptanceRequirement = firstText(payload, "acceptanceRequirement");
+        if (!isBlank(acceptanceRequirement)) {
+          order.acceptanceRequirement = acceptanceRequirement;
+        }
         order.acceptanceRemark = firstText(payload, "acceptanceRemark", "remark");
       }
       case "REJECT_ACCEPTANCE" -> {
