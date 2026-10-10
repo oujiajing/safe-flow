@@ -3700,9 +3700,10 @@ onMounted(() => {
 
 .rectified-photo-preview {
   width: 100%;
-  height: 180px;
+  height: clamp(220px, 24vw, 280px);
   max-height: none;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   background: #f8fafc;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -5440,9 +5441,11 @@ onMounted(() => {
 
 .action-evidence-body img {
   width: 100%;
-  height: 180px;
-  object-fit: cover;
+  height: clamp(220px, 24vw, 280px);
+  object-fit: contain;
+  object-position: center;
   background: #f8fafc;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
 }
 
@@ -5455,7 +5458,7 @@ onMounted(() => {
 .evidence-upload {
   display: grid;
   place-items: center;
-  min-height: 180px;
+  height: clamp(220px, 24vw, 280px);
   font-size: 14px;
   color: #1677ff;
   cursor: pointer;

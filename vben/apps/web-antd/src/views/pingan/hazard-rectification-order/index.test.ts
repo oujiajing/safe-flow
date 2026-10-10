@@ -161,6 +161,12 @@ describe('hazard rectification order page', () => {
     expect(page).toContain('accept="image/*"');
     expect(page).toContain('上传整改后照片');
     expect(page).toContain('class="rectified-photo-preview"');
+    expect(page).toMatch(
+      /\.action-evidence-body img\s*\{[^}]*object-fit:\s*contain;/,
+    );
+    expect(page).toMatch(
+      /\.rectified-photo-preview\s*\{[^}]*object-fit:\s*contain;/,
+    );
     expect(page).toContain(
       ':src="resolveAttachmentPreviewUrl(actionForm.afterPhoto)"',
     );
