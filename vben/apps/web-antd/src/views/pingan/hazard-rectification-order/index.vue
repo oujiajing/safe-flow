@@ -2025,42 +2025,46 @@ onMounted(() => {
           </dl>
         </section>
 
-        <section v-if="availableActions.length > 0" class="order-action-bar">
-          <Button
-            v-for="action in availableActions"
-            :key="action"
-            :danger="action === 'CANCEL' || action === 'REJECT_ACCEPTANCE'"
-            :type="action === 'CANCEL' ? 'default' : 'primary'"
-            @click="
-              openAction(action as PinganHazardRectificationOrderApi.Action)
-            "
-          >
-            <IconifyIcon
-              :icon="
-                action === 'REJECT_ACCEPTANCE'
-                  ? 'lucide:undo-2'
-                  : action === 'CANCEL'
-                    ? 'lucide:circle-slash-2'
-                    : 'lucide:arrow-right'
-              "
-            />
-            {{
-              actionLabels[action as PinganHazardRectificationOrderApi.Action]
-            }}
-          </Button>
-        </section>
+        <div class="detail-command-bar">
+          <nav class="detail-tabs" aria-label="隐患整改详情分区">
+            <button
+              v-for="tab in detailTabs"
+              :key="tab.key"
+              type="button"
+              :class="{ active: activeDetailTab === tab.key }"
+              @click="activeDetailTab = tab.key"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
 
-        <nav class="detail-tabs" aria-label="隐患整改详情分区">
-          <button
-            v-for="tab in detailTabs"
-            :key="tab.key"
-            type="button"
-            :class="{ active: activeDetailTab === tab.key }"
-            @click="activeDetailTab = tab.key"
-          >
-            {{ tab.label }}
-          </button>
-        </nav>
+          <section v-if="availableActions.length > 0" class="order-action-bar">
+            <Button
+              v-for="action in availableActions"
+              :key="action"
+              :danger="action === 'CANCEL' || action === 'REJECT_ACCEPTANCE'"
+              :type="action === 'CANCEL' ? 'default' : 'primary'"
+              @click="
+                openAction(action as PinganHazardRectificationOrderApi.Action)
+              "
+            >
+              <IconifyIcon
+                :icon="
+                  action === 'REJECT_ACCEPTANCE'
+                    ? 'lucide:undo-2'
+                    : action === 'CANCEL'
+                      ? 'lucide:circle-slash-2'
+                      : 'lucide:arrow-right'
+                "
+              />
+              {{
+                actionLabels[
+                  action as PinganHazardRectificationOrderApi.Action
+                ]
+              }}
+            </Button>
+          </section>
+        </div>
 
         <div v-show="activeDetailTab === 'hazard'" class="detail-tab-panel">
           <section class="evidence-compare-grid">
@@ -3561,11 +3565,11 @@ onMounted(() => {
 
 .order-action-bar {
   display: flex;
+  flex: 0 0 auto;
   gap: 8px;
   align-items: center;
   justify-content: flex-end;
-  padding: 10px 0 0;
-  margin-bottom: 12px;
+  min-height: 52px;
 }
 
 .order-result-panel {
@@ -3890,7 +3894,7 @@ onMounted(() => {
 }
 
 .detail-status-main strong,
-.detail-status-main span {
+.detail-status-main div > span {
   display: block;
 }
 
@@ -3940,16 +3944,25 @@ onMounted(() => {
   color: #1677ff;
 }
 
-.detail-tabs {
+.detail-command-bar {
   display: flex;
-  gap: 28px;
+  gap: 20px;
+  align-items: stretch;
   margin-top: 10px;
   border-bottom: 1px solid #e2e8f0;
 }
 
+.detail-tabs {
+  display: flex;
+  flex: 1;
+  gap: 28px;
+  min-width: 0;
+}
+
 .detail-tabs button {
   position: relative;
-  padding: 13px 2px;
+  min-height: 52px;
+  padding: 0 2px;
   font-weight: 600;
   color: #475569;
   cursor: pointer;
@@ -4913,11 +4926,6 @@ onMounted(() => {
 .process-row__content p {
   margin: 3px 0 0;
   color: #64748b;
-}
-
-.process-preview .process-table__head > span:nth-child(2),
-.process-preview .process-row__content {
-  text-align: right;
 }
 
 .process-row details {

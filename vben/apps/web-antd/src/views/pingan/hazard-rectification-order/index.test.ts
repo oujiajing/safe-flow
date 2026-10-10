@@ -214,10 +214,16 @@ describe('hazard rectification order page', () => {
     expect(page).toMatch(
       /\.detail-status-icon\s*\{[^}]*align-items:\s*center;[^}]*justify-content:\s*center;/,
     );
+    expect(page).toContain('class="detail-command-bar"');
+    expect(page).toMatch(
+      /\.detail-command-bar\s*\{[^}]*align-items:\s*stretch;/,
+    );
+    expect(page).toMatch(/\.detail-tabs button\s*\{[^}]*min-height:\s*52px;/);
+    expect(page).toMatch(/\.order-action-bar\s*\{[^}]*min-height:\s*52px;/);
     expect(page).toContain('class="evidence-compare-grid"');
     expect(page).toContain('class="process-table"');
-    expect(page).toMatch(
-      /\.process-preview \.process-row__content\s*\{[^}]*text-align:\s*right;/,
+    expect(page).not.toContain(
+      '.process-preview .process-row__content {\n  text-align: right;',
     );
     expect(page).toContain('class="rectification-detail-drawer"');
     expect(page).toContain(':width="1320"');
